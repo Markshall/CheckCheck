@@ -37,6 +37,7 @@
     <div class="container">
       <main>
         <p class="headline">Enter a shelf location to find it's check character.</p>
+        <p>Need to keep track of your hours? Try <a href="https://www.inwork.at/?ref=checkcheck" target="_blank">InWorkAt</a>.
 
         <div class="location-box">
           <div class="location-box-main">
@@ -111,7 +112,7 @@
           break;
         }
       }
-      
+
       //check for after,before
       if (lastChar === "+" || lastChar === "-") {
         switch (lastChar) {
@@ -124,26 +125,26 @@
           break;
         }
       }
-      
+
       //check for misc locations
       if (location.substr(0,2) == 'CA') {
         returnVal = 'CASH OFFICE ' + [locSplit[2], locSplit[3]].join(' ');
       }
-      
+
       if (location === 'RETS') {
         returnVal = 'RETURNS';
       }
-      
+
       if (location.substr(0,3) === 'DPA') {
         returnVal = 'DPA';
         checkChar.innerText = 'VICTOR';
       }
-      
+
       if (location.substr(0,3) === 'SOB') {
         returnVal = 'SOB';
         checkChar.innerText = 'SIERRA';
       }
-      
+
       return returnVal;
     }
 
@@ -161,7 +162,7 @@
           i+=(location.charCodeAt(k%4)) * (k%3*2+3);
           locationString += ((!!isNaN(c=location[k-2])) ? getPhonetic(c) : numbers[c]) + ' ';
         }
-        
+
         checkChar.innerText = getPhonetic(String.fromCharCode(i%26+65));
         locationString = locationString.replace(/\s$/, '');
         locationText.innerText = getLocationName(locationString);
