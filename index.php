@@ -53,7 +53,7 @@
       </main>
 
       <footer>
-        Designed and developed by <a href="https://www.markwrites.codes" target="_blank">Mark Eriksson</a>.
+        Designed and developed by <a href="https://www.mark-eriksson.com/" target="_blank">Mark Eriksson</a>.
 
         <div class="adspace">
           <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
