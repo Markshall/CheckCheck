@@ -28,7 +28,7 @@
   <body>
     <header>
       <div class="container">
-        <a href="/check" class="logo">
+        <a href="/check/" class="logo">
           CheckCheck
         </a>
       </div>
@@ -53,7 +53,7 @@
       </main>
 
       <footer>
-        Designed and developed by <a href="http://markwrites.codes" target="_blank">Mark Eriksson</a>.
+        Designed and developed by <a href="https://www.markwrites.codes" target="_blank">Mark Eriksson</a>.
 
         <div class="adspace">
           <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
