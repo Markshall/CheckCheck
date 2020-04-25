@@ -38,6 +38,7 @@
       <main>
         <p class="headline">Enter a shelf location to find it's check character.</p>
         <p>Try <a href="https://www.inwork.at/?ref=checkcheck" target="_blank">InWorkAt</a> to keep track of your hours.</p>
+        <p><strong>NEW</strong>: RFC support now supported.</p>
 
         <div class="location-box">
           <div class="location-box-main">
@@ -53,7 +54,8 @@
       </main>
 
       <footer>
-        Designed and developed by <a href="https://www.mark-eriksson.com/" target="_blank">Mark Eriksson</a>.
+        Designed and developed by <a href="https://www.mark-eriksson.com/" target="_blank">Mark Eriksson</a>.<br />
+        Check out the <a href="https://github.com/Markshall/CheckCheck" target="_blank">source on GitHub</a>.
 
         <div class="adspace">
           <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
@@ -157,7 +159,7 @@
 
       self.value = location.replace(/[^a-zA-Z0-9_+-]/g, '');
       if (!(location == "RETURNS" || location == "RETURN" || location == "RETUR")) self.value = self.value.substring(0, 4);
-      
+
       let a = self.value.charCodeAt(0),
       b = self.value.charCodeAt(1),
       c = self.value.charCodeAt(2),
