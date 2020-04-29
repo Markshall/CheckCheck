@@ -37,8 +37,9 @@
     <div class="container">
       <main>
         <p class="headline">Enter a shelf location to find it's check character.</p>
+        <p><strong>NEW</strong>: RFC support now added.</p>
+        <p><strong>COMING SOON</strong>: reverse check character lookup.</p>
         <p>Try <a href="https://www.inwork.at/?ref=checkcheck" target="_blank">InWorkAt</a> to keep track of your hours.</p>
-        <p><strong>NEW</strong>: RFC support now supported.</p>
 
         <div class="location-box">
           <div class="location-box-main">
