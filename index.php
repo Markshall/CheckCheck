@@ -37,8 +37,8 @@
     <div class="container">
       <main>
         <p class="headline">Enter a shelf location to find it's check character.</p>
+        <p><strong style="color:green">NEW</strong>: reverse check character lookup.</p>
         <p><strong>NEW</strong>: RFC support now added.</p>
-        <p><strong>COMING SOON</strong>: reverse check character lookup.</p>
         <p>Try <a href="https://www.inwork.at/?ref=checkcheck" target="_blank">InWorkAt</a> to keep track of your hours.</p>
 
         <div class="location-box">
@@ -237,7 +237,7 @@
 
               if (checkChar === checkInput) {
                 var bay = locationName.substring(0, 2)
-                
+
                 if (!(bay in results)) {
                   results[bay] = [];
                 }
