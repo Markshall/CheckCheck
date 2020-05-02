@@ -79,8 +79,8 @@
     locationString = '';
 
     function getPhonetic(l) {
-      for (q=0;q<phonetic.length;q++) {
-        if (phonetic[q].substr(0,1) === l) {
+      for (q = 0; q < phonetic.length; q++) {
+        if (phonetic[q].substr(0, 1) === l) {
           return phonetic[q];
         }
       }
@@ -89,7 +89,7 @@
     function getLocationName(e) {
       var location  = document.getElementById('location-name').value.toUpperCase(),
           locSplit  = e.split(' '),
-          firstChar = location.substr(0,1),
+          firstChar = location.substr(0, 1),
           lastChar  = location.substr(-1),
           returnVal = e,
           checkChar = document.getElementById('check-char');
@@ -212,8 +212,15 @@
 
     document.getElementById('location-name').addEventListener('input', function(e) {
       var checkInput = this.value.toUpperCase();
+      var locationTextOutput = document.querySelector('.location-text')
+      var checkCharOutput = document.getElementById('check-char')
+
       if (phonetic.indexOf(checkInput) > -1) {
         // reverse look up
+
+        locationTextOutput.style.display = 'none';
+        checkCharOutput.style.display = 'none';
+
         var results = {
           "00": [],
           "01": [],
@@ -234,6 +241,7 @@
             for (var k = 65; k <= 90; k++) {
               var locationName = i + String.fromCharCode(j) + String.fromCharCode(k)
               var [, checkChar] = getCheckChar(locationName)
+
               if (checkChar === checkInput) {
                 results[locationName.substring(0, 2)].push(locationName)
               }
@@ -244,10 +252,13 @@
         console.log(results)
       }
       else {
+        locationTextOutput.style.display = 'block';
+        checkCharOutput.style.display = 'block';
+
         var [locationName, checkChar] = getCheckChar(this.value)
 
-        document.getElementById('location-text').innerText = locationName;
-        document.getElementById('check-char').innerText = checkChar
+        locationTextOutput.querySelector('#location-text').innerText = locationName;
+        checkCharOutput.innerText = checkChar
       }
     });
 
