@@ -73,6 +73,28 @@ main {
 			font-weight: 600;
 		}
 
+#reverse-lookup-results {
+	margin: 20px auto 0;
+	background-color: #efefef;
+	padding: 20px;
+	border-radius: 5px;
+	max-width: 620px;
+	text-align: left;
+	display: none;
+}
+
+details {
+	margin-bottom: 20px;
+}
+
+details p {
+	font-family: Monaco, Consolas, monospace;
+	color: #2d2d2d;
+	font-size: 13px;
+	letter-spacing: 2px;
+	padding-left: 20px;
+}
+
 footer {
 	font-size: 16px;
 	color: #6c6a6a;
@@ -88,13 +110,13 @@ footer .adspace {
 	.container {
 		max-width: 99%;
 	}
-	
+
 	header .logo {
 		width: 100%;
 		font-size: 24px;
 		font-weight: 400;
 	}
-	
+
 	header .container {
 		max-width: 100%;
 	}
