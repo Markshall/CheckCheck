@@ -82,7 +82,6 @@
       for (q=0;q<phonetic.length;q++) {
         if (phonetic[q].substr(0,1) === l) {
           return phonetic[q];
-          break;
         }
       }
     }
@@ -151,27 +150,25 @@
       return returnVal;
     }
 
-    document.getElementById('location-name').addEventListener('input', function(e) {
-      var self = this,
-          locationText = document.getElementById('location-text'),
-          checkChar = document.getElementById('check-char'),
-          location = self.value.toUpperCase(),
+    function getCheckChar(location) {
+      var locationText = '',
+          checkChar = '',
+          location = location.toUpperCase(),
           i = 0;
 
-      self.value = location.replace(/[^a-zA-Z0-9_+-]/g, '');
-      if (!(location == "RETURNS" || location == "RETURN" || location == "RETUR")) self.value = self.value.substring(0, 4);
+      if (!(location == "RETURNS" || location == "RETURN" || location == "RETUR")) location = location.substring(0, 4);
 
-      let a = self.value.charCodeAt(0),
-      b = self.value.charCodeAt(1),
-      c = self.value.charCodeAt(2),
-      d = self.value.charCodeAt(3);
+      let a = location.charCodeAt(0),
+      b = location.charCodeAt(1),
+      c = location.charCodeAt(2),
+      d = location.charCodeAt(3);
 
-      if (self.value.length == 4 && a > 64 && a < 91 && b > 64 && b < 91 && c > 64 && c < 91 && d > 64 && d < 91) {
+      if (location.length == 4 && a > 64 && a < 91 && b > 64 && b < 91 && c > 64 && c < 91 && d > 64 && d < 91) {
         //RFC Way
         let spoken = "";
         let checkDigit = 45;
         for (let i = 0; i < 4; i++) {
-          let a = self.value.charCodeAt(i) - 65;
+          let a = location.charCodeAt(i) - 65;
           spoken += phonetic[a] + (i === 3 ? "" : " ");
           if (i === 0) {
             a *= 5;
@@ -186,31 +183,72 @@
 
         }
         checkDigit = Math.round(((checkDigit / 99) - Math.floor(checkDigit / 99)) * 99);
-        locationText.innerText = spoken;
-        checkChar.innerText = numbers[Math.floor(checkDigit / 10)] + " " + numbers[checkDigit % 10];
+        locationText = spoken;
+        checkChar = numbers[Math.floor(checkDigit / 10)] + " " + numbers[checkDigit % 10];
       }
-      else if (self.value == "RETURNS") {
-        locationText.innerText = "RETURNS";
-        checkChar.innerText = "FOUR EIGHT / OSCAR";
+      else if (location == "RETURNS") {
+        locationText = "RETURNS";
+        checkChar = "FOUR EIGHT / OSCAR";
       }
       else{
         //Store Way
-        if (this.value.length > 3 || this.value === "DPA" || this.value === "SOB") {
+        if (location.length > 3 || location === "DPA" || location === "SOB") {
           for (k=2;k<6;k++) {
             i+=(location.charCodeAt(k%4)) * (k%3*2+3);
             locationString += ((!!isNaN(c=location[k-2])) ? getPhonetic(c) : numbers[c]) + ' ';
           }
 
-          checkChar.innerText = getPhonetic(String.fromCharCode(i%26+65));
+          checkChar = getPhonetic(String.fromCharCode(i%26+65));
           locationString = locationString.replace(/\s$/, '');
-          locationText.innerText = getLocationName(locationString);
+          locationText = getLocationName(locationString);
           locationString = '';
         } else {
-          locationText.innerText = checkChar.innerText = 'NULL';
+          locationText = checkChar = 'NULL';
         }
       }
 
-      e.preventDefault();
+      return [locationText, checkChar]
+    }
+
+    document.getElementById('location-name').addEventListener('input', function(e) {
+      var checkInput = this.value.toUpperCase();
+      if (phonetic.indexOf(checkInput) > -1) {
+        // reverse look up
+        var results = {
+          "00": [],
+          "01": [],
+          "02": [],
+          "03": [],
+          "04": [],
+          "05": [],
+          "06": [],
+          "07": [],
+          "08": [],
+          "09": [],
+          "10": []
+        };
+
+        for (var i = 0; i <= 10; i++) {
+          var i = i.toString().padStart(2, '0')
+          for (var j = 65; j <= 90; j++) {
+            for (var k = 65; k <= 90; k++) {
+              var locationName = i + String.fromCharCode(j) + String.fromCharCode(k)
+              var [, checkChar] = getCheckChar(locationName)
+              if (checkChar === checkInput) {
+                results[locationName.substring(0, 2)].push(locationName)
+              }
+            }
+          }
+        }
+
+        console.log(results)
+      }
+      else {
+        var [locationName, checkChar] = getCheckChar(this.value)
+
+        document.getElementById('location-text').innerText = locationName;
+        document.getElementById('check-char').innerText = checkChar
+      }
     });
 
     document.getElementById('location-name').addEventListener('focus', function(e) {
