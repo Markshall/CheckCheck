@@ -226,21 +226,9 @@
         reverseReultsOutput.style.display = 'block'
         reverseReultsOutput.innerHTML = '';
 
-        var results = {
-          "00": [],
-          "01": [],
-          "02": [],
-          "03": [],
-          "04": [],
-          "05": [],
-          "06": [],
-          "07": [],
-          "08": [],
-          "09": [],
-          "10": []
-        };
+        var results = {};
 
-        for (var i = 0; i <= 10; i++) {
+        for (var i = 0; i <= 100; i++) {
           var i = i.toString().padStart(2, '0')
           for (var j = 65; j <= 90; j++) {
             for (var k = 65; k <= 90; k++) {
@@ -248,13 +236,17 @@
               var [, checkChar] = getCheckChar(locationName)
 
               if (checkChar === checkInput) {
-                results[locationName.substring(0, 2)].push(locationName)
+                var bay = locationName.substring(0, 2)
+                
+                if (!(bay in results)) {
+                  results[bay] = [];
+                }
+
+                results[bay].push(locationName)
               }
             }
           }
         }
-
-        console.log(results)
 
         var keys = Object.keys(results);
         keys.sort()
