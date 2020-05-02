@@ -80,6 +80,7 @@ main {
 	border-radius: 5px;
 	max-width: 620px;
 	text-align: left;
+	display: none;
 }
 
 details {
