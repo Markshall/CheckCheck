@@ -36,10 +36,12 @@
 
     <div class="container">
       <main>
-        <p>Enter a shelf location to find it's check character.</p>
-        <p><strong>NEW!</strong> Reverse lookup. Enter a check character to find locations with that check character!</p>
-        <p><strong>NEW!</strong> RFC support now added!</p>
-        <p>Try <a href="https://www.inwork.at/?ref=checkcheck" target="_blank">InWorkAt</a> to keep track of your hours.</p>
+        <div class="lead-text">
+          <p>Enter a shelf location to find it's check character.</p>
+          <p><span class="standout">NEW!</span> Reverse lookup. Enter a check character to find locations with that check character!</p>
+          <p><span class="standout">NEW!</span> RFC support now added!</p>
+          <p>Try <a href="https://www.inwork.at/?ref=checkcheck" target="_blank">InWorkAt</a> to keep track of your hours.</p>
+        </div>
 
         <div class="location-box">
           <div class="location-box-main">
