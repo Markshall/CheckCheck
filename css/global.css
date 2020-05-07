@@ -101,6 +101,10 @@ details {
 	margin-bottom: 20px;
 }
 
+summary {
+	cursor: pointer;
+}
+
 details p {
 	font-family: Monaco, Consolas, monospace;
 	color: #2d2d2d;

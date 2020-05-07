@@ -230,7 +230,7 @@
 
         var results = {};
 
-        for (var i = 0; i <= 100; i++) {
+        for (var i = 0; i <= 99; i++) {
           var i = i.toString().padStart(2, '0')
           for (var j = 65; j <= 90; j++) {
             for (var k = 65; k <= 90; k++) {
