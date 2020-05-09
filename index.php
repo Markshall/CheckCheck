@@ -47,7 +47,7 @@
           <div class="location-box-main">
             <input type="text" class="location-name" name="location-name" id="location-name" value="NULL" spellcheck="false">
 
-            <p class="location-text">&ldquo;<span id="location-text">NULL</span>&rdquo;</p>
+            <p class="location-text"><span id="location-text">&ldquo;NULL&rdquo;</span></p>
 
             <div id="check-char" class="check-char">
               NULL
@@ -168,11 +168,11 @@
 
       if (/[a-zA-Z]{4}/i.test(location)) {
         //RFC Way
-        rfcResult = checkCharRFC(location)
-        storeResult = checkCharStore(location)
+        const rfcResult = checkCharRFC(location)
+        const storeResult = checkCharStore(location)
 
         return [
-          `RFC: ${rfcResult[0]}<br />Store: ${storeResult[0]}`,
+          `RFC: &ldquo;${rfcResult[0]}&rdquo;<br />Store: &ldquo;${storeResult[0]}&rdquo;`,
           `RFC: ${rfcResult[1]}<br />Store: ${storeResult[1]}`
         ];
       }
@@ -181,7 +181,13 @@
         checkChar = "FOUR EIGHT / OSCAR";
       }
       else {
-        return checkCharStore(location)
+        // Store Way
+        const storeResult = checkCharStore(location);
+
+        return [
+          `&ldquo;${storeResult[0]}&ldquo;`,
+          storeResult[1]
+        ]
       }
 
       return [locationText, checkChar]
