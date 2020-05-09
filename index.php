@@ -172,8 +172,8 @@
         const storeResult = checkCharStore(location)
 
         return [
-          `RFC: &ldquo;${rfcResult[0]}&rdquo;<br />Store: &ldquo;${storeResult[0]}&rdquo;`,
-          `RFC: ${rfcResult[1]}<br />Store: ${storeResult[1]}`
+          `Store: &ldquo;${storeResult[0]}&rdquo;<br />RFC: &ldquo;${rfcResult[0]}&rdquo;`,
+          `Store: ${storeResult[1]}<br />RFC: ${rfcResult[1]}`
         ];
       }
       else if (location == "RETURNS") {
