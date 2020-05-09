@@ -137,6 +137,10 @@
         returnVal = 'CASH OFFICE ' + [locSplit[2], locSplit[3]].join(' ');
       }
 
+      if (location.substr(0, 2) === 'CP') {
+        returnVal = 'COLLECTION POINT ' + [locSplit[2], locSplit[3]].join(' ');
+      }
+
       if (location === 'RETS') {
         returnVal = 'RETURNS';
       }
@@ -160,58 +164,76 @@
           location = location.toUpperCase(),
           i = 0;
 
-      if (!(location == "RETURNS" || location == "RETURN" || location == "RETUR")) location = location.substring(0, 4);
+      if (!(location === "RETURNS" || location === "RETURN" || location === "RETUR")) location = location.substring(0, 4);
 
-      let a = location.charCodeAt(0),
-      b = location.charCodeAt(1),
-      c = location.charCodeAt(2),
-      d = location.charCodeAt(3);
-
-      if (location.length == 4 && a > 64 && a < 91 && b > 64 && b < 91 && c > 64 && c < 91 && d > 64 && d < 91) {
+      if (/[a-zA-Z]{4}/i.test(location)) {
         //RFC Way
-        let spoken = "";
-        let checkDigit = 45;
-        for (let i = 0; i < 4; i++) {
-          let a = location.charCodeAt(i) - 65;
-          spoken += phonetic[a] + (i === 3 ? "" : " ");
-          if (i === 0) {
-            a *= 5;
-          }
-          else if (i == 1 || i == 2) {
-            a *= 7;
-          }
-          else {
-            a *= 3;
-          }
-          checkDigit += a;
+        rfcResult = checkCharRFC(location)
+        storeResult = checkCharStore(location)
 
-        }
-        checkDigit = Math.round(((checkDigit / 99) - Math.floor(checkDigit / 99)) * 99);
-        locationText = spoken;
-        checkChar = numbers[Math.floor(checkDigit / 10)] + " " + numbers[checkDigit % 10];
+        return [
+          `RFC: ${rfcResult[0]}<br />Store: ${storeResult[0]}`,
+          `RFC: ${rfcResult[1]}<br />Store: ${storeResult[1]}`
+        ];
       }
       else if (location == "RETURNS") {
         locationText = "RETURNS";
         checkChar = "FOUR EIGHT / OSCAR";
       }
-      else{
-        //Store Way
-        if (location.length > 3 || location === "DPA" || location === "SOB") {
-          for (k=2;k<6;k++) {
-            i+=(location.charCodeAt(k%4)) * (k%3*2+3);
-            locationString += ((!!isNaN(c=location[k-2])) ? getPhonetic(c) : numbers[c]) + ' ';
-          }
-
-          checkChar = getPhonetic(String.fromCharCode(i%26+65));
-          locationString = locationString.replace(/\s$/, '');
-          locationText = getLocationName(locationString);
-          locationString = '';
-        } else {
-          locationText = checkChar = 'NULL';
-        }
+      else {
+        return checkCharStore(location)
       }
 
       return [locationText, checkChar]
+    }
+
+    function checkCharStore(location) {
+      let locationText, checkChar, i = 0;
+
+      if (location.length > 3 || location === "DPA" || location === "SOB") {
+        for (k = 2; k < 6; k++) {
+          i += (location.charCodeAt(k % 4)) * (k % 3 * 2 + 3);
+          locationString += ((!!isNaN(c=location[k - 2])) ? getPhonetic(c) : numbers[c]) + ' ';
+        }
+
+        checkChar = getPhonetic(String.fromCharCode(i % 26 + 65));
+        locationString = locationString.replace(/\s$/, '');
+        locationText = getLocationName(locationString);
+        locationString = '';
+      } else {
+        locationText = checkChar = 'NULL';
+      }
+
+      return [locationText, checkChar];
+    }
+
+    function checkCharRFC(location) {
+      let spoken = "";
+      let checkDigit = 45;
+      let locationText, checkChar;
+
+      for (let i = 0; i < 4; i++) {
+        let a = location.charCodeAt(i) - 65;
+        spoken += phonetic[a] + (i === 3 ? "" : " ");
+
+        if (i === 0) {
+          a *= 5;
+        }
+        else if (i == 1 || i == 2) {
+          a *= 7;
+        }
+        else {
+          a *= 3;
+        }
+
+        checkDigit += a;
+
+      }
+      checkDigit = Math.round(((checkDigit / 99) - Math.floor(checkDigit / 99)) * 99);
+      locationText = spoken;
+      checkChar = numbers[Math.floor(checkDigit / 10)] + " " + numbers[checkDigit % 10];
+
+      return [locationText, checkChar];
     }
 
     document.getElementById('location-name').addEventListener('input', function(e) {
@@ -275,8 +297,8 @@
 
         var [locationName, checkChar] = getCheckChar(this.value)
 
-        locationTextOutput.querySelector('#location-text').innerText = locationName;
-        checkCharOutput.innerText = checkChar
+        locationTextOutput.querySelector('#location-text').innerHTML = locationName;
+        checkCharOutput.innerHTML = checkChar
       }
     });
 
