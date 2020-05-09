@@ -186,7 +186,7 @@
         const storeResult = checkCharStore(location);
 
         return [
-          `&ldquo;${storeResult[0]}&ldquo;`,
+          `&ldquo;${storeResult[0]}&rdquo;`,
           storeResult[1]
         ]
       }
