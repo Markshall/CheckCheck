@@ -15,14 +15,14 @@
     <link rel="shortcut icon" type="image/x-icon" href="logo.png" />
 
     <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-21727306-1"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+		<script async src="https://www.googletagmanager.com/gtag/js?id=G-TPZX9QX889"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
 
-      gtag('config', 'UA-21727306-1');
-    </script>
+			gtag('config', 'G-TPZX9QX889');
+		</script>
   </head>
 
   <body>
