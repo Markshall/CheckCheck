@@ -33,6 +33,8 @@ header {
 
 .lead-text {
 	font-size: 17px;
+	max-width: 70ch;
+	margin: 0 auto;
 }
 
 .lead-text p {

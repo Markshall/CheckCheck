@@ -37,11 +37,8 @@
     <div class="container">
       <main>
         <div class="lead-text">
-          <p>Enter a shelf location to find it's check character.</p>
-          <p><span class="standout">FEEDACK WELCOME!</span> Please <a href="https://www.mark-eriksson.com/#contact" target="_blank">get in touch</a>.</p>
-          <p><span class="standout">NEW!</span> Reverse lookup. Enter a check character to find locations with that check character!</p>
-          <p><span class="standout">NEW!</span> RFC support now added!</p>
-          <p>Try <a href="https://www.inwork.at/?ref=checkcheck" target="_blank">InWorkAt</a> to keep track of your hours.</p>
+          <p>Enter a shelf location to find its check character, or enter a check character to find all locations wih it!</p>
+          <p>Try <a href="https://www.inwork.at/?ref=checkcheck" rel="noreferrer" target="_blank">InWorkAt</a> to keep track of your hours.</p>
         </div>
 
         <div class="location-box">
