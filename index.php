@@ -37,7 +37,7 @@
     <div class="container">
       <main>
         <div class="lead-text">
-          <p>Enter a shelf location to find its check character, or enter a check character to find all locations wih it!</p>
+          <p>Enter a shelf location to find its check character, or enter a check character to find all locations with it!</p>
           <p>Try <a href="https://www.inwork.at/?ref=checkcheck" rel="noreferrer" target="_blank">InWorkAt</a> to keep track of your hours.</p>
         </div>
 
