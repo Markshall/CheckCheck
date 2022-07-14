@@ -313,5 +313,9 @@
     document.getElementById('location-name').addEventListener('blur', function(e) {
       this.value === "" && (this.value = 'NULL');
     });
+
+    document.getElementById('check-char').addEventListener('click', function(e) {
+      document.getElementById('location-name').focus();
+    })
   </script>
 </html>
