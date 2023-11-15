@@ -54,7 +54,9 @@
 
         <div class="location-box">
           <div class="location-box-main">
-            <input type="text" class="location-name" name="location-name" id="location-name" value="NULL" spellcheck="false">
+            <form id="test" method="get">
+              <input type="text" class="location-name" name="location-name" id="location-name" value="NULL" spellcheck="false">
+            </form>
 
             <p class="location-text"><span id="location-text">&ldquo;NULL&rdquo;</span></p>
 
@@ -87,6 +89,12 @@
   </body>
 
   <script>
+    document.querySelector('#test').addEventListener('submit', function(e) {
+      console.log('hey')
+      e.preventDefault();
+      return false;
+    });
+
     var phonetic = ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA', 'ECHO', 'FOXTROT', 'GOLF', 'HOTEL', 'INDIA', 'JULIET', 'KILO', 'LIMA', 'MIKE', 'NOVEMBER', 'OSCAR', 'PAPA', 'QUEBEC', 'ROMEO', 'SIERRA', 'TANGO', 'UNIFORM', 'VICTOR', 'WHISKEY', 'X-RAY', 'YANKEE', 'ZULU'],
     numbers  = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'],
     locationString = '';
