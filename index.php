@@ -40,7 +40,11 @@
       <main>
         <div class="lead-text">
           <p>Enter a shelf location to find its check character, or enter a check character to find all locations with it!</p>
-          <p>Try <a href="https://www.inwork.at/?ref=checkcheck" rel="noreferrer" target="_blank">InWorkAt</a> to keep track of your hours.</p>
+          <p>
+            Try the all new
+            <a href="https://www.inwork.at/?ref=checkcheck&utm_campaign=inworkatv2" style="font-weight:600;color:#04071b;" target="_blank">InWork<span style="color:#2269f7;">At</span></a>
+            to keep track of your shifts.
+          </p>
         </div>
 
         <div class="location-box">
