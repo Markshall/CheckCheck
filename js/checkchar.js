@@ -121,7 +121,7 @@
       for (let k = 2; k < 6; k++) {
         const c = location[k - 2];
         i += (location.charCodeAt(k % 4)) * (k % 3 * 2 + 3);
-        locationString += (isNaN(c) ? getPhonetic(c) : numbers[c]) + ' ';
+        locationString += ((isNaN(c) ? getPhonetic(c) : numbers[c]) || '?') + ' ';
       }
 
       checkChar = getPhonetic(String.fromCharCode(i % 26 + 65));

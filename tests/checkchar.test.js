@@ -103,3 +103,8 @@ test('reverse lookup finds every store location with a check character', () => {
 test('reverse lookup of an unknown check character is empty', () => {
   assert.deepEqual(CheckCheck.reverseLookup('NOPE'), {});
 });
+
+test('characters with no phonetic spelling show as ?', () => {
+  assert.equal(CheckCheck.getCheckChar('1#AK')[0].text, 'ONE ? ALPHA KILO');
+  assert.equal(CheckCheck.getCheckChar('1 AK')[0].text, 'ONE ? ALPHA KILO');
+});
