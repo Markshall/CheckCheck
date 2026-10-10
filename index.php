@@ -161,12 +161,13 @@
     }
 
     function getCheckChar(location) {
-      var locationText = '',
-          checkChar = '',
-          location = location.toUpperCase(),
-          i = 0;
+      location = location.toUpperCase();
 
-      if (!(location === "RETURNS" || location === "RETURN" || location === "RETUR")) location = location.substring(0, 4);
+      if (location === "RETUR" || location === "RETURN" || location === "RETURNS") {
+        return ['RETURNS', 'FOUR EIGHT / OSCAR'];
+      }
+
+      location = location.substring(0, 4);
 
       if (location in fixedCheckChars) {
         return [`&ldquo;${location}&rdquo;`, fixedCheckChars[location]];
@@ -188,10 +189,6 @@
           `Store: ${storeResult[1]}<br />RFC: ${rfcResult[1]}`
         ];
       }
-      else if (location == "RETURNS") {
-        locationText = "RETURNS";
-        checkChar = "FOUR EIGHT / OSCAR";
-      }
       else {
         // Store Way
         const storeResult = checkCharStore(location);
@@ -201,8 +198,6 @@
           storeResult[1]
         ]
       }
-
-      return [locationText, checkChar]
     }
 
     function checkCharStore(location) {
