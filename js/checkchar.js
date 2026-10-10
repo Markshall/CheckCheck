@@ -85,38 +85,33 @@
     return /[A-Z]{4}/i.test(location);
   }
 
+  // Returns a list of results, each { label, text, checkChar }. There are
+  // two (Store and RFC) for 4-letter locations, otherwise one with no label.
   function getCheckChar(location) {
     location = location.toUpperCase();
 
-    if (location === "RETUR" || location === "RETURN" || location === "RETURNS") {
-      return ['RETURNS', 'FOUR EIGHT / OSCAR'];
+    if (location === 'RETUR' || location === 'RETURN' || location === 'RETURNS') {
+      return [{ label: null, text: 'RETURNS', checkChar: 'FOUR EIGHT / OSCAR' }];
     }
 
     location = location.substring(0, 4);
 
     if (location in fixedCheckChars) {
-      return [`&ldquo;${location}&rdquo;`, fixedCheckChars[location]];
+      return [{ label: null, text: location, checkChar: fixedCheckChars[location] }];
     }
+
+    const storeResult = checkCharStore(location);
 
     if (isRfcLocation(location)) {
-      //RFC Way
-      const rfcResult = checkCharRFC(location)
-      const storeResult = checkCharStore(location)
+      const rfcResult = checkCharRFC(location);
 
       return [
-        `Store: &ldquo;${storeResult[0]}&rdquo;<br />RFC: &ldquo;${rfcResult[0]}&rdquo;`,
-        `Store: ${storeResult[1]}<br />RFC: ${rfcResult[1]}`
+        { label: 'Store', text: storeResult[0], checkChar: storeResult[1] },
+        { label: 'RFC', text: rfcResult[0], checkChar: rfcResult[1] }
       ];
     }
-    else {
-      // Store Way
-      const storeResult = checkCharStore(location);
 
-      return [
-        `&ldquo;${storeResult[0]}&rdquo;`,
-        storeResult[1]
-      ]
-    }
+    return [{ label: null, text: storeResult[0], checkChar: storeResult[1] }];
   }
 
   function checkCharStore(location) {

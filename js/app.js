@@ -1,3 +1,12 @@
+function renderLines(element, lines) {
+  element.replaceChildren();
+
+  lines.forEach(function (line, i) {
+    if (i > 0) element.appendChild(document.createElement('br'));
+    element.appendChild(document.createTextNode(line));
+  });
+}
+
 document.getElementById('location-name').addEventListener('input', function(e) {
   var checkInput = this.value.toUpperCase();
   var locationTextOutput = document.querySelector('.location-text')
@@ -35,7 +44,7 @@ document.getElementById('location-name').addEventListener('input', function(e) {
     checkCharOutput.style.display = 'block';
     reverseReultsOutput.style.display = 'none'
 
-    var [locationName, checkChar] = CheckCheck.getCheckChar(this.value)
+    var results = CheckCheck.getCheckChar(this.value)
     var location = checkInput.substring(0, 4)
 
     if (CheckCheck.isRfcLocation(location)) {
@@ -46,8 +55,12 @@ document.getElementById('location-name').addEventListener('input', function(e) {
       });
     }
 
-    locationTextOutput.querySelector('#location-text').innerHTML = locationName;
-    checkCharOutput.innerHTML = checkChar
+    renderLines(locationTextOutput.querySelector('#location-text'), results.map(function (result) {
+      return (result.label ? result.label + ': ' : '') + '\u201C' + result.text + '\u201D';
+    }));
+    renderLines(checkCharOutput, results.map(function (result) {
+      return (result.label ? result.label + ': ' : '') + result.checkChar;
+    }));
   }
 });
 

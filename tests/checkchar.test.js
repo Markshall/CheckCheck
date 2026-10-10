@@ -52,25 +52,33 @@ test('getCheckChar uppercases and truncates input', () => {
   assert.deepEqual(CheckCheck.getCheckChar('10AKXYZ'), CheckCheck.getCheckChar('10AK'));
 });
 
+test('getCheckChar gives a single unlabelled result for store locations', () => {
+  assert.deepEqual(CheckCheck.getCheckChar('10AK'), [
+    { label: null, text: 'ONE ZERO ALPHA KILO', checkChar: 'NOVEMBER' },
+  ]);
+});
+
 test('getCheckChar shows both store and RFC results for 4 letters', () => {
   assert.deepEqual(CheckCheck.getCheckChar('ABCD'), [
-    'Store: &ldquo;ALPHA BRAVO CHARLIE DELTA&rdquo;<br />RFC: &ldquo;ALPHA BRAVO CHARLIE DELTA&rdquo;',
-    'Store: ECHO<br />RFC: SEVEN FIVE',
+    { label: 'Store', text: 'ALPHA BRAVO CHARLIE DELTA', checkChar: 'ECHO' },
+    { label: 'RFC', text: 'ALPHA BRAVO CHARLIE DELTA', checkChar: 'SEVEN FIVE' },
   ]);
 });
 
 test('fixed check characters', () => {
-  assert.equal(CheckCheck.getCheckChar('DPA')[1], 'VICTOR');
-  assert.equal(CheckCheck.getCheckChar('SOB')[1], 'SIERRA');
+  assert.deepEqual(CheckCheck.getCheckChar('DPA'), [{ label: null, text: 'DPA', checkChar: 'VICTOR' }]);
+  assert.deepEqual(CheckCheck.getCheckChar('SOB'), [{ label: null, text: 'SOB', checkChar: 'SIERRA' }]);
 
   for (const input of ['RETUR', 'RETURN', 'RETURNS', 'returns']) {
-    assert.deepEqual(CheckCheck.getCheckChar(input), ['RETURNS', 'FOUR EIGHT / OSCAR'], input);
+    assert.deepEqual(CheckCheck.getCheckChar(input), [
+      { label: null, text: 'RETURNS', checkChar: 'FOUR EIGHT / OSCAR' },
+    ], input);
   }
 });
 
 test('too short to have a check character', () => {
   for (const input of ['', '1', '10']) {
-    assert.equal(CheckCheck.getCheckChar(input)[1], 'NULL', input);
+    assert.equal(CheckCheck.getCheckChar(input)[0].checkChar, 'NULL', input);
   }
 });
 
