@@ -95,9 +95,8 @@
       }
     }
 
-    function getLocationName(e) {
-      var location  = document.getElementById('location-name').value.toUpperCase(),
-          locSplit  = e.split(' '),
+    function getLocationName(location, e) {
+      var locSplit  = e.split(' '),
           firstChar = location.substr(0, 1),
           lastChar  = location.substr(-1),
           returnVal = e;
@@ -211,7 +210,7 @@
 
         checkChar = getPhonetic(String.fromCharCode(i % 26 + 65));
         locationString = locationString.replace(/\s$/, '');
-        locationText = getLocationName(locationString);
+        locationText = getLocationName(location, locationString);
         locationString = '';
       } else {
         locationText = checkChar = 'NULL';
