@@ -61,19 +61,13 @@
   }
 
   input.addEventListener('input', function () {
-    if (CheckCheck.phonetic.includes(this.value.toUpperCase())) {
-      showReverseLookup(this.value);
+    const value = this.value.trim();
+
+    if (CheckCheck.phonetic.includes(value.toUpperCase())) {
+      showReverseLookup(value);
     } else {
-      showCheckChar(this.value);
+      showCheckChar(value);
     }
-  });
-
-  input.addEventListener('focus', function () {
-    this.value === 'NULL' && (this.value = '');
-  });
-
-  input.addEventListener('blur', function () {
-    this.value === '' && (this.value = 'NULL');
   });
 
   checkCharOutput.addEventListener('click', function () {

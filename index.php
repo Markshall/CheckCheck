@@ -52,11 +52,12 @@
 
         <div class="location-box">
           <div class="location-box-main">
-            <input type="text" class="location-name" name="location-name" id="location-name" value="NULL" spellcheck="false">
+            <label for="location-name" class="visually-hidden">Shelf location or check character</label>
+            <input type="text" class="location-name" name="location-name" id="location-name" placeholder="NULL" maxlength="8" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
 
             <p class="location-text"><span id="location-text">&ldquo;NULL&rdquo;</span></p>
 
-            <div id="check-char" class="check-char">
+            <div id="check-char" class="check-char" role="status">
               NULL
             </div>
           </div>
