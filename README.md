@@ -31,6 +31,8 @@ Type a location into the box and its check character is shown underneath. Letter
 
 Four letters (e.g. `ABCD`) show both the store and the RFC check character.
 
+If another location has the same check character and is only one mistake away (a misheard character, e.g. `07AZ` and `J7AZ`, or two swapped, e.g. `L10A` and `L01A`), it's listed underneath. The headset accepts either, so stock voiced to one may really be at the other.
+
 Type a check character instead (e.g. `NOVEMBER`) to list every store location from `00AA` to `99ZZ` that uses it, grouped by aisle.
 
 ## How it works
