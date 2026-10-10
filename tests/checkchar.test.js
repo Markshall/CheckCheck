@@ -8,6 +8,8 @@ test('store check characters', () => {
     '01AK': { text: 'ZERO ONE ALPHA KILO', checkChar: 'PAPA' },
     '10AK': { text: 'ONE ZERO ALPHA KILO', checkChar: 'NOVEMBER' },
     '99ZZ': { text: 'NINE NINE ZULU ZULU', checkChar: 'YANKEE' },
+    'S1PG': { text: 'SECURITY ONE PAPA GOLF', checkChar: 'X-RAY' },
+    'Z99Z': { text: 'NINE NINE BULK ZULU', checkChar: 'KILO' },
   };
 
   for (const [location, expected] of Object.entries(cases)) {
