@@ -2,17 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="minimum-scale=1.0, width=device-width, maximum-scale=1.0, user-scalable=no, minimal-ui, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>CheckCheck</title>
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600&display=swap">
     <link rel="stylesheet" href="css/reset.css?v2">
     <link rel="stylesheet" href="css/global.css?v2">
 
+    <script src="js/checkchar.js" defer></script>
+    <script src="js/app.js" defer></script>
+
     <link rel="apple-touch-icon" href="logo.png" />
-    <link rel="shortcut icon" type="image/x-icon" href="logo.png" />
+    <link rel="icon" type="image/png" href="logo.png" />
 
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
@@ -30,7 +35,7 @@
     <!-- End Google Tag Manager (noscript) -->
     <header>
       <div class="container">
-        <a href="/check/" class="logo">
+        <a href="./" class="logo">
           CheckCheck
         </a>
       </div>
@@ -42,18 +47,19 @@
           <p>Enter a shelf location to find its check character, or enter a check character to find all locations with it!</p>
           <p>
             Try the all new
-            <a href="https://www.inwork.at/?ref=checkcheck&utm_campaign=inworkatv2" style="font-weight:600;color:#04071b;" target="_blank">InWork<span style="color:#2269f7;">At</span></a>
+            <a href="https://www.inwork.at/?ref=checkcheck&amp;utm_campaign=inworkatv2" class="inworkat" target="_blank" rel="noopener">InWork<span>At</span></a>
             to keep track of your shifts.
           </p>
         </div>
 
         <div class="location-box">
           <div class="location-box-main">
-            <input type="text" class="location-name" name="location-name" id="location-name" value="NULL" spellcheck="false">
+            <label for="location-name" class="visually-hidden">Shelf location or check character</label>
+            <input type="text" class="location-name" name="location-name" id="location-name" placeholder="NULL" maxlength="8" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
 
             <p class="location-text"><span id="location-text">&ldquo;NULL&rdquo;</span></p>
 
-            <div id="check-char" class="check-char">
+            <div id="check-char" class="check-char" role="status">
               NULL
             </div>
           </div>
@@ -63,8 +69,8 @@
       </main>
 
       <footer>
-        Designed and developed by <a href="https://www.mark-eriksson.com/" target="_blank">Mark Eriksson</a>.<br />
-        Check out the <a href="https://github.com/Markshall/CheckCheck" target="_blank">source on GitHub</a>.
+        Designed and developed by <a href="https://www.mark-eriksson.com/" target="_blank" rel="noopener">Mark Eriksson</a>.<br />
+        Check out the <a href="https://github.com/Markshall/CheckCheck" target="_blank" rel="noopener">source on GitHub</a>.
 
         <div class="adspace">
           <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
@@ -80,254 +86,4 @@
       </footer>
     </div>
   </body>
-
-  <script>
-    var phonetic = ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA', 'ECHO', 'FOXTROT', 'GOLF', 'HOTEL', 'INDIA', 'JULIET', 'KILO', 'LIMA', 'MIKE', 'NOVEMBER', 'OSCAR', 'PAPA', 'QUEBEC', 'ROMEO', 'SIERRA', 'TANGO', 'UNIFORM', 'VICTOR', 'WHISKEY', 'X-RAY', 'YANKEE', 'ZULU'],
-    numbers  = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'],
-    locationString = '';
-
-    function getPhonetic(l) {
-      for (q = 0; q < phonetic.length; q++) {
-        if (phonetic[q].substr(0, 1) === l) {
-          return phonetic[q];
-        }
-      }
-    }
-
-    function getLocationName(e) {
-      var location  = document.getElementById('location-name').value.toUpperCase(),
-          locSplit  = e.split(' '),
-          firstChar = location.substr(0, 1),
-          lastChar  = location.substr(-1),
-          returnVal = e,
-          checkChar = document.getElementById('check-char');
-
-      //check for jewellery, security, linbins, bulk
-      if (firstChar === "J" || firstChar === "S" || firstChar === "L" || firstChar === "Z") {
-        switch (firstChar) {
-          case 'J':
-            returnVal = 'JEWELLERY ' + [locSplit[1], locSplit[2], locSplit[3]].join(' ');
-          break;
-
-          case 'S':
-            returnVal = 'SECURITY ' + [locSplit[1], locSplit[2], locSplit[3]].join(' ');
-          break;
-
-          case 'L':
-            returnVal = [locSplit[1], locSplit[2]].join(' ') + ' LINBIN ' + locSplit[3];
-          break;
-
-          case 'Z':
-            returnVal = [locSplit[1], locSplit[2]].join(' ') + ' BULK ' + locSplit[3];
-          break;
-        }
-      }
-
-      //check for after,before
-      if (lastChar === "+" || lastChar === "-") {
-        switch (lastChar) {
-          case '+':
-            returnVal = 'AFTER ' + [locSplit[0], locSplit[1], locSplit[2]].join(' ');
-          break;
-
-          case '-':
-            returnVal = 'BEFORE ' + [locSplit[0], locSplit[1], locSplit[2]].join(' ');
-          break;
-        }
-      }
-
-      //check for misc locations
-      if (location.substr(0,2) == 'CA') {
-        returnVal = 'CASH OFFICE ' + [locSplit[2], locSplit[3]].join(' ');
-      }
-
-      if (location.substr(0, 2) === 'CP') {
-        returnVal = 'COLLECTION POINT ' + [locSplit[2], locSplit[3]].join(' ');
-      }
-
-      if (location === 'RETS') {
-        returnVal = 'RETURNS';
-      }
-
-      if (location.substr(0,3) === 'DPA') {
-        returnVal = 'DPA';
-        checkChar.innerText = 'VICTOR';
-      }
-
-      if (location.substr(0,3) === 'SOB') {
-        returnVal = 'SOB';
-        checkChar.innerText = 'SIERRA';
-      }
-
-      return returnVal;
-    }
-
-    function getCheckChar(location) {
-      var locationText = '',
-          checkChar = '',
-          location = location.toUpperCase(),
-          i = 0;
-
-      if (!(location === "RETURNS" || location === "RETURN" || location === "RETUR")) location = location.substring(0, 4);
-
-      if (/[a-zA-Z]{4}/i.test(location)) {
-        //RFC Way
-        const rfcResult = checkCharRFC(location)
-        const storeResult = checkCharStore(location)
-
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-          'event': 'checkcheck_input',
-          'locationName': location
-        });
-
-        return [
-          `Store: &ldquo;${storeResult[0]}&rdquo;<br />RFC: &ldquo;${rfcResult[0]}&rdquo;`,
-          `Store: ${storeResult[1]}<br />RFC: ${rfcResult[1]}`
-        ];
-      }
-      else if (location == "RETURNS") {
-        locationText = "RETURNS";
-        checkChar = "FOUR EIGHT / OSCAR";
-      }
-      else {
-        // Store Way
-        const storeResult = checkCharStore(location);
-
-        return [
-          `&ldquo;${storeResult[0]}&rdquo;`,
-          storeResult[1]
-        ]
-      }
-
-      return [locationText, checkChar]
-    }
-
-    function checkCharStore(location) {
-      let locationText, checkChar, i = 0;
-
-      if (location.length > 3 || location === "DPA" || location === "SOB") {
-        for (k = 2; k < 6; k++) {
-          i += (location.charCodeAt(k % 4)) * (k % 3 * 2 + 3);
-          locationString += ((!!isNaN(c=location[k - 2])) ? getPhonetic(c) : numbers[c]) + ' ';
-        }
-
-        checkChar = getPhonetic(String.fromCharCode(i % 26 + 65));
-        locationString = locationString.replace(/\s$/, '');
-        locationText = getLocationName(locationString);
-        locationString = '';
-      } else {
-        locationText = checkChar = 'NULL';
-      }
-
-      return [locationText, checkChar];
-    }
-
-    function checkCharRFC(location) {
-      let spoken = "";
-      let checkDigit = 45;
-      let locationText, checkChar;
-
-      for (let i = 0; i < 4; i++) {
-        let a = location.charCodeAt(i) - 65;
-        spoken += phonetic[a] + (i === 3 ? "" : " ");
-
-        if (i === 0) {
-          a *= 5;
-        }
-        else if (i == 1 || i == 2) {
-          a *= 7;
-        }
-        else {
-          a *= 3;
-        }
-
-        checkDigit += a;
-
-      }
-      checkDigit = Math.round(((checkDigit / 99) - Math.floor(checkDigit / 99)) * 99);
-      locationText = spoken;
-      checkChar = numbers[Math.floor(checkDigit / 10)] + " " + numbers[checkDigit % 10];
-
-      return [locationText, checkChar];
-    }
-
-    document.getElementById('location-name').addEventListener('input', function(e) {
-      var checkInput = this.value.toUpperCase();
-      var locationTextOutput = document.querySelector('.location-text')
-      var checkCharOutput = document.getElementById('check-char')
-      var reverseReultsOutput = document.getElementById('reverse-lookup-results')
-
-      if (phonetic.indexOf(checkInput) > -1) {
-        // reverse look up
-
-        locationTextOutput.style.display = 'none';
-        checkCharOutput.style.display = 'none';
-        reverseReultsOutput.style.display = 'block'
-        reverseReultsOutput.innerHTML = '';
-
-        var results = {};
-
-        for (var i = 0; i <= 99; i++) {
-          var i = i.toString().padStart(2, '0')
-          for (var j = 65; j <= 90; j++) {
-            for (var k = 65; k <= 90; k++) {
-              var locationName = i + String.fromCharCode(j) + String.fromCharCode(k)
-              var [, checkChar] = getCheckChar(locationName)
-
-              if (checkChar === checkInput) {
-                var bay = locationName.substring(0, 2)
-
-                if (!(bay in results)) {
-                  results[bay] = [];
-                }
-
-                results[bay].push(locationName)
-              }
-            }
-          }
-        }
-
-        var keys = Object.keys(results);
-        keys.sort()
-
-        for (var i = 0; i < keys.length; i++) {
-          var details = document.createElement('details');
-          var summary = document.createElement('summary');
-          var locations = document.createElement('p');
-
-          locations.innerText = results[keys[i]].join(', ')
-
-          summary.innerText = keys[i];
-
-          details.appendChild(summary);
-          details.appendChild(locations)
-
-          reverseReultsOutput.appendChild(details)
-        }
-      }
-      else {
-        locationTextOutput.style.display = 'block';
-        checkCharOutput.style.display = 'block';
-        reverseReultsOutput.style.display = 'none'
-
-        var [locationName, checkChar] = getCheckChar(this.value)
-
-        locationTextOutput.querySelector('#location-text').innerHTML = locationName;
-        checkCharOutput.innerHTML = checkChar
-      }
-    });
-
-    document.getElementById('location-name').addEventListener('focus', function(e) {
-      this.value === 'NULL' && (this.value = '');
-    });
-
-    document.getElementById('location-name').addEventListener('blur', function(e) {
-      this.value === "" && (this.value = 'NULL');
-    });
-
-    document.getElementById('check-char').addEventListener('click', function(e) {
-      document.getElementById('location-name').focus();
-    })
-  </script>
 </html>
