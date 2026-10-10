@@ -168,12 +168,40 @@
     return [locationText, checkChar];
   }
 
+  var reverseIndex = null;
+
+  // Every store location 00AA-99ZZ grouped by check character, then by
+  // aisle. Built on first use and reused after that.
+  function reverseLookup(checkChar) {
+    if (!reverseIndex) {
+      reverseIndex = {};
+
+      for (let i = 0; i <= 99; i++) {
+        const aisle = i.toString().padStart(2, '0');
+
+        for (let j = 65; j <= 90; j++) {
+          for (let k = 65; k <= 90; k++) {
+            const location = aisle + String.fromCharCode(j) + String.fromCharCode(k);
+            const char = checkCharStore(location)[1];
+
+            reverseIndex[char] = reverseIndex[char] || {};
+            reverseIndex[char][aisle] = reverseIndex[char][aisle] || [];
+            reverseIndex[char][aisle].push(location);
+          }
+        }
+      }
+    }
+
+    return reverseIndex[checkChar.toUpperCase()] || {};
+  }
+
   return {
     phonetic: phonetic,
     numbers: numbers,
     isRfcLocation: isRfcLocation,
     getCheckChar: getCheckChar,
     checkCharStore: checkCharStore,
-    checkCharRFC: checkCharRFC
+    checkCharRFC: checkCharRFC,
+    reverseLookup: reverseLookup
   };
 });

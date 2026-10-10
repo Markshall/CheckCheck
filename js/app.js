@@ -12,30 +12,8 @@ document.getElementById('location-name').addEventListener('input', function(e) {
     reverseReultsOutput.style.display = 'block'
     reverseReultsOutput.innerHTML = '';
 
-    var results = {};
-
-    for (var i = 0; i <= 99; i++) {
-      var aisle = i.toString().padStart(2, '0')
-      for (var j = 65; j <= 90; j++) {
-        for (var k = 65; k <= 90; k++) {
-          var locationName = aisle + String.fromCharCode(j) + String.fromCharCode(k)
-          var [, checkChar] = CheckCheck.getCheckChar(locationName)
-
-          if (checkChar === checkInput) {
-            var bay = locationName.substring(0, 2)
-
-            if (!(bay in results)) {
-              results[bay] = [];
-            }
-
-            results[bay].push(locationName)
-          }
-        }
-      }
-    }
-
-    var keys = Object.keys(results);
-    keys.sort()
+    var results = CheckCheck.reverseLookup(checkInput);
+    var keys = Object.keys(results).sort();
 
     for (var i = 0; i < keys.length; i++) {
       var details = document.createElement('details');

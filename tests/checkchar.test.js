@@ -73,3 +73,25 @@ test('too short to have a check character', () => {
     assert.equal(CheckCheck.getCheckChar(input)[1], 'NULL', input);
   }
 });
+
+test('reverse lookup finds every store location with a check character', () => {
+  const results = CheckCheck.reverseLookup('november');
+  const locations = Object.values(results).flat();
+
+  assert.ok(results['10'].includes('10AK'));
+  assert.ok(locations.length > 0);
+
+  for (const location of locations) {
+    assert.equal(CheckCheck.checkCharStore(location)[1], 'NOVEMBER', location);
+  }
+
+  const total = CheckCheck.phonetic
+    .map(char => Object.values(CheckCheck.reverseLookup(char)).flat().length)
+    .reduce((a, b) => a + b);
+
+  assert.equal(total, 100 * 26 * 26);
+});
+
+test('reverse lookup of an unknown check character is empty', () => {
+  assert.deepEqual(CheckCheck.reverseLookup('NOPE'), {});
+});
