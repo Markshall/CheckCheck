@@ -6,6 +6,7 @@
   const locationText = document.getElementById('location-text');
   const checkCharOutput = document.getElementById('check-char');
   const reverseResultsOutput = document.getElementById('reverse-lookup-results');
+  let lastTrackedLocation = null;
 
   function renderLines(element, lines) {
     element.replaceChildren();
@@ -44,7 +45,8 @@
     checkCharOutput.style.display = 'block';
     reverseResultsOutput.style.display = 'none';
 
-    if (CheckCheck.isRfcLocation(location)) {
+    if (CheckCheck.isRfcLocation(location) && location !== lastTrackedLocation) {
+      lastTrackedLocation = location;
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push({
         'event': 'checkcheck_input',
