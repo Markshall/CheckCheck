@@ -264,10 +264,10 @@
         var results = {};
 
         for (var i = 0; i <= 99; i++) {
-          var i = i.toString().padStart(2, '0')
+          var aisle = i.toString().padStart(2, '0')
           for (var j = 65; j <= 90; j++) {
             for (var k = 65; k <= 90; k++) {
-              var locationName = i + String.fromCharCode(j) + String.fromCharCode(k)
+              var locationName = aisle + String.fromCharCode(j) + String.fromCharCode(k)
               var [, checkChar] = getCheckChar(locationName)
 
               if (checkChar === checkInput) {
