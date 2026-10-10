@@ -17,7 +17,7 @@
     <script src="js/app.js" defer></script>
 
     <link rel="apple-touch-icon" href="logo.png" />
-    <link rel="shortcut icon" type="image/x-icon" href="logo.png" />
+    <link rel="icon" type="image/png" href="logo.png" />
 
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
