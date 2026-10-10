@@ -35,7 +35,7 @@
     <!-- End Google Tag Manager (noscript) -->
     <header>
       <div class="container">
-        <a href="/check/" class="logo">
+        <a href="./" class="logo">
           CheckCheck
         </a>
       </div>
