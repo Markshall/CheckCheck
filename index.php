@@ -47,7 +47,7 @@
           <p>Enter a shelf location to find its check character, or enter a check character to find all locations with it!</p>
           <p>
             Try the all new
-            <a href="https://www.inwork.at/?ref=checkcheck&amp;utm_campaign=inworkatv2" class="inworkat" target="_blank">InWork<span>At</span></a>
+            <a href="https://www.inwork.at/?ref=checkcheck&amp;utm_campaign=inworkatv2" class="inworkat" target="_blank" rel="noopener">InWork<span>At</span></a>
             to keep track of your shifts.
           </p>
         </div>
@@ -69,8 +69,8 @@
       </main>
 
       <footer>
-        Designed and developed by <a href="https://www.mark-eriksson.com/" target="_blank">Mark Eriksson</a>.<br />
-        Check out the <a href="https://github.com/Markshall/CheckCheck" target="_blank">source on GitHub</a>.
+        Designed and developed by <a href="https://www.mark-eriksson.com/" target="_blank" rel="noopener">Mark Eriksson</a>.<br />
+        Check out the <a href="https://github.com/Markshall/CheckCheck" target="_blank" rel="noopener">source on GitHub</a>.
 
         <div class="adspace">
           <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
