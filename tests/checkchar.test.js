@@ -35,8 +35,8 @@ test('after and before locations', () => {
 
 test('special location names', () => {
   const cases = {
-    'J10A': { text: 'JEWELLERY ONE ZERO ALPHA', checkChar: 'WHISKEY' },
-    'S10A': { text: 'SECURITY ONE ZERO ALPHA', checkChar: 'PAPA' },
+    'J1PG': { text: 'JEWELLERY ONE PAPA GOLF', checkChar: 'ECHO' },
+    'S1PG': { text: 'SECURITY ONE PAPA GOLF', checkChar: 'X-RAY' },
     'L10A': { text: 'ONE ZERO LINBIN ALPHA', checkChar: 'GOLF' },
     'Z10A': { text: 'ONE ZERO BULK ALPHA', checkChar: 'YANKEE' },
     'CA12': { text: 'CASH OFFICE ONE TWO', checkChar: 'JULIET' },

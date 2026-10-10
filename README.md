@@ -20,8 +20,8 @@ Type a location into the box and its check character is shown underneath. Letter
 | --- | --- | --- |
 | Aisle, bay and shelf | `10AK` | ONE ZERO ALPHA KILO |
 | After / before a location (`+` / `-`) | `10A+` | AFTER ONE ZERO ALPHA |
-| Jewellery (`J`) | `J10A` | JEWELLERY ONE ZERO ALPHA |
-| Security (`S`) | `S10A` | SECURITY ONE ZERO ALPHA |
+| Jewellery (`J`) | `J1PG` | JEWELLERY ONE PAPA GOLF |
+| Security (`S`) | `S1PG` | SECURITY ONE PAPA GOLF |
 | Linbin (`L`) | `L10A` | ONE ZERO LINBIN ALPHA |
 | Bulk (`Z`) | `Z10A` | ONE ZERO BULK ALPHA |
 | Cash office (`CA`) | `CA12` | CASH OFFICE ONE TWO |

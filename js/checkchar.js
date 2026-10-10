@@ -24,7 +24,7 @@
   }
 
   // Turns the spoken characters into what's said to the headset, e.g.
-  // J10A -> JEWELLERY ONE ZERO ALPHA, 10A+ -> AFTER ONE ZERO ALPHA.
+  // J1PG -> JEWELLERY ONE PAPA GOLF, 10A+ -> AFTER ONE ZERO ALPHA.
   function getLocationName(location, words) {
     const prefix = location.substring(0, 2);
     const lastChar = location.slice(-1);
