@@ -7,7 +7,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>CheckCheck</title>
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600&display=swap">
     <link rel="stylesheet" href="css/reset.css?v2">
     <link rel="stylesheet" href="css/global.css?v2">
 
