@@ -84,6 +84,7 @@
   <script>
     var phonetic = ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA', 'ECHO', 'FOXTROT', 'GOLF', 'HOTEL', 'INDIA', 'JULIET', 'KILO', 'LIMA', 'MIKE', 'NOVEMBER', 'OSCAR', 'PAPA', 'QUEBEC', 'ROMEO', 'SIERRA', 'TANGO', 'UNIFORM', 'VICTOR', 'WHISKEY', 'X-RAY', 'YANKEE', 'ZULU'],
     numbers  = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'],
+    fixedCheckChars = { 'DPA': 'VICTOR', 'SOB': 'SIERRA' },
     locationString = '';
 
     function getPhonetic(l) {
@@ -99,8 +100,7 @@
           locSplit  = e.split(' '),
           firstChar = location.substr(0, 1),
           lastChar  = location.substr(-1),
-          returnVal = e,
-          checkChar = document.getElementById('check-char');
+          returnVal = e;
 
       //check for jewellery, security, linbins, bulk
       if (firstChar === "J" || firstChar === "S" || firstChar === "L" || firstChar === "Z") {
@@ -151,12 +151,10 @@
 
       if (location.substr(0,3) === 'DPA') {
         returnVal = 'DPA';
-        checkChar.innerText = 'VICTOR';
       }
 
       if (location.substr(0,3) === 'SOB') {
         returnVal = 'SOB';
-        checkChar.innerText = 'SIERRA';
       }
 
       return returnVal;
@@ -169,6 +167,10 @@
           i = 0;
 
       if (!(location === "RETURNS" || location === "RETURN" || location === "RETUR")) location = location.substring(0, 4);
+
+      if (location in fixedCheckChars) {
+        return [`&ldquo;${location}&rdquo;`, fixedCheckChars[location]];
+      }
 
       if (/[a-zA-Z]{4}/i.test(location)) {
         //RFC Way
