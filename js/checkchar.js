@@ -24,7 +24,7 @@
   }
 
   // Turns the spoken characters into what's said to the headset, e.g.
-  // J10A -> JEWELLERY ONE ZERO ALPHA, 10A+ -> AFTER ONE ZERO ALPHA.
+  // J1PG -> JEWELLERY ONE PAPA GOLF, 10A+ -> AFTER ONE ZERO ALPHA.
   function getLocationName(location, words) {
     const prefix = location.substring(0, 2);
     const lastChar = location.slice(-1);
@@ -149,6 +149,65 @@
     return reverseIndex[checkChar.toUpperCase()] || {};
   }
 
+  const locationPatterns = [
+    /^\d\d[A-Z][A-Z]$/, // 10AK
+    /^[JS]\d[A-Z][A-Z]$/, // S1PG
+    /^[LZ]\d\d[A-Z]$/, // L10A
+    /^C[AP]\d\d$/ // CA12
+  ];
+  const prefixWords = { J: 'JEWELLERY', S: 'SECURITY', L: 'LINBIN', Z: 'BULK' };
+  const locationChars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+  function isLocation(location) {
+    return locationPatterns.some(pattern => pattern.test(location));
+  }
+
+  function wordAt(location, i) {
+    return (i === 0 && prefixWords[location[0]]) || speak(location[i]);
+  }
+
+  // Locations one mistake away from the given one (a single character
+  // misheard, or two characters swapped) that share its check character,
+  // so the headset would have accepted either. Each is
+  // { location, text, checkChar, reason }.
+  function similarLocations(location) {
+    location = location.toUpperCase().substring(0, 4);
+
+    if (!isLocation(location)) {
+      return [];
+    }
+
+    const checkChar = checkCharStore(location).checkChar;
+    const found = new Map();
+
+    function consider(candidate, reason) {
+      if (candidate !== location && !found.has(candidate) && isLocation(candidate) &&
+          checkCharStore(candidate).checkChar === checkChar) {
+        found.set(candidate, Object.assign({ location: candidate, reason: reason }, checkCharStore(candidate)));
+      }
+    }
+
+    for (let i = 0; i < 4; i++) {
+      for (const char of locationChars) {
+        const candidate = location.substring(0, i) + char + location.substring(i + 1);
+        consider(candidate, wordAt(candidate, i) + ' heard as ' + wordAt(location, i));
+      }
+    }
+
+    // Only neighbouring digits or neighbouring letters, e.g. ONE ZERO said
+    // as ZERO ONE, as a prefix like JEWELLERY can't swap with a digit.
+    for (let i = 0; i < 3; i++) {
+      const chars = location.split('');
+
+      if (/\d/.test(chars[i]) === /\d/.test(chars[i + 1])) {
+        [chars[i], chars[i + 1]] = [chars[i + 1], chars[i]];
+        consider(chars.join(''), wordAt(location, i) + ' and ' + wordAt(location, i + 1) + ' swapped');
+      }
+    }
+
+    return Array.from(found.values());
+  }
+
   return {
     phonetic: phonetic,
     numbers: numbers,
@@ -156,6 +215,7 @@
     getCheckChar: getCheckChar,
     checkCharStore: checkCharStore,
     checkCharRFC: checkCharRFC,
-    reverseLookup: reverseLookup
+    reverseLookup: reverseLookup,
+    similarLocations: similarLocations
   };
 });

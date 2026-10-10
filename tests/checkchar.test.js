@@ -35,8 +35,8 @@ test('after and before locations', () => {
 
 test('special location names', () => {
   const cases = {
-    'J10A': { text: 'JEWELLERY ONE ZERO ALPHA', checkChar: 'WHISKEY' },
-    'S10A': { text: 'SECURITY ONE ZERO ALPHA', checkChar: 'PAPA' },
+    'J1PG': { text: 'JEWELLERY ONE PAPA GOLF', checkChar: 'ECHO' },
+    'S1PG': { text: 'SECURITY ONE PAPA GOLF', checkChar: 'X-RAY' },
     'L10A': { text: 'ONE ZERO LINBIN ALPHA', checkChar: 'GOLF' },
     'Z10A': { text: 'ONE ZERO BULK ALPHA', checkChar: 'YANKEE' },
     'CA12': { text: 'CASH OFFICE ONE TWO', checkChar: 'JULIET' },
@@ -109,4 +109,37 @@ test('reverse lookup of an unknown check character is empty', () => {
 test('characters with no phonetic spelling show as ?', () => {
   assert.equal(CheckCheck.getCheckChar('1#AK')[0].text, 'ONE ? ALPHA KILO');
   assert.equal(CheckCheck.getCheckChar('1 AK')[0].text, 'ONE ? ALPHA KILO');
+});
+
+test('similar locations from issue #5', () => {
+  assert.deepEqual(CheckCheck.similarLocations('07AZ'), [
+    { location: 'J7AZ', reason: 'JEWELLERY heard as ZERO', text: 'JEWELLERY SEVEN ALPHA ZULU', checkChar: 'YANKEE' },
+  ]);
+  assert.deepEqual(CheckCheck.similarLocations('J7AZ').map(r => r.location), ['07AZ']);
+});
+
+test('similar locations include security and swapped characters', () => {
+  const locations = input => CheckCheck.similarLocations(input).map(r => r.location);
+
+  assert.deepEqual(locations('97AZ'), ['S7AZ']);
+  assert.deepEqual(locations('10AN'), ['10NA']);
+  assert.deepEqual(locations('l10a'), ['L01A']);
+  assert.deepEqual(locations('S7AZ'), ['97AZ']);
+});
+
+test('similar locations all share the check character', () => {
+  for (const location of ['07AZ', '97AZ', '10AN', 'J7AZ', 'S7AZ', 'L10A', 'S1PG']) {
+    const checkChar = CheckCheck.checkCharStore(location).checkChar;
+
+    for (const result of CheckCheck.similarLocations(location)) {
+      assert.equal(result.checkChar, checkChar, location + ' -> ' + result.location);
+      assert.notEqual(result.location, location);
+    }
+  }
+});
+
+test('no similar locations for unique or unknown locations', () => {
+  for (const input of ['10AK', 'Z99Z', 'CA12', 'ABCD', '10A+', 'DPA', 'J10A', '', '10']) {
+    assert.deepEqual(CheckCheck.similarLocations(input), [], input);
+  }
 });

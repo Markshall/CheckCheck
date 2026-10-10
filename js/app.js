@@ -6,6 +6,7 @@
   const locationText = document.getElementById('location-text');
   const checkCharOutput = document.getElementById('check-char');
   const reverseResultsOutput = document.getElementById('reverse-lookup-results');
+  const similarOutput = document.getElementById('similar-locations');
   let lastTrackedLocation = null;
 
   function renderLines(element, lines) {
@@ -17,11 +18,43 @@
     });
   }
 
+  // Locations the headset would also accept for this one, so stock voiced
+  // here may really be there (or the other way round).
+  function showSimilarLocations(value) {
+    const results = CheckCheck.similarLocations(value);
+
+    if (!results.length) {
+      similarOutput.style.display = 'none';
+      similarOutput.replaceChildren();
+      return;
+    }
+
+    const heading = document.createElement('p');
+    const list = document.createElement('ul');
+
+    heading.textContent = 'Same check character, easily confused with:';
+    list.replaceChildren(...results.map(function (result) {
+      const item = document.createElement('li');
+      const location = document.createElement('strong');
+      const reason = document.createElement('small');
+
+      location.textContent = result.location;
+      reason.textContent = result.reason;
+
+      item.append(location, ' “' + result.text + '”', reason);
+      return item;
+    }));
+
+    similarOutput.replaceChildren(heading, list);
+    similarOutput.style.display = 'block';
+  }
+
   function showReverseLookup(checkChar) {
     const results = CheckCheck.reverseLookup(checkChar);
 
     locationTextOutput.style.display = 'none';
     checkCharOutput.style.display = 'none';
+    similarOutput.style.display = 'none';
     reverseResultsOutput.style.display = 'block';
 
     reverseResultsOutput.replaceChildren(...Object.keys(results).sort().map(function (aisle) {
@@ -60,6 +93,7 @@
     renderLines(checkCharOutput, results.map(function (result) {
       return (result.label ? result.label + ': ' : '') + result.checkChar;
     }));
+    showSimilarLocations(value);
   }
 
   input.addEventListener('input', function () {

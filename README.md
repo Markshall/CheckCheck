@@ -20,8 +20,8 @@ Type a location into the box and its check character is shown underneath. Letter
 | --- | --- | --- |
 | Aisle, bay and shelf | `10AK` | ONE ZERO ALPHA KILO |
 | After / before a location (`+` / `-`) | `10A+` | AFTER ONE ZERO ALPHA |
-| Jewellery (`J`) | `J10A` | JEWELLERY ONE ZERO ALPHA |
-| Security (`S`) | `S10A` | SECURITY ONE ZERO ALPHA |
+| Jewellery (`J`) | `J1PG` | JEWELLERY ONE PAPA GOLF |
+| Security (`S`) | `S1PG` | SECURITY ONE PAPA GOLF |
 | Linbin (`L`) | `L10A` | ONE ZERO LINBIN ALPHA |
 | Bulk (`Z`) | `Z10A` | ONE ZERO BULK ALPHA |
 | Cash office (`CA`) | `CA12` | CASH OFFICE ONE TWO |
@@ -30,6 +30,8 @@ Type a location into the box and its check character is shown underneath. Letter
 | DPA / SOB | `DPA`, `SOB` | DPA, SOB |
 
 Four letters (e.g. `ABCD`) show both the store and the RFC check character.
+
+If another location has the same check character and is only one mistake away (a misheard character, e.g. `07AZ` and `J7AZ`, or two swapped, e.g. `L10A` and `L01A`), it's listed underneath. The headset accepts either, so stock voiced to one may really be at the other.
 
 Type a check character instead (e.g. `NOVEMBER`) to list every store location from `00AA` to `99ZZ` that uses it, grouped by aisle.
 

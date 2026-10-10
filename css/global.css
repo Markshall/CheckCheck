@@ -106,6 +106,42 @@ main {
 	white-space: nowrap;
 }
 
+.similar-locations {
+	margin: 15px auto 0;
+	max-width: 420px;
+	padding: 12px 15px;
+	border-left: 4px solid #e53a40;
+	background-color: #fdf0f0;
+	font-size: 16px;
+	text-align: left;
+	display: none;
+}
+
+	.similar-locations p {
+		margin-bottom: 5px;
+		font-weight: 600;
+	}
+
+	.similar-locations ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.similar-locations li {
+		margin-top: 8px;
+	}
+
+	.similar-locations strong {
+		font-weight: 600;
+	}
+
+	.similar-locations small {
+		display: block;
+		color: #6c6a6a;
+		font-size: 14px;
+	}
+
 #reverse-lookup-results {
 	margin: 20px auto 0;
 	background-color: #efefef;

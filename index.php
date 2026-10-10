@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600&display=swap">
     <link rel="stylesheet" href="css/reset.css?v2">
-    <link rel="stylesheet" href="css/global.css?v2">
+    <link rel="stylesheet" href="css/global.css?v3">
 
     <script src="js/checkchar.js" defer></script>
     <script src="js/app.js" defer></script>
@@ -64,6 +64,8 @@
             </div>
           </div>
         </div>
+
+        <div id="similar-locations" class="similar-locations" aria-live="polite"></div>
 
         <div id="reverse-lookup-results"></div>
       </main>
