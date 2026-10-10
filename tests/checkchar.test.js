@@ -124,11 +124,11 @@ test('similar locations include security and swapped characters', () => {
   assert.deepEqual(locations('97AZ'), ['S7AZ']);
   assert.deepEqual(locations('10AN'), ['10NA']);
   assert.deepEqual(locations('l10a'), ['L01A']);
-  assert.ok(locations('J10A').includes('J01A'));
+  assert.deepEqual(locations('S7AZ'), ['97AZ']);
 });
 
 test('similar locations all share the check character', () => {
-  for (const location of ['07AZ', '97AZ', '10AN', 'J10A', 'S10A', 'L10A', 'S1PG']) {
+  for (const location of ['07AZ', '97AZ', '10AN', 'J7AZ', 'S7AZ', 'L10A', 'S1PG']) {
     const checkChar = CheckCheck.checkCharStore(location).checkChar;
 
     for (const result of CheckCheck.similarLocations(location)) {
@@ -139,7 +139,7 @@ test('similar locations all share the check character', () => {
 });
 
 test('no similar locations for unique or unknown locations', () => {
-  for (const input of ['10AK', 'Z99Z', 'CA12', 'ABCD', '10A+', 'DPA', '', '10']) {
+  for (const input of ['10AK', 'Z99Z', 'CA12', 'ABCD', '10A+', 'DPA', 'J10A', '', '10']) {
     assert.deepEqual(CheckCheck.similarLocations(input), [], input);
   }
 });

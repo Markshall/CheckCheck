@@ -151,7 +151,6 @@
 
   const locationPatterns = [
     /^\d\d[A-Z][A-Z]$/, // 10AK
-    /^[JS]\d\d[A-Z]$/, // J10A
     /^[JS]\d[A-Z][A-Z]$/, // S1PG
     /^[LZ]\d\d[A-Z]$/, // L10A
     /^C[AP]\d\d$/ // CA12
