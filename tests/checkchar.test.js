@@ -110,3 +110,36 @@ test('characters with no phonetic spelling show as ?', () => {
   assert.equal(CheckCheck.getCheckChar('1#AK')[0].text, 'ONE ? ALPHA KILO');
   assert.equal(CheckCheck.getCheckChar('1 AK')[0].text, 'ONE ? ALPHA KILO');
 });
+
+test('similar locations from issue #5', () => {
+  assert.deepEqual(CheckCheck.similarLocations('07AZ'), [
+    { location: 'J7AZ', reason: 'JEWELLERY heard as ZERO', text: 'JEWELLERY SEVEN ALPHA ZULU', checkChar: 'YANKEE' },
+  ]);
+  assert.deepEqual(CheckCheck.similarLocations('J7AZ').map(r => r.location), ['07AZ']);
+});
+
+test('similar locations include security and swapped characters', () => {
+  const locations = input => CheckCheck.similarLocations(input).map(r => r.location);
+
+  assert.deepEqual(locations('97AZ'), ['S7AZ']);
+  assert.deepEqual(locations('10AN'), ['10NA']);
+  assert.deepEqual(locations('l10a'), ['L01A']);
+  assert.ok(locations('J10A').includes('J01A'));
+});
+
+test('similar locations all share the check character', () => {
+  for (const location of ['07AZ', '97AZ', '10AN', 'J10A', 'S10A', 'L10A', 'S1PG']) {
+    const checkChar = CheckCheck.checkCharStore(location).checkChar;
+
+    for (const result of CheckCheck.similarLocations(location)) {
+      assert.equal(result.checkChar, checkChar, location + ' -> ' + result.location);
+      assert.notEqual(result.location, location);
+    }
+  }
+});
+
+test('no similar locations for unique or unknown locations', () => {
+  for (const input of ['10AK', 'Z99Z', 'CA12', 'ABCD', '10A+', 'DPA', '', '10']) {
+    assert.deepEqual(CheckCheck.similarLocations(input), [], input);
+  }
+});
