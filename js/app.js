@@ -1,51 +1,48 @@
-function renderLines(element, lines) {
-  element.replaceChildren();
+(function () {
+  'use strict';
 
-  lines.forEach(function (line, i) {
-    if (i > 0) element.appendChild(document.createElement('br'));
-    element.appendChild(document.createTextNode(line));
-  });
-}
+  const input = document.getElementById('location-name');
+  const locationTextOutput = document.querySelector('.location-text');
+  const locationText = document.getElementById('location-text');
+  const checkCharOutput = document.getElementById('check-char');
+  const reverseResultsOutput = document.getElementById('reverse-lookup-results');
 
-document.getElementById('location-name').addEventListener('input', function(e) {
-  var checkInput = this.value.toUpperCase();
-  var locationTextOutput = document.querySelector('.location-text')
-  var checkCharOutput = document.getElementById('check-char')
-  var reverseReultsOutput = document.getElementById('reverse-lookup-results')
+  function renderLines(element, lines) {
+    element.replaceChildren();
 
-  if (CheckCheck.phonetic.indexOf(checkInput) > -1) {
-    // reverse look up
+    lines.forEach(function (line, i) {
+      if (i > 0) element.appendChild(document.createElement('br'));
+      element.appendChild(document.createTextNode(line));
+    });
+  }
+
+  function showReverseLookup(checkChar) {
+    const results = CheckCheck.reverseLookup(checkChar);
 
     locationTextOutput.style.display = 'none';
     checkCharOutput.style.display = 'none';
-    reverseReultsOutput.style.display = 'block'
-    reverseReultsOutput.innerHTML = '';
+    reverseResultsOutput.style.display = 'block';
 
-    var results = CheckCheck.reverseLookup(checkInput);
-    var keys = Object.keys(results).sort();
+    reverseResultsOutput.replaceChildren(...Object.keys(results).sort().map(function (aisle) {
+      const details = document.createElement('details');
+      const summary = document.createElement('summary');
+      const locations = document.createElement('p');
 
-    for (var i = 0; i < keys.length; i++) {
-      var details = document.createElement('details');
-      var summary = document.createElement('summary');
-      var locations = document.createElement('p');
+      summary.textContent = aisle;
+      locations.textContent = results[aisle].join(', ');
 
-      locations.innerText = results[keys[i]].join(', ')
-
-      summary.innerText = keys[i];
-
-      details.appendChild(summary);
-      details.appendChild(locations)
-
-      reverseReultsOutput.appendChild(details)
-    }
+      details.append(summary, locations);
+      return details;
+    }));
   }
-  else {
+
+  function showCheckChar(value) {
+    const results = CheckCheck.getCheckChar(value);
+    const location = value.toUpperCase().substring(0, 4);
+
     locationTextOutput.style.display = 'block';
     checkCharOutput.style.display = 'block';
-    reverseReultsOutput.style.display = 'none'
-
-    var results = CheckCheck.getCheckChar(this.value)
-    var location = checkInput.substring(0, 4)
+    reverseResultsOutput.style.display = 'none';
 
     if (CheckCheck.isRfcLocation(location)) {
       window.dataLayer = window.dataLayer || [];
@@ -55,23 +52,31 @@ document.getElementById('location-name').addEventListener('input', function(e) {
       });
     }
 
-    renderLines(locationTextOutput.querySelector('#location-text'), results.map(function (result) {
-      return (result.label ? result.label + ': ' : '') + '\u201C' + result.text + '\u201D';
+    renderLines(locationText, results.map(function (result) {
+      return (result.label ? result.label + ': ' : '') + '“' + result.text + '”';
     }));
     renderLines(checkCharOutput, results.map(function (result) {
       return (result.label ? result.label + ': ' : '') + result.checkChar;
     }));
   }
-});
 
-document.getElementById('location-name').addEventListener('focus', function(e) {
-  this.value === 'NULL' && (this.value = '');
-});
+  input.addEventListener('input', function () {
+    if (CheckCheck.phonetic.includes(this.value.toUpperCase())) {
+      showReverseLookup(this.value);
+    } else {
+      showCheckChar(this.value);
+    }
+  });
 
-document.getElementById('location-name').addEventListener('blur', function(e) {
-  this.value === "" && (this.value = 'NULL');
-});
+  input.addEventListener('focus', function () {
+    this.value === 'NULL' && (this.value = '');
+  });
 
-document.getElementById('check-char').addEventListener('click', function(e) {
-  document.getElementById('location-name').focus();
-})
+  input.addEventListener('blur', function () {
+    this.value === '' && (this.value = 'NULL');
+  });
+
+  checkCharOutput.addEventListener('click', function () {
+    input.focus();
+  });
+})();
