@@ -5,80 +5,65 @@
     root.CheckCheck = factory();
   }
 })(this, function () {
-  var phonetic = ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA', 'ECHO', 'FOXTROT', 'GOLF', 'HOTEL', 'INDIA', 'JULIET', 'KILO', 'LIMA', 'MIKE', 'NOVEMBER', 'OSCAR', 'PAPA', 'QUEBEC', 'ROMEO', 'SIERRA', 'TANGO', 'UNIFORM', 'VICTOR', 'WHISKEY', 'X-RAY', 'YANKEE', 'ZULU'],
-  numbers  = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'],
-  fixedCheckChars = { 'DPA': 'VICTOR', 'SOB': 'SIERRA' };
+  'use strict';
 
-  function getPhonetic(l) {
-    for (let q = 0; q < phonetic.length; q++) {
-      if (phonetic[q].substr(0, 1) === l) {
-        return phonetic[q];
-      }
-    }
+  const phonetic = ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA', 'ECHO', 'FOXTROT', 'GOLF', 'HOTEL', 'INDIA', 'JULIET', 'KILO', 'LIMA', 'MIKE', 'NOVEMBER', 'OSCAR', 'PAPA', 'QUEBEC', 'ROMEO', 'SIERRA', 'TANGO', 'UNIFORM', 'VICTOR', 'WHISKEY', 'X-RAY', 'YANKEE', 'ZULU'];
+  const numbers = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'];
+  const fixedCheckChars = { DPA: 'VICTOR', SOB: 'SIERRA' };
+  const returnsAliases = ['RETUR', 'RETURN', 'RETURNS'];
+
+  // Both formulas weight the four characters 5, 7, 7, 3.
+  const weights = [5, 7, 7, 3];
+
+  function getPhonetic(char) {
+    return /^[A-Z]$/.test(char) ? phonetic[char.charCodeAt(0) - 65] : undefined;
   }
 
-  function getLocationName(location, e) {
-    var locSplit  = e.split(' '),
-        firstChar = location.substr(0, 1),
-        lastChar  = location.substr(-1),
-        returnVal = e;
+  function speak(char) {
+    return (/^[0-9]$/.test(char) ? numbers[char] : getPhonetic(char)) || '?';
+  }
 
-    //check for jewellery, security, linbins, bulk
-    if (firstChar === "J" || firstChar === "S" || firstChar === "L" || firstChar === "Z") {
-      switch (firstChar) {
-        case 'J':
-          returnVal = 'JEWELLERY ' + [locSplit[1], locSplit[2], locSplit[3]].join(' ');
+  // Turns the spoken characters into what's said to the headset, e.g.
+  // J10A -> JEWELLERY ONE ZERO ALPHA, 10A+ -> AFTER ONE ZERO ALPHA.
+  function getLocationName(location, words) {
+    const prefix = location.substring(0, 2);
+    const lastChar = location.slice(-1);
+    let name = words.join(' ');
+
+    switch (location[0]) {
+      case 'J':
+        name = 'JEWELLERY ' + words.slice(1).join(' ');
         break;
-
-        case 'S':
-          returnVal = 'SECURITY ' + [locSplit[1], locSplit[2], locSplit[3]].join(' ');
+      case 'S':
+        name = 'SECURITY ' + words.slice(1).join(' ');
         break;
-
-        case 'L':
-          returnVal = [locSplit[1], locSplit[2]].join(' ') + ' LINBIN ' + locSplit[3];
+      case 'L':
+        name = words.slice(1, 3).join(' ') + ' LINBIN ' + words[3];
         break;
-
-        case 'Z':
-          returnVal = [locSplit[1], locSplit[2]].join(' ') + ' BULK ' + locSplit[3];
+      case 'Z':
+        name = words.slice(1, 3).join(' ') + ' BULK ' + words[3];
         break;
-      }
     }
 
-    //check for after,before
-    if (lastChar === "+" || lastChar === "-") {
-      switch (lastChar) {
-        case '+':
-          returnVal = 'AFTER ' + [locSplit[0], locSplit[1], locSplit[2]].join(' ');
-        break;
-
-        case '-':
-          returnVal = 'BEFORE ' + [locSplit[0], locSplit[1], locSplit[2]].join(' ');
-        break;
-      }
+    if (lastChar === '+') {
+      name = 'AFTER ' + words.slice(0, 3).join(' ');
+    } else if (lastChar === '-') {
+      name = 'BEFORE ' + words.slice(0, 3).join(' ');
     }
 
-    //check for misc locations
-    if (location.substr(0,2) == 'CA') {
-      returnVal = 'CASH OFFICE ' + [locSplit[2], locSplit[3]].join(' ');
+    if (prefix === 'CA') {
+      name = 'CASH OFFICE ' + words.slice(2).join(' ');
+    } else if (prefix === 'CP') {
+      name = 'COLLECTION POINT ' + words.slice(2).join(' ');
+    } else if (location === 'RETS') {
+      name = 'RETURNS';
+    } else if (location.startsWith('DPA')) {
+      name = 'DPA';
+    } else if (location.startsWith('SOB')) {
+      name = 'SOB';
     }
 
-    if (location.substr(0, 2) === 'CP') {
-      returnVal = 'COLLECTION POINT ' + [locSplit[2], locSplit[3]].join(' ');
-    }
-
-    if (location === 'RETS') {
-      returnVal = 'RETURNS';
-    }
-
-    if (location.substr(0,3) === 'DPA') {
-      returnVal = 'DPA';
-    }
-
-    if (location.substr(0,3) === 'SOB') {
-      returnVal = 'SOB';
-    }
-
-    return returnVal;
+    return name;
   }
 
   function isRfcLocation(location) {
@@ -90,7 +75,7 @@
   function getCheckChar(location) {
     location = location.toUpperCase();
 
-    if (location === 'RETUR' || location === 'RETURN' || location === 'RETURNS') {
+    if (returnsAliases.includes(location)) {
       return [{ label: null, text: 'RETURNS', checkChar: 'FOUR EIGHT / OSCAR' }];
     }
 
@@ -100,70 +85,44 @@
       return [{ label: null, text: location, checkChar: fixedCheckChars[location] }];
     }
 
-    const storeResult = checkCharStore(location);
+    const store = checkCharStore(location);
 
     if (isRfcLocation(location)) {
-      const rfcResult = checkCharRFC(location);
-
       return [
-        { label: 'Store', text: storeResult[0], checkChar: storeResult[1] },
-        { label: 'RFC', text: rfcResult[0], checkChar: rfcResult[1] }
+        Object.assign({ label: 'Store' }, store),
+        Object.assign({ label: 'RFC' }, checkCharRFC(location))
       ];
     }
 
-    return [{ label: null, text: storeResult[0], checkChar: storeResult[1] }];
+    return [Object.assign({ label: null }, store)];
   }
 
   function checkCharStore(location) {
-    let locationText, checkChar, i = 0, locationString = '';
-
-    if (location.length > 3 || location === "DPA" || location === "SOB") {
-      for (let k = 2; k < 6; k++) {
-        const c = location[k - 2];
-        i += (location.charCodeAt(k % 4)) * (k % 3 * 2 + 3);
-        locationString += ((isNaN(c) ? getPhonetic(c) : numbers[c]) || '?') + ' ';
-      }
-
-      checkChar = getPhonetic(String.fromCharCode(i % 26 + 65));
-      locationString = locationString.replace(/\s$/, '');
-      locationText = getLocationName(location, locationString);
-    } else {
-      locationText = checkChar = 'NULL';
+    if (location.length < 4) {
+      return { text: 'NULL', checkChar: 'NULL' };
     }
 
-    return [locationText, checkChar];
+    const chars = location.substring(0, 4).split('');
+    const total = chars.reduce((sum, char, i) => sum + char.charCodeAt(0) * weights[i], 0);
+
+    return {
+      text: getLocationName(location, chars.map(speak)),
+      checkChar: phonetic[total % 26]
+    };
   }
 
   function checkCharRFC(location) {
-    let spoken = "";
-    let checkDigit = 45;
-    let locationText, checkChar;
+    const chars = location.substring(0, 4).split('');
+    const total = chars.reduce((sum, char, i) => sum + (char.charCodeAt(0) - 65) * weights[i], 45);
+    const checkDigit = total % 99;
 
-    for (let i = 0; i < 4; i++) {
-      let a = location.charCodeAt(i) - 65;
-      spoken += phonetic[a] + (i === 3 ? "" : " ");
-
-      if (i === 0) {
-        a *= 5;
-      }
-      else if (i == 1 || i == 2) {
-        a *= 7;
-      }
-      else {
-        a *= 3;
-      }
-
-      checkDigit += a;
-
-    }
-    checkDigit = Math.round(((checkDigit / 99) - Math.floor(checkDigit / 99)) * 99);
-    locationText = spoken;
-    checkChar = numbers[Math.floor(checkDigit / 10)] + " " + numbers[checkDigit % 10];
-
-    return [locationText, checkChar];
+    return {
+      text: chars.map(getPhonetic).join(' '),
+      checkChar: numbers[Math.floor(checkDigit / 10)] + ' ' + numbers[checkDigit % 10]
+    };
   }
 
-  var reverseIndex = null;
+  let reverseIndex = null;
 
   // Every store location 00AA-99ZZ grouped by check character, then by
   // aisle. Built on first use and reused after that.
@@ -174,10 +133,10 @@
       for (let i = 0; i <= 99; i++) {
         const aisle = i.toString().padStart(2, '0');
 
-        for (let j = 65; j <= 90; j++) {
-          for (let k = 65; k <= 90; k++) {
-            const location = aisle + String.fromCharCode(j) + String.fromCharCode(k);
-            const char = checkCharStore(location)[1];
+        for (const first of phonetic) {
+          for (const second of phonetic) {
+            const location = aisle + first[0] + second[0];
+            const char = checkCharStore(location).checkChar;
 
             reverseIndex[char] = reverseIndex[char] || {};
             reverseIndex[char][aisle] = reverseIndex[char][aisle] || [];

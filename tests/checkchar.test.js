@@ -4,10 +4,10 @@ const CheckCheck = require('../js/checkchar.js');
 
 test('store check characters', () => {
   const cases = {
-    '00AA': ['ZERO ZERO ALPHA ALPHA', 'ECHO'],
-    '01AK': ['ZERO ONE ALPHA KILO', 'PAPA'],
-    '10AK': ['ONE ZERO ALPHA KILO', 'NOVEMBER'],
-    '99ZZ': ['NINE NINE ZULU ZULU', 'YANKEE'],
+    '00AA': { text: 'ZERO ZERO ALPHA ALPHA', checkChar: 'ECHO' },
+    '01AK': { text: 'ZERO ONE ALPHA KILO', checkChar: 'PAPA' },
+    '10AK': { text: 'ONE ZERO ALPHA KILO', checkChar: 'NOVEMBER' },
+    '99ZZ': { text: 'NINE NINE ZULU ZULU', checkChar: 'YANKEE' },
   };
 
   for (const [location, expected] of Object.entries(cases)) {
@@ -16,30 +16,30 @@ test('store check characters', () => {
 });
 
 test('swapped digits give a different check character', () => {
-  assert.notEqual(CheckCheck.checkCharStore('10AK')[1], CheckCheck.checkCharStore('01AK')[1]);
+  assert.notEqual(CheckCheck.checkCharStore('10AK').checkChar, CheckCheck.checkCharStore('01AK').checkChar);
 });
 
 test('RFC check characters', () => {
-  assert.deepEqual(CheckCheck.checkCharRFC('AAAA'), ['ALPHA ALPHA ALPHA ALPHA', 'FOUR FIVE']);
-  assert.deepEqual(CheckCheck.checkCharRFC('ABCD'), ['ALPHA BRAVO CHARLIE DELTA', 'SEVEN FIVE']);
-  assert.deepEqual(CheckCheck.checkCharRFC('RETS'), ['ROMEO ECHO TANGO SIERRA', 'FOUR EIGHT']);
-  assert.deepEqual(CheckCheck.checkCharRFC('ZZZZ'), ['ZULU ZULU ZULU ZULU', 'ZERO ONE']);
+  assert.deepEqual(CheckCheck.checkCharRFC('AAAA'), { text: 'ALPHA ALPHA ALPHA ALPHA', checkChar: 'FOUR FIVE' });
+  assert.deepEqual(CheckCheck.checkCharRFC('ABCD'), { text: 'ALPHA BRAVO CHARLIE DELTA', checkChar: 'SEVEN FIVE' });
+  assert.deepEqual(CheckCheck.checkCharRFC('RETS'), { text: 'ROMEO ECHO TANGO SIERRA', checkChar: 'FOUR EIGHT' });
+  assert.deepEqual(CheckCheck.checkCharRFC('ZZZZ'), { text: 'ZULU ZULU ZULU ZULU', checkChar: 'ZERO ONE' });
 });
 
 test('after and before locations', () => {
-  assert.deepEqual(CheckCheck.checkCharStore('10A+'), ['AFTER ONE ZERO ALPHA', 'VICTOR']);
-  assert.deepEqual(CheckCheck.checkCharStore('10A-'), ['BEFORE ONE ZERO ALPHA', 'BRAVO']);
+  assert.deepEqual(CheckCheck.checkCharStore('10A+'), { text: 'AFTER ONE ZERO ALPHA', checkChar: 'VICTOR' });
+  assert.deepEqual(CheckCheck.checkCharStore('10A-'), { text: 'BEFORE ONE ZERO ALPHA', checkChar: 'BRAVO' });
 });
 
 test('special location names', () => {
   const cases = {
-    'J10A': ['JEWELLERY ONE ZERO ALPHA', 'WHISKEY'],
-    'S10A': ['SECURITY ONE ZERO ALPHA', 'PAPA'],
-    'L10A': ['ONE ZERO LINBIN ALPHA', 'GOLF'],
-    'Z10A': ['ONE ZERO BULK ALPHA', 'YANKEE'],
-    'CA12': ['CASH OFFICE ONE TWO', 'JULIET'],
-    'CP12': ['COLLECTION POINT ONE TWO', 'KILO'],
-    'RETS': ['RETURNS', 'OSCAR'],
+    'J10A': { text: 'JEWELLERY ONE ZERO ALPHA', checkChar: 'WHISKEY' },
+    'S10A': { text: 'SECURITY ONE ZERO ALPHA', checkChar: 'PAPA' },
+    'L10A': { text: 'ONE ZERO LINBIN ALPHA', checkChar: 'GOLF' },
+    'Z10A': { text: 'ONE ZERO BULK ALPHA', checkChar: 'YANKEE' },
+    'CA12': { text: 'CASH OFFICE ONE TWO', checkChar: 'JULIET' },
+    'CP12': { text: 'COLLECTION POINT ONE TWO', checkChar: 'KILO' },
+    'RETS': { text: 'RETURNS', checkChar: 'OSCAR' },
   };
 
   for (const [location, expected] of Object.entries(cases)) {
@@ -90,7 +90,7 @@ test('reverse lookup finds every store location with a check character', () => {
   assert.ok(locations.length > 0);
 
   for (const location of locations) {
-    assert.equal(CheckCheck.checkCharStore(location)[1], 'NOVEMBER', location);
+    assert.equal(CheckCheck.checkCharStore(location).checkChar, 'NOVEMBER', location);
   }
 
   const total = CheckCheck.phonetic
