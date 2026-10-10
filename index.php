@@ -84,11 +84,10 @@
   <script>
     var phonetic = ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA', 'ECHO', 'FOXTROT', 'GOLF', 'HOTEL', 'INDIA', 'JULIET', 'KILO', 'LIMA', 'MIKE', 'NOVEMBER', 'OSCAR', 'PAPA', 'QUEBEC', 'ROMEO', 'SIERRA', 'TANGO', 'UNIFORM', 'VICTOR', 'WHISKEY', 'X-RAY', 'YANKEE', 'ZULU'],
     numbers  = ['ZERO', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'],
-    fixedCheckChars = { 'DPA': 'VICTOR', 'SOB': 'SIERRA' },
-    locationString = '';
+    fixedCheckChars = { 'DPA': 'VICTOR', 'SOB': 'SIERRA' };
 
     function getPhonetic(l) {
-      for (q = 0; q < phonetic.length; q++) {
+      for (let q = 0; q < phonetic.length; q++) {
         if (phonetic[q].substr(0, 1) === l) {
           return phonetic[q];
         }
@@ -200,18 +199,18 @@
     }
 
     function checkCharStore(location) {
-      let locationText, checkChar, i = 0;
+      let locationText, checkChar, i = 0, locationString = '';
 
       if (location.length > 3 || location === "DPA" || location === "SOB") {
-        for (k = 2; k < 6; k++) {
+        for (let k = 2; k < 6; k++) {
+          const c = location[k - 2];
           i += (location.charCodeAt(k % 4)) * (k % 3 * 2 + 3);
-          locationString += ((!!isNaN(c=location[k - 2])) ? getPhonetic(c) : numbers[c]) + ' ';
+          locationString += (isNaN(c) ? getPhonetic(c) : numbers[c]) + ' ';
         }
 
         checkChar = getPhonetic(String.fromCharCode(i % 26 + 65));
         locationString = locationString.replace(/\s$/, '');
         locationText = getLocationName(location, locationString);
-        locationString = '';
       } else {
         locationText = checkChar = 'NULL';
       }
