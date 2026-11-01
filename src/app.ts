@@ -1,6 +1,7 @@
 import * as CheckCheck from './checkchar.ts';
 import { lookup, filterAisles } from './lookup.ts';
 import type { View } from './lookup.ts';
+import { addRecent, loadRecent, saveRecent } from './recent.ts';
 
 declare global {
   interface Window {
@@ -27,10 +28,17 @@ const locationText = find('#location-text');
 const checkCharOutput = find('#check-char');
 const noteOutput = find('#input-note');
 const suggestionsOutput = find('#suggestions');
+const recentOutput = find('#recent');
 const similarOutput = find('#similar-locations');
 const reverseResultsOutput = find('#reverse-lookup-results');
 let lastTrackedLocation: string | null = null;
 let shownCheckChar: string | null = null;
+let recent = loadRecent();
+let rememberTimer: number | undefined;
+
+// How long a lookup has to stay in the box before it's remembered, so the
+// steps on the way (1, 10, 10A) aren't.
+const REMEMBER_AFTER = 1500;
 
 const notes = {
   unknown: 'That isn’t a usual location, so check what you’ve typed.',
@@ -86,6 +94,58 @@ function renderSuggestions(suggestions: string[]): void {
       return button;
     })
   );
+}
+
+function remember(value: string): void {
+  recent = addRecent(recent, value);
+  saveRecent(recent);
+}
+
+// Recent lookups as small copies of the label with their check characters,
+// so they can often be read without tapping. A check character looked up
+// on its own is shown as just the black strip.
+function renderRecent(visible: boolean): void {
+  show(recentOutput, visible && recent.length > 0);
+  if (!visible || !recent.length) return;
+
+  const header = create('div', 'recent-header');
+  const clear = create('button', 'recent-clear', 'Clear');
+  const list = create('div', 'recent-list');
+
+  clear.type = 'button';
+  clear.addEventListener('click', function () {
+    recent = [];
+    saveRecent(recent);
+    renderRecent(false);
+  });
+  header.append(create('h2', 'recent-heading', 'Recent'), clear);
+
+  list.replaceChildren(...recent.map(function (value) {
+    const view = lookup(value);
+    const button = create('button', 'recent-item');
+
+    button.type = 'button';
+    if (view.kind === 'checkChar') {
+      button.classList.add('is-check-char');
+      button.append(create('span', 'recent-caption', 'Every location with'), create('span', 'recent-location', value));
+    } else if (view.kind === 'location') {
+      button.append(
+        create('span', 'recent-location', value),
+        create('span', 'recent-check-char', view.results.map(result => result.checkChar).join(' / '))
+      );
+    } else {
+      button.append(create('span', 'recent-location', value));
+    }
+    button.addEventListener('click', function () {
+      input.value = value;
+      update();
+      remember(value);
+    });
+
+    return button;
+  }));
+
+  recentOutput.replaceChildren(header, list);
 }
 
 // Locations the headset would also accept for this one, so stock voiced
@@ -197,6 +257,7 @@ function render(view: View): void {
   show(noteOutput, view.kind === 'location' && view.note !== null);
   renderSuggestions(view.kind === 'partial' || view.kind === 'location' ? view.suggestions : []);
   renderSimilar(view.kind === 'location' ? view.similar : []);
+  renderRecent(view.kind === 'empty');
 
   if (!isCheckChar) shownCheckChar = null;
 
@@ -226,6 +287,13 @@ function update(): void {
 
   if (view.kind === 'location') track(input.value.trim());
   render(view);
+
+  // Only whole lookups: a known location, or a check character.
+  window.clearTimeout(rememberTimer);
+  if ((view.kind === 'location' && view.note === null && !view.suggestions.length) || view.kind === 'checkChar') {
+    const value = input.value.trim().toUpperCase();
+    rememberTimer = window.setTimeout(() => remember(value), REMEMBER_AFTER);
+  }
 }
 
 input.addEventListener('input', update);

@@ -228,6 +228,102 @@ main {
 		outline-offset: 2px;
 	}
 
+/* Recent lookups, each a small copy of the label. */
+
+.recent {
+	max-width: 440px;
+	margin: 22px auto 0;
+	text-align: left;
+}
+
+.recent-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 8px;
+}
+
+	.recent-heading {
+		font-size: 12px;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--muted);
+	}
+
+	.recent-clear {
+		border: 0;
+		background: none;
+		padding: 4px 0;
+		color: var(--red);
+		font-family: inherit;
+		font-size: 15px;
+		cursor: pointer;
+	}
+
+.recent-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+	gap: 8px;
+}
+
+	.recent-item {
+		display: flex;
+		flex-direction: column;
+		border: 2px solid var(--label-black);
+		border-radius: 2px;
+		padding: 0;
+		background-color: var(--label-yellow);
+		box-shadow: 0 0 0 3px var(--label-yellow);
+		margin: 3px;
+		font-family: inherit;
+		text-transform: uppercase;
+		cursor: pointer;
+		overflow: hidden;
+	}
+
+	.recent-item:focus-visible {
+		outline: 2px solid var(--red);
+		outline-offset: 4px;
+	}
+
+	.recent-location {
+		padding: 4px 8px;
+		font-size: 22px;
+		font-weight: 600;
+		line-height: 1.2;
+		color: var(--label-black);
+	}
+
+	.recent-item.is-check-char {
+		justify-content: center;
+		background-color: var(--label-black);
+	}
+
+		.recent-item.is-check-char .recent-location {
+			color: var(--label-yellow);
+		}
+
+	.recent-caption {
+		padding-top: 4px;
+		font-size: 10px;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		color: var(--label-yellow);
+		opacity: 0.7;
+	}
+
+	.recent-check-char {
+		flex-grow: 1;
+		padding: 2px 8px 3px;
+		background-color: var(--label-black);
+		color: var(--label-yellow);
+		font-size: 13px;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		line-height: 1.3;
+	}
+
 /* Easily confused locations */
 
 .similar-locations {
