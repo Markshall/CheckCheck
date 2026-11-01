@@ -1,7 +1,9 @@
-import * as CheckCheck from './checkchar.ts';
+import type { LocationGroup, LocationKind, SimilarLocation } from './checkchar.ts';
 import { lookup, filterAisles } from './lookup.ts';
-import type { View } from './lookup.ts';
+import type { LocationMatch, View } from './lookup.ts';
 import { addRecent, loadRecent, saveRecent } from './recent.ts';
+import { loadThemeChoice, nextThemeChoice, resolveTheme, saveThemeChoice, themeColors } from './theme.ts';
+import type { ThemeChoice } from './theme.ts';
 
 declare global {
   interface Window {
@@ -25,28 +27,49 @@ function create<K extends keyof HTMLElementTagNameMap>(tag: K, className?: strin
 
 const input = find<HTMLInputElement>('#location-name');
 const locationText = find('#location-text');
-const checkCharOutput = find('#check-char');
+const checkCharOutput = find<HTMLButtonElement>('#check-char');
+const statusOutput = find('#lookup-status');
 const noteOutput = find('#input-note');
 const suggestionsOutput = find('#suggestions');
 const recentOutput = find('#recent');
 const similarOutput = find('#similar-locations');
 const reverseResultsOutput = find('#reverse-lookup-results');
-let lastTrackedLocation: string | null = null;
+let lastTracked: string | null = null;
 let shownCheckChar: string | null = null;
 let recent = loadRecent();
-let rememberTimer: number | undefined;
+let settleTimer: number | undefined;
 
-// How long a lookup has to stay in the box before it's remembered, so the
-// steps on the way (1, 10, 10A) aren't.
-const REMEMBER_AFTER = 1500;
+// How long a lookup has to stay in the box before it's tracked and
+// remembered, so the steps on the way (1, 10, 10A) aren't.
+const SETTLE_AFTER = 1500;
 
 const notes = {
   unknown: 'That isn’t a usual location, so check what you’ve typed.',
   extra: 'Only the first four characters count.'
 };
 
+const groupNames: Record<LocationKind, string> = {
+  shelf: 'Shelves',
+  afterBefore: 'After and before',
+  jewellery: 'Jewellery',
+  security: 'Security',
+  linbin: 'Linbin',
+  bulk: 'Bulk',
+  cashOffice: 'Cash office',
+  collectionPoint: 'Collection point',
+  other: 'Other'
+};
+
+// Kinds with enough locations in an aisle to show each aisle as a tile.
+// The rest are one list.
+const tiledKinds: LocationKind[] = ['shelf', 'jewellery', 'security'];
+
 function show(element: HTMLElement, visible: boolean): void {
   element.hidden = !visible;
+}
+
+function plural(count: number, noun: string): string {
+  return count.toLocaleString('en-GB') + ' ' + noun + (count === 1 ? '' : 's');
 }
 
 interface Row {
@@ -55,11 +78,12 @@ interface Row {
 }
 
 // One row per result, so a four letter location shows its store and RFC
-// answers one above the other with their labels kept small.
+// answers one above the other with their labels kept small. Spans, as the
+// check character strip is a button.
 function renderRows(element: HTMLElement, rows: Row[]): void {
   element.classList.remove('is-hint', 'is-error');
   element.replaceChildren(...rows.map(function (row) {
-    const line = create('div', 'row');
+    const line = create('span', 'row');
 
     if (row.label) line.append(create('span', 'row-label', row.label), ' ');
     line.appendChild(create('span', 'row-value', row.value));
@@ -78,27 +102,37 @@ function renderHint(text: string, isError = false): void {
   checkCharOutput.textContent = 'Check character';
 }
 
-function renderSuggestions(suggestions: string[]): void {
-  show(suggestionsOutput, suggestions.length > 0);
-  if (!suggestions.length) return;
+// What a screen reader announces: the answer, not every keystroke's hint.
+function announce(text: string): void {
+  if (statusOutput.textContent !== text) statusOutput.textContent = text;
+}
+
+function announcement(view: View, match: LocationMatch | null): string {
+  const parts = match
+    ? match.results.map(result => (result.label ? result.label + ' check character ' : 'Check character ') + result.checkChar)
+    : [];
+
+  if (view.kind === 'checkChar') parts.push(plural(view.total, 'location') + ' have the check character ' + view.checkChar);
+  return parts.join('. ');
+}
+
+// Buttons that fill the box, e.g. NOVEMBER for NOV, or 01AK for 1AK.
+function renderSuggestions(caption: string, words: string[], className = ''): void {
+  show(suggestionsOutput, words.length > 0);
+  if (!words.length) return;
 
   suggestionsOutput.replaceChildren(
-    create('span', '', 'Find every location with'),
-    ...suggestions.map(function (word) {
-      const button = create('button', 'suggestion', word);
+    create('span', '', caption),
+    ...words.map(function (word) {
+      const button = create('button', ('suggestion ' + className).trim(), word);
       button.type = 'button';
       button.addEventListener('click', function () {
         input.value = word;
-        update();
+        update(true);
       });
       return button;
     })
   );
-}
-
-function remember(value: string): void {
-  recent = addRecent(recent, value);
-  saveRecent(recent);
 }
 
 // Recent lookups as small copies of the label with their check characters,
@@ -127,7 +161,7 @@ function renderRecent(visible: boolean): void {
     button.type = 'button';
     if (view.kind === 'checkChar') {
       button.classList.add('is-check-char');
-      button.append(create('span', 'recent-caption', 'Every location with'), create('span', 'recent-location', value));
+      button.append(create('span', 'recent-caption', 'Every location with'), create('span', 'recent-location', view.checkChar));
     } else if (view.kind === 'location') {
       button.append(
         create('span', 'recent-location', value),
@@ -138,8 +172,7 @@ function renderRecent(visible: boolean): void {
     }
     button.addEventListener('click', function () {
       input.value = value;
-      update();
-      remember(value);
+      update(true);
     });
 
     return button;
@@ -150,7 +183,7 @@ function renderRecent(visible: boolean): void {
 
 // Locations the headset would also accept for this one, so stock voiced
 // here may really be there (or the other way round).
-function renderSimilar(similar: CheckCheck.SimilarLocation[]): void {
+function renderSimilar(similar: SimilarLocation[]): void {
   show(similarOutput, similar.length > 0);
   if (!similar.length) return;
 
@@ -158,15 +191,13 @@ function renderSimilar(similar: CheckCheck.SimilarLocation[]): void {
 
   list.replaceChildren(...similar.map(function (result) {
     const item = create('li');
-    item.append(create('strong', '', result.location), ' “' + result.text + '”', create('small', '', result.reason));
+    const reason = result.labels.length ? result.reason + ' · same ' + result.labels.join(' and ') : result.reason;
+
+    item.append(create('strong', '', result.location), ' “' + result.text + '”', create('small', '', reason));
     return item;
   }));
 
   similarOutput.replaceChildren(create('p', '', 'Same check character, easily confused with:'), list);
-}
-
-function plural(count: number, noun: string): string {
-  return count.toLocaleString('en-GB') + ' ' + noun + (count === 1 ? '' : 's');
 }
 
 function renderAisle(aisle: string, locations: string[], open: boolean): HTMLDetailsElement {
@@ -186,22 +217,62 @@ function renderAisle(aisle: string, locations: string[], open: boolean): HTMLDet
   return details;
 }
 
+// One kind of location, e.g. jewellery, showing only the aisles that match
+// the aisle box. null when none do.
+function renderGroup(group: LocationGroup, query: string): HTMLElement | null {
+  const aisles = filterAisles(Object.keys(group.aisles).sort(), query);
+  if (!aisles.length) return null;
+
+  const count = aisles.reduce((sum, aisle) => sum + group.aisles[aisle].length, 0);
+  let body: HTMLElement;
+
+  if (tiledKinds.includes(group.kind)) {
+    // A whole aisle number opens that aisle.
+    body = create('div', 'aisles');
+    body.replaceChildren(...aisles.map(aisle => renderAisle(aisle, group.aisles[aisle], aisle === query)));
+  } else {
+    body = create('ul', 'location-list');
+    body.replaceChildren(...aisles.flatMap(aisle => group.aisles[aisle]).map(location => create('li', '', location)));
+  }
+
+  const name = create('span', 'group-name', groupNames[group.kind]);
+  const total = create('small', '', plural(count, 'location'));
+
+  // Shelves are what's looked for most, so they're always open. The rest
+  // open once the aisle box narrows them down.
+  if (group.kind === 'shelf') {
+    const section = create('section', 'location-group');
+    const heading = create('h3', 'group-heading');
+
+    heading.append(name, total);
+    section.append(heading, body);
+    return section;
+  }
+
+  const details = create('details', 'location-group');
+  const summary = create('summary', 'group-heading');
+
+  summary.append(name, total);
+  details.open = query !== '';
+  details.append(summary, body);
+  return details;
+}
+
 function renderReverse(view: Extract<View, { kind: 'checkChar' }>): void {
   // Typing in the box fires for every key, so keep the aisle box (and what's
   // typed in it) while the check character stays the same.
   if (view.checkChar === shownCheckChar) return;
   shownCheckChar = view.checkChar;
 
-  const aisles = Object.keys(view.aisles).sort();
   const heading = create('p', 'reverse-heading');
   const filter = create('div', 'aisle-filter');
   const filterLabel = create('label', '', 'Jump to aisle');
   const filterInput = create('input');
-  const grid = create('div', 'aisles');
+  const groups = create('div', 'location-groups');
 
   heading.append(
-    create('strong', '', plural(view.total, 'shelf location')),
-    ' have the check character ' + view.checkChar + '. Tap an aisle to see which shelves they are.'
+    create('strong', '', plural(view.total, 'location')),
+    ' have the check character ' + view.checkChar + '. Tap an aisle or a group to see which they are.'
   );
 
   filterLabel.htmlFor = 'aisle-filter';
@@ -209,57 +280,58 @@ function renderReverse(view: Extract<View, { kind: 'checkChar' }>): void {
     id: 'aisle-filter',
     type: 'text',
     inputMode: 'numeric',
+    enterKeyHint: 'done',
     maxLength: 2,
     placeholder: 'All',
     autocomplete: 'off'
   });
+  dismissKeyboardOnEnter(filterInput);
   filter.append(filterLabel, filterInput);
 
-  function renderGrid(): void {
+  function renderGroups(): void {
     const query = filterInput.value.replace(/\D/g, '');
-    const shown = filterAisles(aisles, query);
+    const shown = view.groups.map(group => renderGroup(group, query)).filter(group => group !== null);
 
     if (!shown.length) {
-      grid.replaceChildren(create('p', 'aisles-empty', 'No locations in aisle ' + query + ' use ' + view.checkChar + '.'));
+      groups.replaceChildren(create('p', 'aisles-empty', 'No locations in aisle ' + query + ' use ' + view.checkChar + '.'));
       return;
     }
 
-    // A whole aisle number opens that aisle.
-    const openOne = query.length === 2 && shown.length === 1;
-    grid.replaceChildren(...shown.map(aisle => renderAisle(aisle, view.aisles[aisle], openOne)));
+    groups.replaceChildren(...shown);
   }
 
-  filterInput.addEventListener('input', renderGrid);
-  renderGrid();
+  filterInput.addEventListener('input', renderGroups);
+  renderGroups();
 
-  reverseResultsOutput.replaceChildren(heading, filter, grid);
-}
-
-function track(value: string): void {
-  const location = value.toUpperCase().substring(0, 4);
-
-  if (CheckCheck.isRfcLocation(location) && location !== lastTrackedLocation) {
-    lastTrackedLocation = location;
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      'event': 'checkcheck_input',
-      'locationName': location
-    });
-  }
+  reverseResultsOutput.replaceChildren(heading, filter, groups);
 }
 
 function render(view: View): void {
-  const isCheckChar = view.kind === 'checkChar';
+  // A check character like GOLF is a four letter location too, so it
+  // shows on the label as well as listing its locations.
+  const match = view.kind === 'location' ? view : view.kind === 'checkChar' ? view.location : null;
+  const showLabel = view.kind !== 'checkChar' || match !== null;
 
-  show(locationText, !isCheckChar);
-  show(checkCharOutput, !isCheckChar);
-  show(reverseResultsOutput, isCheckChar);
+  show(locationText, showLabel);
+  show(checkCharOutput, showLabel);
+  show(reverseResultsOutput, view.kind === 'checkChar');
   show(noteOutput, view.kind === 'location' && view.note !== null);
-  renderSuggestions(view.kind === 'partial' || view.kind === 'location' ? view.suggestions : []);
-  renderSimilar(view.kind === 'location' ? view.similar : []);
+  renderSimilar(match ? match.similar : []);
   renderRecent(view.kind === 'empty');
+  announce(announcement(view, match));
 
-  if (!isCheckChar) shownCheckChar = null;
+  if (view.kind === 'invalid' && view.didYouMean) {
+    renderSuggestions('Did you mean', [view.didYouMean], 'is-location');
+  } else {
+    renderSuggestions('Find every location with', view.kind === 'partial' || view.kind === 'location' ? view.suggestions : []);
+  }
+
+  if (match) {
+    renderRows(locationText, match.results.map(result => ({ label: result.label, value: '“' + result.text + '”' })));
+    renderRows(checkCharOutput, match.results.map(result => ({ label: result.label, value: result.checkChar })));
+  }
+
+  if (view.kind !== 'checkChar') shownCheckChar = null;
 
   switch (view.kind) {
     case 'empty':
@@ -272,8 +344,6 @@ function render(view: View): void {
       renderHint('That isn’t a location', true);
       break;
     case 'location':
-      renderRows(locationText, view.results.map(result => ({ label: result.label, value: '“' + result.text + '”' })));
-      renderRows(checkCharOutput, view.results.map(result => ({ label: result.label, value: result.checkChar })));
       if (view.note) noteOutput.textContent = notes[view.note];
       break;
     case 'checkChar':
@@ -282,28 +352,104 @@ function render(view: View): void {
   }
 }
 
-function update(): void {
-  const view = lookup(input.value);
+type Settled = Extract<View, { kind: 'location' | 'checkChar' }>;
 
-  if (view.kind === 'location') track(input.value.trim());
-  render(view);
+function track(value: string, view: Settled): void {
+  if (value === lastTracked) return;
+  lastTracked = value;
 
-  // Only whole lookups: a known location, or a check character.
-  window.clearTimeout(rememberTimer);
-  if ((view.kind === 'location' && view.note === null && !view.suggestions.length) || view.kind === 'checkChar') {
-    const value = input.value.trim().toUpperCase();
-    rememberTimer = window.setTimeout(() => remember(value), REMEMBER_AFTER);
+  window.dataLayer = window.dataLayer || [];
+  if (view.kind === 'location' || view.location) {
+    window.dataLayer.push({ event: 'checkcheck_input', locationName: value });
+  }
+  if (view.kind === 'checkChar') {
+    window.dataLayer.push({ event: 'checkcheck_reverse_lookup', checkChar: view.checkChar });
   }
 }
 
-input.addEventListener('input', update);
+function remember(value: string): void {
+  recent = addRecent(recent, value);
+  saveRecent(recent);
+}
 
+// A lookup that's stayed in the box, or was tapped: tracked, and kept in
+// recent lookups if it's a whole one (a known location, or a check
+// character) rather than the start of one, like NOVE.
+function settle(value: string, view: Settled): void {
+  track(value, view);
+  if ((view.kind === 'location' && view.note === null && !view.suggestions.length) || view.kind === 'checkChar') {
+    remember(value);
+  }
+}
+
+// now: settle straight away, for a tap or the Done key, rather than after
+// SETTLE_AFTER.
+function update(now = false): void {
+  const value = input.value.trim().toUpperCase();
+  const view = lookup(value);
+
+  render(view);
+
+  window.clearTimeout(settleTimer);
+  if (view.kind === 'location' || view.kind === 'checkChar') {
+    if (now) {
+      settle(value, view);
+    } else {
+      settleTimer = window.setTimeout(() => settle(value, view), SETTLE_AFTER);
+    }
+  }
+}
+
+// The keyboard's Done (enterkeyhint) puts it away, so the results under
+// the box can be seen.
+function dismissKeyboardOnEnter(field: HTMLInputElement, onEnter?: () => void): void {
+  field.addEventListener('keydown', function (event) {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    onEnter?.();
+    field.blur();
+  });
+}
+
+input.addEventListener('input', () => update());
+dismissKeyboardOnEnter(input, () => update(true));
+
+// Tapping the strip selects what's typed, ready for the next location.
 checkCharOutput.addEventListener('click', function () {
   input.focus();
+  input.select();
 });
 
 // The browser may refill the box when coming back to the page.
 update();
+
+const themeToggle = find<HTMLButtonElement>('#theme-toggle');
+const themeName = find('#theme-name');
+const themeColor = find<HTMLMetaElement>('meta[name="theme-color"]');
+const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+let themeChoice = loadThemeChoice();
+
+const themeNames: Record<ThemeChoice, string> = { auto: 'Auto', light: 'Light', dark: 'Dark' };
+
+// The index.html script has already set the theme. This keeps it up to
+// date when it's changed here, or on the phone while it's on auto.
+function applyTheme(): void {
+  const theme = resolveTheme(themeChoice, systemDark.matches);
+
+  document.documentElement.dataset.theme = theme;
+  themeColor.content = themeColors[theme];
+  themeToggle.dataset.choice = themeChoice;
+  themeName.textContent = themeNames[themeChoice];
+}
+
+themeToggle.addEventListener('click', function () {
+  themeChoice = nextThemeChoice(themeChoice, systemDark.matches);
+  saveThemeChoice(themeChoice);
+  applyTheme();
+});
+systemDark.addEventListener('change', applyTheme);
+applyTheme();
+themeToggle.hidden = false;
 
 // Cache the app so it opens with no signal (see public/sw.js). Not in
 // development, where the cache would serve stale code.

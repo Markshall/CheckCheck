@@ -6,20 +6,59 @@
 @import '@fontsource/source-sans-3/latin-600.css';
 
 :root {
+	color-scheme: light;
 	--red: #e53a40;
 	--red-dark: #c72228;
 	--label-yellow: #efdc05;
 	--label-black: #000;
+	--page: #fff;
+	--header: var(--red);
 	--ink: #090707;
 	--muted: #6c6a6a;
+	--link: var(--red);
 	--surface: #f4f3f1;
 	--rule: #e2e0dd;
+	--field: #fff;
+	--note-background: #fdf9d6;
+	--warning-background: #fdf0f0;
+	/* Edges of yellow things on the page, e.g. an open aisle. */
+	--keyline: var(--label-black);
+	--label-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 6px 18px rgba(0, 0, 0, 0.1);
+	/* Edge of the black check character chips, which needs no edge on white. */
+	--chip-edge: transparent;
+	--inworkat: #04071b;
+	--inworkat-accent: #2269f7;
+}
+
+/* Stockrooms are often dim. The label stays yellow and black, as printed,
+   and the header's red is deeper so the label is the brightest thing on
+   the page (themeColors in src/theme.ts matches it). data-theme is set by
+   the script in index.html's <head>, from the phone's setting or the
+   theme button. */
+:root[data-theme="dark"] {
+	color-scheme: dark;
+	--page: #141313;
+	--header: #a32227;
+	--ink: #f1efec;
+	--muted: #a8a5a1;
+	--link: #ff7377;
+	--surface: #242221;
+	--rule: #403d3b;
+	--field: #1d1c1b;
+	--note-background: #2f2b0c;
+	--warning-background: #351a1b;
+	--keyline: var(--label-yellow);
+	/* A shadow can't be seen on a dark page. */
+	--label-shadow: none;
+	--chip-edge: rgba(239, 220, 5, 0.45);
+	--inworkat: #fff;
+	--inworkat-accent: #6d9cff;
 }
 
 body {
 	font: 400 18px/1.6 'Source Sans 3', 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	color: var(--ink);
-	background-color: #fff;
+	background-color: var(--page);
 	-webkit-text-size-adjust: 100%;
 }
 
@@ -32,13 +71,13 @@ body {
 
 [hidden] { display: none !important; }
 
-a { color: var(--red); text-decoration: none; }
+a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* Header */
 
 header {
-	background-color: var(--red);
+	background-color: var(--header);
 	padding-top: env(safe-area-inset-top);
 }
 
@@ -53,6 +92,58 @@ header {
 
 	header .logo:hover {
 		text-decoration: none;
+	}
+
+	header .container {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+
+	.theme-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 36px;
+		padding: 4px 12px 4px 9px;
+		border: 1px solid rgba(255, 255, 255, 0.55);
+		border-radius: 999px;
+		background: none;
+		color: #fff;
+		font-family: inherit;
+		font-size: 15px;
+		line-height: 1;
+		cursor: pointer;
+	}
+
+	.theme-toggle:hover {
+		background-color: rgba(255, 255, 255, 0.12);
+	}
+
+	.theme-toggle:focus-visible {
+		outline: 2px solid #fff;
+		outline-offset: 2px;
+	}
+
+	.theme-icon {
+		width: 18px;
+		height: 18px;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: round;
+	}
+
+	/* One icon, for the choice. */
+	.theme-icon > g {
+		display: none;
+	}
+
+	.theme-toggle[data-choice="auto"] .theme-icon-auto,
+	.theme-toggle[data-choice="light"] .theme-icon-light,
+	.theme-toggle[data-choice="dark"] .theme-icon-dark {
+		display: inline;
 	}
 
 main {
@@ -73,11 +164,12 @@ main {
 
 .location-box {
 	background-color: var(--label-yellow);
+	color: var(--label-black);
 	max-width: 440px;
 	margin: 0 auto;
 	padding: 8px;
 	border-radius: 2px;
-	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 6px 18px rgba(0, 0, 0, 0.1);
+	box-shadow: var(--label-shadow);
 }
 
 	.location-box-main {
@@ -120,11 +212,22 @@ main {
 			letter-spacing: 0.02em;
 		}
 
+			.row {
+				display: block;
+			}
+
 			.location-text .row + .row {
 				margin-top: 4px;
 			}
 
+		/* A button: tapping it selects the location, ready for the next. */
 		.check-char {
+			display: block;
+			width: 100%;
+			border: 0;
+			border-radius: 0;
+			font-family: inherit;
+			text-align: center;
 			background-color: var(--label-black);
 			color: var(--label-yellow);
 			padding: 6px 10px 8px;
@@ -133,7 +236,12 @@ main {
 			text-transform: uppercase;
 			font-weight: 600;
 			letter-spacing: 0.02em;
-			cursor: text;
+			cursor: pointer;
+		}
+
+		.check-char:focus-visible {
+			outline: 3px solid var(--red);
+			outline-offset: 2px;
 		}
 
 			.check-char .row + .row {
@@ -189,7 +297,7 @@ main {
 	padding: 8px 14px;
 	border-left: 4px solid var(--label-yellow);
 	border-radius: 0 4px 4px 0;
-	background-color: #fdf9d6;
+	background-color: var(--note-background);
 	font-size: 15px;
 	line-height: 1.4;
 	text-align: left;
@@ -211,6 +319,7 @@ main {
 
 	.suggestion {
 		border: 0;
+		box-shadow: inset 0 0 0 1px var(--chip-edge);
 		border-radius: 4px;
 		padding: 6px 12px;
 		background-color: var(--label-black);
@@ -221,6 +330,16 @@ main {
 		line-height: 1.2;
 		letter-spacing: 0.04em;
 		cursor: pointer;
+	}
+
+	/* A location, e.g. 01AK for 1AK, looks like the label. */
+	.suggestion.is-location {
+		box-shadow: none;
+		padding: 4px 10px;
+		border: 2px solid var(--label-black);
+		border-radius: 2px;
+		background-color: var(--label-yellow);
+		color: var(--label-black);
 	}
 
 	.suggestion:focus-visible {
@@ -255,7 +374,7 @@ main {
 		border: 0;
 		background: none;
 		padding: 4px 0;
-		color: var(--red);
+		color: var(--link);
 		font-family: inherit;
 		font-size: 15px;
 		cursor: pointer;
@@ -332,7 +451,7 @@ main {
 	padding: 14px 16px;
 	border-left: 4px solid var(--red);
 	border-radius: 0 4px 4px 0;
-	background-color: #fdf0f0;
+	background-color: var(--warning-background);
 	font-size: 16px;
 	line-height: 1.4;
 	text-align: left;
@@ -396,7 +515,7 @@ main {
 		height: 40px;
 		border: 1px solid var(--rule);
 		border-radius: 4px;
-		background-color: #fff;
+		background-color: var(--field);
 		font: inherit;
 		font-size: 18px;
 		text-align: center;
@@ -417,6 +536,82 @@ main {
 	text-align: center;
 	color: var(--muted);
 	font-size: 16px;
+}
+
+/* Each kind of location, e.g. jewellery. Shelves are always open, and the
+   rest open when tapped. */
+
+.location-group + .location-group {
+	margin-top: 10px;
+}
+
+.group-heading {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	margin-bottom: 8px;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+	.group-heading small {
+		margin-left: auto;
+		font-size: 14px;
+		font-weight: 400;
+		color: var(--muted);
+	}
+
+details.location-group {
+	border-top: 1px solid var(--rule);
+	padding-top: 10px;
+}
+
+	details.location-group > summary {
+		cursor: pointer;
+		list-style: none;
+		user-select: none;
+	}
+
+	details.location-group > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	/* A chevron that turns when the group opens. */
+	details.location-group > summary::before {
+		content: '';
+		align-self: center;
+		width: 7px;
+		height: 7px;
+		border-right: 2px solid var(--muted);
+		border-bottom: 2px solid var(--muted);
+		transform: rotate(-45deg);
+		transition: transform 0.15s;
+	}
+
+	details.location-group[open] > summary::before {
+		transform: rotate(45deg);
+	}
+
+	details.location-group:not([open]) > summary {
+		margin-bottom: 0;
+	}
+
+	details.location-group > summary:focus-visible {
+		outline: 2px solid var(--red);
+		outline-offset: 2px;
+	}
+
+.location-list {
+	list-style: none;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+	gap: 4px;
+	padding: 10px;
+	border: 1px solid var(--rule);
+	border-radius: 4px;
+	font-family: Monaco, Consolas, monospace;
+	font-size: 14px;
+	text-align: center;
 }
 
 .aisles {
@@ -481,13 +676,14 @@ main {
 		gap: 6px;
 		padding: 8px 12px;
 		background-color: var(--label-yellow);
-		border-color: var(--label-black);
+		border-color: var(--keyline);
 		border-radius: 4px 4px 0 0;
+		color: var(--label-black);
 	}
 
 	.aisles details[open] .aisle-caption,
 	.aisles details[open] summary small {
-		color: var(--ink);
+		color: var(--label-black);
 	}
 
 	.aisles details[open] .aisle-caption {
@@ -509,7 +705,7 @@ main {
 		grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
 		gap: 4px;
 		padding: 10px;
-		border: 1px solid var(--label-black);
+		border: 1px solid var(--keyline);
 		border-top: 0;
 		border-radius: 0 0 4px 4px;
 		font-family: Monaco, Consolas, monospace;
@@ -540,20 +736,33 @@ footer {
 
 .inworkat {
 	font-weight: 600;
-	color: #04071b;
+	color: var(--inworkat);
 }
 
 .inworkat span {
-	color: #2269f7;
+	color: var(--inworkat-accent);
 }
 
 footer .adspace {
 	margin: 16px auto 0;
 }
 
+@media (prefers-reduced-motion: reduce) {
+	details.location-group > summary::before {
+		transition: none;
+	}
+}
+
 @media only screen and (max-width: 650px) {
+	/* The logo stays in the middle, with the theme button on the right. */
 	header .container {
-		text-align: center;
+		position: relative;
+		justify-content: center;
+	}
+
+	.theme-toggle {
+		position: absolute;
+		right: 16px;
 	}
 
 	main {

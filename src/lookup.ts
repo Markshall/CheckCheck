@@ -1,25 +1,32 @@
 // Decides what the page shows for whatever is typed in the box, without
 // touching the page, so it can be tested. src/app.ts draws the result.
 import * as CheckCheck from './checkchar.ts';
-import type { LabelledResult, LocationsByAisle, SimilarLocation } from './checkchar.ts';
+import type { LabelledResult, LocationGroup, SimilarLocation } from './checkchar.ts';
+
+// A location's check characters, and the locations easily confused with it.
+export interface LocationMatch {
+  results: LabelledResult[];
+  similar: SimilarLocation[];
+}
 
 export type View =
   // Nothing typed yet.
   | { kind: 'empty' }
   // The start of a location or check character, e.g. 10A or NOV.
   | { kind: 'partial'; suggestions: string[] }
-  // Can't become a location or check character, e.g. XQ9.
-  | { kind: 'invalid' }
-  | {
+  // Can't become a location or check character, e.g. XQ9. didYouMean is
+  // the location with an aisle's missing 0 put back, e.g. 01AK for 1AK.
+  | { kind: 'invalid'; didYouMean: string | null }
+  | (LocationMatch & {
       kind: 'location';
-      results: LabelledResult[];
-      similar: SimilarLocation[];
       // Check characters the input could be the start of, e.g. NOVE.
       suggestions: string[];
       note: Note | null;
-    }
-  // A check character, e.g. NOVEMBER: every location that uses it.
-  | { kind: 'checkChar'; checkChar: string; aisles: LocationsByAisle; total: number };
+    })
+  // A check character, e.g. NOVEMBER: every location that uses it. Seven
+  // of them (ECHO, GOLF, KILO, LIMA, MIKE, PAPA, ZULU) and XRAY are four
+  // letter RFC locations too, and location has that location's answer.
+  | { kind: 'checkChar'; checkChar: string; groups: LocationGroup[]; total: number; location: LocationMatch | null };
 
 // 'unknown': it has a check character but isn't a location format we know,
 // e.g. 1A2B. 'extra': only the first four characters count, e.g. 10AKX.
@@ -55,12 +62,32 @@ function isLocationStart(value: string): boolean {
   return words.some(word => word.startsWith(value)) || matchesFormat(value, true);
 }
 
+// X-RAY can be typed without its hyphen, which is awkward on a phone.
+function spellings(word: string): string[] {
+  return [word, word.replace('-', '')];
+}
+
+function findCheckChar(value: string): string | null {
+  return CheckCheck.phonetic.find(word => spellings(word).includes(value)) ?? null;
+}
+
 // Check characters that start with what's typed. From two characters, as
 // one letter would suggest a word for every letter of the alphabet.
 function suggestionsFor(value: string): string[] {
   if (value.length < 2) return [];
 
-  return CheckCheck.phonetic.filter(word => word.startsWith(value) && word !== value);
+  return CheckCheck.phonetic.filter(word => word !== value && spellings(word).some(spelling => spelling.startsWith(value)));
+}
+
+// Aisles 00-09 typed without their 0, e.g. 1AK, 1A+ or L1A.
+function withLeadingZero(value: string): string | null {
+  if (/^\d[A-Z][A-Z+-]$/.test(value)) return '0' + value;
+  if (/^[LZ]\d[A-Z]$/.test(value)) return value[0] + '0' + value.substring(1);
+  return null;
+}
+
+function match(value: string): LocationMatch {
+  return { results: CheckCheck.getCheckChar(value), similar: CheckCheck.similarLocations(value) };
 }
 
 export function lookup(input: string): View {
@@ -68,18 +95,21 @@ export function lookup(input: string): View {
 
   if (!value) return { kind: 'empty' };
 
-  if (CheckCheck.phonetic.includes(value)) {
-    const aisles = CheckCheck.reverseLookup(value);
-    const total = Object.values(aisles).reduce((sum, locations) => sum + locations.length, 0);
+  const checkChar = findCheckChar(value);
 
-    return { kind: 'checkChar', checkChar: value, aisles, total };
+  if (checkChar) {
+    const groups = CheckCheck.reverseLookup(checkChar);
+    const total = groups.reduce((sum, group) => sum + group.total, 0);
+
+    return { kind: 'checkChar', checkChar, groups, total, location: isKnownLocation(value) ? match(value) : null };
   }
 
   const suggestions = suggestionsFor(value);
-  const results = CheckCheck.getCheckChar(value);
 
-  if (results[0].checkChar === 'NULL') {
-    return isLocationStart(value) || suggestions.length ? { kind: 'partial', suggestions } : { kind: 'invalid' };
+  if (CheckCheck.getCheckChar(value)[0].checkChar === 'NULL') {
+    return isLocationStart(value) || suggestions.length
+      ? { kind: 'partial', suggestions }
+      : { kind: 'invalid', didYouMean: withLeadingZero(value) };
   }
 
   let note: Note | null = null;
@@ -88,7 +118,7 @@ export function lookup(input: string): View {
     note = value.length > 4 && isKnownLocation(value.substring(0, 4)) ? 'extra' : 'unknown';
   }
 
-  return { kind: 'location', results, similar: CheckCheck.similarLocations(value), suggestions, note };
+  return { kind: 'location', ...match(value), suggestions, note };
 }
 
 // The aisles whose number starts with what's typed in the aisle box, e.g. 7

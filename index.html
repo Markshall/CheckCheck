@@ -8,6 +8,19 @@
     <meta name="theme-color" content="#e53a40">
     <title>CheckCheck</title>
 
+    <!-- Sets the light or dark theme before the page is drawn, so a dark one
+         doesn't flash white. src/theme.ts has the same rules and colours, and
+         takes over once it loads. -->
+    <script>
+      (function () {
+        var choice = null;
+        try { choice = localStorage.getItem('checkcheck:theme'); } catch (e) {}
+        var dark = choice === 'dark' || (choice !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+        document.querySelector('meta[name="theme-color"]').content = dark ? '#a32227' : '#e53a40';
+      })();
+    </script>
+
     <link rel="stylesheet" href="/css/reset.css">
     <link rel="stylesheet" href="/css/global.css">
 
@@ -54,6 +67,17 @@
         <a href="./" class="logo">
           CheckCheck
         </a>
+
+        <!-- Shown by src/app.ts, which shows one icon for the choice. -->
+        <button type="button" id="theme-toggle" class="theme-toggle" hidden>
+          <svg class="theme-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <g class="theme-icon-auto"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></g>
+            <g class="theme-icon-light"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></g>
+            <g class="theme-icon-dark"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></g>
+          </svg>
+          <span class="visually-hidden">Theme:</span>
+          <span id="theme-name">Auto</span>
+        </button>
       </div>
     </header>
 
@@ -64,13 +88,16 @@
         <div class="location-box">
           <div class="location-box-main">
             <label for="location-name" class="visually-hidden">Shelf location or check character</label>
-            <input type="text" class="location-name" name="location-name" id="location-name" placeholder="10AK" maxlength="8" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+            <input type="text" class="location-name" name="location-name" id="location-name" placeholder="10AK" maxlength="8" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
 
             <div class="location-text is-hint" id="location-text">Type a shelf location</div>
 
-            <div id="check-char" class="check-char is-hint" role="status">Check character</div>
+            <button type="button" id="check-char" class="check-char is-hint" aria-describedby="check-char-help">Check character</button>
+            <span id="check-char-help" class="visually-hidden">Selects the location, ready to type the next one.</span>
           </div>
         </div>
+
+        <p id="lookup-status" class="visually-hidden" role="status"></p>
 
         <p id="input-note" class="input-note" role="status" hidden></p>
 

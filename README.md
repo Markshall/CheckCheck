@@ -31,13 +31,18 @@ Type a location into the box and its check character is shown underneath. Letter
 
 Four letters (e.g. `ABCD`) show both the store and the RFC check character.
 
-While a location is half typed the label says to keep typing, and it says when what's typed can't be a location (e.g. `XQ9`). A location in none of the formats above, or with more than four characters, still gets a check character, with a note underneath.
+While a location is half typed the label says to keep typing, and it says when what's typed can't be a location (e.g. `XQ9`). An aisle typed without its 0 (e.g. `1AK` or `L1A`) offers the location with it (`01AK`, `L01A`) as a button. A location in none of the formats above, or with more than four characters, still gets a check character, with a note underneath.
 
-If another location has the same check character and is only one mistake away (a misheard character, e.g. `07AZ` and `J7AZ`, or two swapped, e.g. `L10A` and `L01A`), it's listed underneath. The headset accepts either, so stock voiced to one may really be at the other.
+If another location has the same check character and is only one mistake away (a misheard character, e.g. `07AZ` and `J7AZ`, or two swapped, e.g. `L10A` and `L01A`), it's listed underneath. The headset accepts either, so stock voiced to one may really be at the other. Four letter locations are compared with other four letter locations on both their Store and RFC check characters. Swapping the middle two letters (e.g. `ABCD` and `ACBD`) never changes either, so almost every one has a match.
 
 Lookups you've stayed on for a moment are listed under the box while it's empty, with their check characters, so they can be read or tapped again. They're kept in the browser's local storage and never leave the phone.
 
-Type a check character instead (e.g. `NOVEMBER`) to list every store location from `00AA` to `99ZZ` that uses it, grouped by aisle. The start of one (e.g. `NOV`) offers it as a button, and the aisle box jumps to one aisle.
+Type a check character instead (e.g. `NOVEMBER`) to list every location that uses it, in each format in the table above except four letters (there are 456,976 of those). Shelves from `00AA` to `99ZZ` are shown by aisle, and the other kinds (jewellery, linbin and so on) open when tapped. The start of one (e.g. `NOV`) offers it as a button, and the aisle box jumps to one aisle. `X-RAY` can be typed as `XRAY`. `ECHO`, `GOLF`, `KILO`, `LIMA`, `MIKE`, `PAPA`, `ZULU` and `XRAY` are four letter locations as well as check characters, so they show both.
+
+The page follows the phone's dark mode, and the button in the header switches it between Auto, Light and Dark for a phone kept in light mode in a dim stockroom (or the other way round). The first tap always changes the page. The choice is kept in the browser's local storage, like recent lookups, and a small script in `index.html`'s `<head>` applies it before the page is drawn so it doesn't flash. The label stays yellow and black, the way it's printed.
+
+## Analytics
+Each lookup is sent to Google Tag Manager once it has stayed in the box for 1.5 seconds, or straight away when it's tapped or the keyboard's Done key is pressed, so the steps on the way (`1`, `10`, `10A`) aren't. A location sends `checkcheck_input` with `locationName`, and a check character sends `checkcheck_reverse_lookup` with `checkChar`. A word like `GOLF` sends both.
 
 ## Offline
 CheckCheck works with no signal once it has been opened, and phones can add it to the home screen. `public/sw.js` is a service worker that caches the page, its built CSS and JS, and the font (served from `assets/` rather than Google Fonts). The page comes from the network when it can, so a deploy shows up straight away, and from the cache when the network is down or takes more than 3 seconds. It only runs in the built app, not the dev server.
@@ -47,7 +52,7 @@ The icons in `public/icons/` are drawn in `icon.svg`. `icon-maskable-512.png` is
 ## How it works
 CheckCheck takes the location the user enters and splits it digit by digit.  Argos use a formula which determines check characters for locations which involves quite a bit of maths, I simply took this and used it to my advantage to make this app.
 
-The formulas live in `src/checkchar.ts`. `src/lookup.ts` decides what to show for what's typed, and `src/app.ts` draws it on the page. Only `app.ts` touches the page, so the other two are tested directly.
+The formulas live in `src/checkchar.ts`. `src/lookup.ts` decides what to show for what's typed, and `src/app.ts` draws it on the page. `src/recent.ts` and `src/theme.ts` keep recent lookups and the theme on the phone. Only `app.ts` touches the page, so the others are tested directly.
 
 ## Development
 The app is written in TypeScript and built with [Vite](https://vite.dev). Run the dev server in Docker:

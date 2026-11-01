@@ -84,26 +84,57 @@ test('too short to have a check character', () => {
   }
 });
 
-test('reverse lookup finds every store location with a check character', () => {
-  const results = CheckCheck.reverseLookup('november');
-  const locations = Object.values(results).flat();
+test('reverse lookup finds every location with a check character', () => {
+  const groups = CheckCheck.reverseLookup('november');
+  const shelves = groups.find(group => group.kind === 'shelf');
 
-  assert.ok(results['10'].includes('10AK'));
-  assert.ok(locations.length > 0);
+  assert.ok(shelves?.aisles['10'].includes('10AK'));
 
-  for (const location of locations) {
-    assert.equal(CheckCheck.checkCharStore(location).checkChar, 'NOVEMBER', location);
+  for (const group of groups) {
+    const locations = Object.values(group.aisles).flat();
+
+    assert.equal(group.total, locations.length, group.kind);
+    for (const location of locations) {
+      assert.equal(CheckCheck.storeCheckChar(location), 'NOVEMBER', location);
+    }
+  }
+});
+
+test('reverse lookup covers every location format', () => {
+  const totals: Record<string, number> = {};
+
+  for (const char of CheckCheck.phonetic) {
+    for (const group of CheckCheck.reverseLookup(char)) {
+      totals[group.kind] = (totals[group.kind] ?? 0) + group.total;
+    }
   }
 
-  const total = CheckCheck.phonetic
-    .map(char => Object.values(CheckCheck.reverseLookup(char)).flat().length)
-    .reduce((a, b) => a + b);
+  assert.deepEqual(totals, {
+    shelf: 100 * 26 * 26, // 00AA-99ZZ
+    afterBefore: 100 * 26 * 2, // 00A+-99Z-
+    jewellery: 10 * 26 * 26, // J0AA-J9ZZ
+    security: 10 * 26 * 26,
+    linbin: 100 * 26, // L00A-L99Z
+    bulk: 100 * 26,
+    cashOffice: 100, // CA00-CA99
+    collectionPoint: 100,
+    other: 3 // RETS, DPA, SOB
+  });
+});
 
-  assert.equal(total, 100 * 26 * 26);
+test('reverse lookup groups by aisle in the README order', () => {
+  const groups = CheckCheck.reverseLookup('ECHO');
+
+  assert.deepEqual(groups.map(group => group.kind).slice(0, 3), ['shelf', 'afterBefore', 'jewellery']);
+  assert.ok(groups.find(group => group.kind === 'jewellery')?.aisles['1'].includes('J1PG'));
+  assert.ok(CheckCheck.reverseLookup('GOLF').find(group => group.kind === 'linbin')?.aisles['10'].includes('L10A'));
+  assert.ok(CheckCheck.reverseLookup('JULIET').find(group => group.kind === 'cashOffice')?.aisles[''].includes('CA12'));
+  assert.deepEqual(CheckCheck.reverseLookup('VICTOR').find(group => group.kind === 'other')?.aisles[''], ['DPA']);
+  assert.deepEqual(CheckCheck.reverseLookup('OSCAR').find(group => group.kind === 'other')?.aisles[''], ['RETS']);
 });
 
 test('reverse lookup of an unknown check character is empty', () => {
-  assert.deepEqual(CheckCheck.reverseLookup('NOPE'), {});
+  assert.deepEqual(CheckCheck.reverseLookup('NOPE'), []);
 });
 
 test('characters with no phonetic spelling show as ?', () => {
@@ -113,7 +144,7 @@ test('characters with no phonetic spelling show as ?', () => {
 
 test('similar locations from issue #5', () => {
   assert.deepEqual(CheckCheck.similarLocations('07AZ'), [
-    { location: 'J7AZ', reason: 'JEWELLERY heard as ZERO', text: 'JEWELLERY SEVEN ALPHA ZULU', checkChar: 'YANKEE' },
+    { location: 'J7AZ', reason: 'JEWELLERY heard as ZERO', text: 'JEWELLERY SEVEN ALPHA ZULU', labels: [] },
   ]);
   assert.deepEqual(CheckCheck.similarLocations('J7AZ').map(r => r.location), ['07AZ']);
 });
@@ -132,14 +163,40 @@ test('similar locations all share the check character', () => {
     const checkChar = CheckCheck.checkCharStore(location).checkChar;
 
     for (const result of CheckCheck.similarLocations(location)) {
-      assert.equal(result.checkChar, checkChar, location + ' -> ' + result.location);
+      assert.equal(CheckCheck.checkCharStore(result.location).checkChar, checkChar, location + ' -> ' + result.location);
       assert.notEqual(result.location, location);
     }
   }
 });
 
+test('similar RFC locations', () => {
+  // The two middle letters have the same weight, so swapping them never
+  // changes either check character.
+  assert.deepEqual(CheckCheck.similarLocations('abcd'), [
+    { location: 'ACBD', reason: 'BRAVO and CHARLIE swapped', text: 'ALPHA CHARLIE BRAVO DELTA', labels: ['Store', 'RFC'] },
+  ]);
+
+  // Letters 13 apart share a store check character when swapped next to
+  // a letter with a different weight, but not an RFC one.
+  assert.deepEqual(CheckCheck.similarLocations('ANAA').map(r => [r.location, r.labels]), [
+    ['NAAA', ['Store']],
+    ['AANA', ['Store', 'RFC']],
+  ]);
+
+  // Only other four letter locations, never store formats like J1CD.
+  for (const location of ['ABCD', 'JBCD', 'ZZZZ', 'RETS', 'GOLF']) {
+    for (const result of CheckCheck.similarLocations(location)) {
+      assert.match(result.location, /^[A-Z]{4}$/, location + ' -> ' + result.location);
+      for (const label of result.labels) {
+        const checkChar = label === 'RFC' ? CheckCheck.checkCharRFC : CheckCheck.checkCharStore;
+        assert.equal(checkChar(result.location).checkChar, checkChar(location).checkChar, location + ' -> ' + result.location);
+      }
+    }
+  }
+});
+
 test('no similar locations for unique or unknown locations', () => {
-  for (const input of ['10AK', 'Z99Z', 'CA12', 'ABCD', '10A+', 'DPA', 'J10A', '', '10']) {
+  for (const input of ['10AK', 'Z99Z', 'CA12', 'AAAA', '10A+', 'DPA', 'J10A', '', '10']) {
     assert.deepEqual(CheckCheck.similarLocations(input), [], input);
   }
 });
