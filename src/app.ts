@@ -1,4 +1,5 @@
 import type { LocationGroup, LocationKind, SimilarLocation } from './checkchar.ts';
+import { fromHash, toHash } from './link.ts';
 import { lookup, filterAisles } from './lookup.ts';
 import type { LocationMatch, View } from './lookup.ts';
 import { addRecent, loadRecent, saveRecent } from './recent.ts';
@@ -389,6 +390,7 @@ function update(now = false): void {
   const view = lookup(value);
 
   render(view);
+  updateLink(value);
 
   window.clearTimeout(settleTimer);
   if (view.kind === 'location' || view.kind === 'checkChar') {
@@ -420,8 +422,31 @@ checkCharOutput.addEventListener('click', function () {
   input.select();
 });
 
-// The browser may refill the box when coming back to the page.
-update();
+// The link follows what's typed, so it can be copied or shared from the
+// browser. Replaced rather than added to, so Back leaves the page rather
+// than stepping back through every key.
+function updateLink(value: string): void {
+  const hash = toHash(value);
+
+  if (hash !== location.hash) {
+    history.replaceState(history.state, '', location.pathname + location.search + hash);
+  }
+}
+
+// A link like /check/#10AK looks it up straight away, as if it was tapped.
+function openLink(): void {
+  input.value = fromHash(location.hash);
+  update(true);
+}
+
+window.addEventListener('hashchange', openLink);
+
+// Otherwise the browser may refill the box when coming back to the page.
+if (location.hash) {
+  openLink();
+} else {
+  update();
+}
 
 const themeToggle = find<HTMLButtonElement>('#theme-toggle');
 const themeName = find('#theme-name');

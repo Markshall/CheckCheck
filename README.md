@@ -39,10 +39,12 @@ Lookups you've stayed on for a moment are listed under the box while it's empty,
 
 Type a check character instead (e.g. `NOVEMBER`) to list every location that uses it, in each format in the table above except four letters (there are 456,976 of those). Shelves from `00AA` to `99ZZ` are shown by aisle, and the other kinds (jewellery, linbin and so on) open when tapped. The start of one (e.g. `NOV`) offers it as a button, and the aisle box jumps to one aisle. `X-RAY` can be typed as `XRAY`. `ECHO`, `GOLF`, `KILO`, `LIMA`, `MIKE`, `PAPA`, `ZULU` and `XRAY` are four letter locations as well as check characters, so they show both.
 
+A link can open a lookup by putting it after a `#`, e.g. [www.mark-eriksson.com/check/#10AK](https://www.mark-eriksson.com/check/#10AK) or `/check/#NOVEMBER`, so it can be sent to someone or put in a QR code. The link in the address bar follows what's typed, so it can be copied from there. It's after the `#` rather than in a `?query` because the part after the `#` never reaches the server, so every link is the same page in the browser's, the service worker's and Cloudflare's caches, and works offline too.
+
 The page follows the phone's dark mode, and the button in the header switches it between Auto, Light and Dark for a phone kept in light mode in a dim stockroom (or the other way round). The first tap always changes the page. The choice is kept in the browser's local storage, like recent lookups, and a small script in `index.html`'s `<head>` applies it before the page is drawn so it doesn't flash. The label stays yellow and black, the way it's printed.
 
 ## Analytics
-Each lookup is sent to Google Tag Manager once it has stayed in the box for 1.5 seconds, or straight away when it's tapped or the keyboard's Done key is pressed, so the steps on the way (`1`, `10`, `10A`) aren't. A location sends `checkcheck_lookup` with `locationName`, and a check character sends `checkcheck_reverse_lookup` with `checkChar`. A word like `GOLF` sends both.
+Each lookup is sent to Google Tag Manager once it has stayed in the box for 1.5 seconds, or straight away when it's tapped, opened from a link, or the keyboard's Done key is pressed, so the steps on the way (`1`, `10`, `10A`) aren't. A location sends `checkcheck_lookup` with `locationName`, and a check character sends `checkcheck_reverse_lookup` with `checkChar`. A word like `GOLF` sends both.
 
 Each event has the same name all the way through, so they're easy to follow in Tag Manager:
 
@@ -54,14 +56,14 @@ Each event has the same name all the way through, so they're easy to follow in T
 The trigger has to match the name the page pushes, or the tag never fires. GA4 only shows the parameters in reports once they're registered as custom dimensions (Admin → Custom definitions).
 
 ## Offline
-CheckCheck works with no signal once it has been opened, and phones can add it to the home screen. `public/sw.js` is a service worker that caches the page, its built CSS and JS, and the font (served from `assets/` rather than Google Fonts). The page comes from the network when it can, so a deploy shows up straight away, and from the cache when the network is down or takes more than 3 seconds. It only runs in the built app, not the dev server.
+CheckCheck works with no signal once it has been opened, and phones can add it to the home screen. `public/sw.js` is a service worker that caches the page, its built CSS and JS, and the font (served from `assets/` rather than Google Fonts). The page comes from the network when it can, so a deploy shows up straight away, and from the cache when the network is down or takes more than 3 seconds. Cached files are matched on their URL alone (`ignoreVary`), as the page asks for its CSS and JS with an `Origin` header that the cached copies don't have. It only runs in the built app, not the dev server.
 
 The icons in `public/icons/` are drawn in `icon.svg`. `icon-maskable-512.png` is the same drawing scaled to 80%, so Android can crop it to a circle.
 
 ## How it works
 CheckCheck takes the location the user enters and splits it digit by digit.  Argos use a formula which determines check characters for locations which involves quite a bit of maths, I simply took this and used it to my advantage to make this app.
 
-The formulas live in `src/checkchar.ts`. `src/lookup.ts` decides what to show for what's typed, and `src/app.ts` draws it on the page. `src/recent.ts` and `src/theme.ts` keep recent lookups and the theme on the phone. Only `app.ts` touches the page, so the others are tested directly.
+The formulas live in `src/checkchar.ts`. `src/lookup.ts` decides what to show for what's typed, and `src/app.ts` draws it on the page. `src/recent.ts` and `src/theme.ts` keep recent lookups and the theme on the phone, and `src/link.ts` reads and writes the lookup in the link. Only `app.ts` touches the page, so the others are tested directly.
 
 ## Development
 The app is written in TypeScript and built with [Vite](https://vite.dev). Run the dev server in Docker:
@@ -79,10 +81,19 @@ then open http://localhost:5174. Or, with Node 24 or later, run `npm install` an
 npm test
 ```
 
+runs the unit tests in `tests/` with Node's test runner. They cover everything but `src/app.ts` and the service worker.
+
+```
+npx playwright install chromium   # once
+npm run test:e2e
+```
+
+builds the app and runs the browser tests in `e2e/` with [Playwright](https://playwright.dev), in Chromium sized like a phone. They type in the box, open links, and check the app still works with the network turned off once it has been opened. Requests to anywhere but the test server are blocked, so they don't send lookups to Tag Manager or load ads.
+
 ## Deploying
 CheckCheck is served at [www.mark-eriksson.com/check/](https://www.mark-eriksson.com/check/), inside the portfolio's web root, so the portfolio's `.htaccess` applies here too. It leaves `/check/` out of its Content-Security-Policy and caching rules, and the portfolio's deploy leaves the `check/` folder alone.
 
-Pull requests into `master` run `.github/workflows/check.yml`, which runs the tests, type checks and builds the app, but never deploys. Only the merge deploys. [Dependabot](https://docs.github.com/en/code-security/dependabot) (`.github/dependabot.yml`) opens dependency PRs every Monday, and they go through the same check.
+Pull requests into `master` run `.github/workflows/check.yml`, which audits the dependencies that ship to phones (`npm audit --omit=dev`), runs the unit tests, type checks and builds the app, then runs the browser tests, but never deploys. If a browser test fails, its trace is attached to the run (open it with `npx playwright show-trace`). Only the merge deploys. [Dependabot](https://docs.github.com/en/code-security/dependabot) (`.github/dependabot.yml`) opens dependency PRs every Monday, and they go through the same check.
 
 Pushing to `master` runs `.github/workflows/deploy.yml` when the push touches something that affects the built app (`index.html`, `css/`, `src/`, `public/`, dependencies, the Vite or TypeScript config, or the deploy scripts and workflow). README-only commits don't deploy. You can also run it by hand from the Actions tab. The workflow tests, type checks and builds the app, then uploads `dist/` with rsync over SSH. The server's SSH port is firewalled, so the runner joins the tailnet first and connects to the server's Tailscale address, the same way the portfolio deploys. It needs these repository secrets:
 

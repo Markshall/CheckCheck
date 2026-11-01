@@ -74,8 +74,15 @@ async function page(event) {
   }
 }
 
+// Cached copies are matched on their URL alone. The page asks for its CSS
+// and JS with an Origin header (Vite adds crossorigin to their tags), but
+// they were cached without one, so a server that sends Vary: Origin (like
+// vite preview) would otherwise never match them and break the app offline.
+// They never change at the same URL, so the Vary header doesn't matter.
+const MATCH = { ignoreVary: true };
+
 async function asset(request) {
-  const cached = await caches.match(request);
+  const cached = await caches.match(request, MATCH);
   if (cached) return cached;
 
   const response = await fetch(request);
@@ -89,7 +96,7 @@ async function asset(request) {
 // From the cache straight away, updated in the background for next time.
 async function staticFile(event) {
   const cache = await caches.open(CACHE);
-  const cached = await cache.match(event.request);
+  const cached = await cache.match(event.request, MATCH);
   const network = fetch(event.request).then(async response => {
     if (response.ok) await cache.put(event.request, response.clone());
     return response;
