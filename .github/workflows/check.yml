@@ -1,0 +1,27 @@
+name: Check
+
+# Test, type check and build pull requests before they're merged. Needs no secrets and
+# never deploys.
+on:
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm test
+      # Type checks (tsc) before building.
+      - run: npm run build

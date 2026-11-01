@@ -1,0 +1,29 @@
+# Weekly dependency updates, grouped so each ecosystem opens at most one PR a
+# week (plus separate PRs for security fixes). The Check workflow builds and
+# audits each one before it can be merged.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      # Patch and minor bumps together; majors get their own PR, since they
+      # can need code changes.
+      npm-minor:
+        update-types: [minor, patch]
+    commit-message:
+      prefix: deps
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: ci
