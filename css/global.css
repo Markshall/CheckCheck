@@ -6,7 +6,7 @@
 @import '@fontsource/source-sans-3/latin-600.css';
 
 :root {
-	color-scheme: light dark;
+	color-scheme: light;
 	--red: #e53a40;
 	--red-dark: #c72228;
 	--label-yellow: #efdc05;
@@ -32,26 +32,27 @@
 
 /* Stockrooms are often dim. The label stays yellow and black, as printed,
    and the header's red is deeper so the label is the brightest thing on
-   the page (theme-color in index.html matches it). */
-@media (prefers-color-scheme: dark) {
-	:root {
-		--page: #141313;
-		--header: #a32227;
-		--ink: #f1efec;
-		--muted: #a8a5a1;
-		--link: #ff7377;
-		--surface: #242221;
-		--rule: #403d3b;
-		--field: #1d1c1b;
-		--note-background: #2f2b0c;
-		--warning-background: #351a1b;
-		--keyline: var(--label-yellow);
-		/* A shadow can't be seen on a dark page. */
-		--label-shadow: none;
-		--chip-edge: rgba(239, 220, 5, 0.45);
-		--inworkat: #fff;
-		--inworkat-accent: #6d9cff;
-	}
+   the page (themeColors in src/theme.ts matches it). data-theme is set by
+   the script in index.html's <head>, from the phone's setting or the
+   theme button. */
+:root[data-theme="dark"] {
+	color-scheme: dark;
+	--page: #141313;
+	--header: #a32227;
+	--ink: #f1efec;
+	--muted: #a8a5a1;
+	--link: #ff7377;
+	--surface: #242221;
+	--rule: #403d3b;
+	--field: #1d1c1b;
+	--note-background: #2f2b0c;
+	--warning-background: #351a1b;
+	--keyline: var(--label-yellow);
+	/* A shadow can't be seen on a dark page. */
+	--label-shadow: none;
+	--chip-edge: rgba(239, 220, 5, 0.45);
+	--inworkat: #fff;
+	--inworkat-accent: #6d9cff;
 }
 
 body {
@@ -91,6 +92,58 @@ header {
 
 	header .logo:hover {
 		text-decoration: none;
+	}
+
+	header .container {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+
+	.theme-toggle {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 36px;
+		padding: 4px 12px 4px 9px;
+		border: 1px solid rgba(255, 255, 255, 0.55);
+		border-radius: 999px;
+		background: none;
+		color: #fff;
+		font-family: inherit;
+		font-size: 15px;
+		line-height: 1;
+		cursor: pointer;
+	}
+
+	.theme-toggle:hover {
+		background-color: rgba(255, 255, 255, 0.12);
+	}
+
+	.theme-toggle:focus-visible {
+		outline: 2px solid #fff;
+		outline-offset: 2px;
+	}
+
+	.theme-icon {
+		width: 18px;
+		height: 18px;
+		fill: none;
+		stroke: currentColor;
+		stroke-width: 2;
+		stroke-linecap: round;
+	}
+
+	/* One icon, for the choice. */
+	.theme-icon > g {
+		display: none;
+	}
+
+	.theme-toggle[data-choice="auto"] .theme-icon-auto,
+	.theme-toggle[data-choice="light"] .theme-icon-light,
+	.theme-toggle[data-choice="dark"] .theme-icon-dark {
+		display: inline;
 	}
 
 main {
@@ -701,8 +754,15 @@ footer .adspace {
 }
 
 @media only screen and (max-width: 650px) {
+	/* The logo stays in the middle, with the theme button on the right. */
 	header .container {
-		text-align: center;
+		position: relative;
+		justify-content: center;
+	}
+
+	.theme-toggle {
+		position: absolute;
+		right: 16px;
 	}
 
 	main {
