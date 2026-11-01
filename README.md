@@ -47,5 +47,10 @@ With Node 20 or later:
 npm test
 ```
 
+## Deploying
+CheckCheck is served at [www.mark-eriksson.com/check/](https://www.mark-eriksson.com/check/), inside the portfolio's web root, so the portfolio's `.htaccess` applies here too. It leaves `/check/` out of its Content-Security-Policy and caching rules, and the portfolio's deploy leaves the `check/` folder alone.
+
+This repo's `.htaccess` hides everything that isn't the app (`.git`, other dotfiles, this README, `package.json`, `tests/` and folder listings) and sets cache headers. Cloudflare keeps the page for 5 minutes, and the CSS, JS and logo for a day. When you change one of those files, bump the `?v` on its `<link>` or `<script>` in `index.php` so visitors get it straight away.
+
 ## Issues
 Any issues should be reported to markeriksson94@live.co.uk or [filed here](https://github.com/Markshall/CheckCheck/issues).

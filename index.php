@@ -13,8 +13,8 @@
     <link rel="stylesheet" href="css/reset.css?v2">
     <link rel="stylesheet" href="css/global.css?v3">
 
-    <script src="js/checkchar.js" defer></script>
-    <script src="js/app.js" defer></script>
+    <script src="js/checkchar.js?v2" defer></script>
+    <script src="js/app.js?v2" defer></script>
 
     <link rel="apple-touch-icon" href="logo.png" />
     <link rel="icon" type="image/png" href="logo.png" />
