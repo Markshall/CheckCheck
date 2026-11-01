@@ -42,7 +42,16 @@ Type a check character instead (e.g. `NOVEMBER`) to list every location that use
 The page follows the phone's dark mode, and the button in the header switches it between Auto, Light and Dark for a phone kept in light mode in a dim stockroom (or the other way round). The first tap always changes the page. The choice is kept in the browser's local storage, like recent lookups, and a small script in `index.html`'s `<head>` applies it before the page is drawn so it doesn't flash. The label stays yellow and black, the way it's printed.
 
 ## Analytics
-Each lookup is sent to Google Tag Manager once it has stayed in the box for 1.5 seconds, or straight away when it's tapped or the keyboard's Done key is pressed, so the steps on the way (`1`, `10`, `10A`) aren't. A location sends `checkcheck_input` with `locationName`, and a check character sends `checkcheck_reverse_lookup` with `checkChar`. A word like `GOLF` sends both.
+Each lookup is sent to Google Tag Manager once it has stayed in the box for 1.5 seconds, or straight away when it's tapped or the keyboard's Done key is pressed, so the steps on the way (`1`, `10`, `10A`) aren't. A location sends `checkcheck_lookup` with `locationName`, and a check character sends `checkcheck_reverse_lookup` with `checkChar`. A word like `GOLF` sends both.
+
+Each event has the same name all the way through, so they're easy to follow in Tag Manager:
+
+| Pushed to the dataLayer | Tag Manager trigger (Custom Event) | Sent to GA4 as | GA4 parameter |
+| --- | --- | --- | --- |
+| `checkcheck_lookup` | `checkcheck_lookup` | `checkcheck_lookup` | `location_name`, from `locationName` |
+| `checkcheck_reverse_lookup` | `checkcheck_reverse_lookup` | `checkcheck_reverse_lookup` | `check_char`, from `checkChar` |
+
+The trigger has to match the name the page pushes, or the tag never fires. GA4 only shows the parameters in reports once they're registered as custom dimensions (Admin → Custom definitions).
 
 ## Offline
 CheckCheck works with no signal once it has been opened, and phones can add it to the home screen. `public/sw.js` is a service worker that caches the page, its built CSS and JS, and the font (served from `assets/` rather than Google Fonts). The page comes from the network when it can, so a deploy shows up straight away, and from the cache when the network is down or takes more than 3 seconds. It only runs in the built app, not the dev server.
