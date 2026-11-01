@@ -174,3 +174,11 @@ input.addEventListener('input', function () {
 checkCharOutput.addEventListener('click', function () {
   input.focus();
 });
+
+// Cache the app so it opens with no signal (see public/sw.js). Not in
+// development, where the cache would serve stale code.
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(function (error: unknown) {
+    console.warn('CheckCheck will not work offline:', error);
+  });
+}
