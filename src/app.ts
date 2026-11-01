@@ -1,4 +1,3 @@
-import * as CheckCheck from './checkchar.ts';
 import type { LocationGroup, LocationKind, SimilarLocation } from './checkchar.ts';
 import { lookup, filterAisles } from './lookup.ts';
 import type { View } from './lookup.ts';
@@ -32,14 +31,14 @@ const suggestionsOutput = find('#suggestions');
 const recentOutput = find('#recent');
 const similarOutput = find('#similar-locations');
 const reverseResultsOutput = find('#reverse-lookup-results');
-let lastTrackedLocation: string | null = null;
+let lastTracked: string | null = null;
 let shownCheckChar: string | null = null;
 let recent = loadRecent();
-let rememberTimer: number | undefined;
+let settleTimer: number | undefined;
 
-// How long a lookup has to stay in the box before it's remembered, so the
-// steps on the way (1, 10, 10A) aren't.
-const REMEMBER_AFTER = 1500;
+// How long a lookup has to stay in the box before it's tracked and
+// remembered, so the steps on the way (1, 10, 10A) aren't.
+const SETTLE_AFTER = 1500;
 
 const notes = {
   unknown: 'That isn’t a usual location, so check what you’ve typed.',
@@ -111,16 +110,11 @@ function renderSuggestions(caption: string, words: string[], className = ''): vo
       button.type = 'button';
       button.addEventListener('click', function () {
         input.value = word;
-        update();
+        update(true);
       });
       return button;
     })
   );
-}
-
-function remember(value: string): void {
-  recent = addRecent(recent, value);
-  saveRecent(recent);
 }
 
 // Recent lookups as small copies of the label with their check characters,
@@ -160,8 +154,7 @@ function renderRecent(visible: boolean): void {
     }
     button.addEventListener('click', function () {
       input.value = value;
-      update();
-      remember(value);
+      update(true);
     });
 
     return button;
@@ -338,34 +331,54 @@ function render(view: View): void {
   }
 }
 
-function track(value: string): void {
-  const location = value.toUpperCase().substring(0, 4);
+type Settled = Extract<View, { kind: 'location' | 'checkChar' }>;
 
-  if (CheckCheck.isRfcLocation(location) && location !== lastTrackedLocation) {
-    lastTrackedLocation = location;
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      'event': 'checkcheck_input',
-      'locationName': location
-    });
+function track(value: string, view: Settled): void {
+  if (value === lastTracked) return;
+  lastTracked = value;
+
+  window.dataLayer = window.dataLayer || [];
+  if (view.kind === 'location' || view.location) {
+    window.dataLayer.push({ event: 'checkcheck_input', locationName: value });
+  }
+  if (view.kind === 'checkChar') {
+    window.dataLayer.push({ event: 'checkcheck_reverse_lookup', checkChar: view.checkChar });
   }
 }
 
-function update(): void {
-  const view = lookup(input.value);
+function remember(value: string): void {
+  recent = addRecent(recent, value);
+  saveRecent(recent);
+}
 
-  if (view.kind === 'location') track(input.value.trim());
+// A lookup that's stayed in the box, or was tapped: tracked, and kept in
+// recent lookups if it's a whole one (a known location, or a check
+// character) rather than the start of one, like NOVE.
+function settle(value: string, view: Settled): void {
+  track(value, view);
+  if ((view.kind === 'location' && view.note === null && !view.suggestions.length) || view.kind === 'checkChar') {
+    remember(value);
+  }
+}
+
+// now: settle straight away, for a tap, rather than after SETTLE_AFTER.
+function update(now = false): void {
+  const value = input.value.trim().toUpperCase();
+  const view = lookup(value);
+
   render(view);
 
-  // Only whole lookups: a known location, or a check character.
-  window.clearTimeout(rememberTimer);
-  if ((view.kind === 'location' && view.note === null && !view.suggestions.length) || view.kind === 'checkChar') {
-    const value = input.value.trim().toUpperCase();
-    rememberTimer = window.setTimeout(() => remember(value), REMEMBER_AFTER);
+  window.clearTimeout(settleTimer);
+  if (view.kind === 'location' || view.kind === 'checkChar') {
+    if (now) {
+      settle(value, view);
+    } else {
+      settleTimer = window.setTimeout(() => settle(value, view), SETTLE_AFTER);
+    }
   }
 }
 
-input.addEventListener('input', update);
+input.addEventListener('input', () => update());
 
 checkCharOutput.addEventListener('click', function () {
   input.focus();
