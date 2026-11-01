@@ -144,7 +144,7 @@ test('characters with no phonetic spelling show as ?', () => {
 
 test('similar locations from issue #5', () => {
   assert.deepEqual(CheckCheck.similarLocations('07AZ'), [
-    { location: 'J7AZ', reason: 'JEWELLERY heard as ZERO', text: 'JEWELLERY SEVEN ALPHA ZULU', checkChar: 'YANKEE' },
+    { location: 'J7AZ', reason: 'JEWELLERY heard as ZERO', text: 'JEWELLERY SEVEN ALPHA ZULU', labels: [] },
   ]);
   assert.deepEqual(CheckCheck.similarLocations('J7AZ').map(r => r.location), ['07AZ']);
 });
@@ -163,14 +163,40 @@ test('similar locations all share the check character', () => {
     const checkChar = CheckCheck.checkCharStore(location).checkChar;
 
     for (const result of CheckCheck.similarLocations(location)) {
-      assert.equal(result.checkChar, checkChar, location + ' -> ' + result.location);
+      assert.equal(CheckCheck.checkCharStore(result.location).checkChar, checkChar, location + ' -> ' + result.location);
       assert.notEqual(result.location, location);
     }
   }
 });
 
+test('similar RFC locations', () => {
+  // The two middle letters have the same weight, so swapping them never
+  // changes either check character.
+  assert.deepEqual(CheckCheck.similarLocations('abcd'), [
+    { location: 'ACBD', reason: 'BRAVO and CHARLIE swapped', text: 'ALPHA CHARLIE BRAVO DELTA', labels: ['Store', 'RFC'] },
+  ]);
+
+  // Letters 13 apart share a store check character when swapped next to
+  // a letter with a different weight, but not an RFC one.
+  assert.deepEqual(CheckCheck.similarLocations('ANAA').map(r => [r.location, r.labels]), [
+    ['NAAA', ['Store']],
+    ['AANA', ['Store', 'RFC']],
+  ]);
+
+  // Only other four letter locations, never store formats like J1CD.
+  for (const location of ['ABCD', 'JBCD', 'ZZZZ', 'RETS', 'GOLF']) {
+    for (const result of CheckCheck.similarLocations(location)) {
+      assert.match(result.location, /^[A-Z]{4}$/, location + ' -> ' + result.location);
+      for (const label of result.labels) {
+        const checkChar = label === 'RFC' ? CheckCheck.checkCharRFC : CheckCheck.checkCharStore;
+        assert.equal(checkChar(result.location).checkChar, checkChar(location).checkChar, location + ' -> ' + result.location);
+      }
+    }
+  }
+});
+
 test('no similar locations for unique or unknown locations', () => {
-  for (const input of ['10AK', 'Z99Z', 'CA12', 'ABCD', '10A+', 'DPA', 'J10A', '', '10']) {
+  for (const input of ['10AK', 'Z99Z', 'CA12', 'AAAA', '10A+', 'DPA', 'J10A', '', '10']) {
     assert.deepEqual(CheckCheck.similarLocations(input), [], input);
   }
 });

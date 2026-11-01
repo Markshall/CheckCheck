@@ -33,7 +33,7 @@ Four letters (e.g. `ABCD`) show both the store and the RFC check character.
 
 While a location is half typed the label says to keep typing, and it says when what's typed can't be a location (e.g. `XQ9`). A location in none of the formats above, or with more than four characters, still gets a check character, with a note underneath.
 
-If another location has the same check character and is only one mistake away (a misheard character, e.g. `07AZ` and `J7AZ`, or two swapped, e.g. `L10A` and `L01A`), it's listed underneath. The headset accepts either, so stock voiced to one may really be at the other.
+If another location has the same check character and is only one mistake away (a misheard character, e.g. `07AZ` and `J7AZ`, or two swapped, e.g. `L10A` and `L01A`), it's listed underneath. The headset accepts either, so stock voiced to one may really be at the other. Four letter locations are compared with other four letter locations on both their Store and RFC check characters. Swapping the middle two letters (e.g. `ABCD` and `ACBD`) never changes either, so almost every one has a match.
 
 Lookups you've stayed on for a moment are listed under the box while it's empty, with their check characters, so they can be read or tapped again. They're kept in the browser's local storage and never leave the phone.
 

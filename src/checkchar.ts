@@ -15,9 +15,13 @@ export interface LabelledResult extends CheckCharResult {
   label: string | null;
 }
 
-export interface SimilarLocation extends CheckCharResult {
+export interface SimilarLocation {
   location: string;
+  text: string;
   reason: string;
+  // Which check characters it shares, for four letter locations that have
+  // a Store and an RFC one, e.g. ['Store', 'RFC']. Empty for the others.
+  labels: string[];
 }
 
 // Locations grouped by aisle, e.g. { '10': ['10AK', '10BF'] }. Locations
@@ -86,7 +90,7 @@ function getLocationName(location: string, words: string[]): string {
 }
 
 function isRfcLocation(location: string): boolean {
-  return /[A-Z]{4}/i.test(location);
+  return /^[A-Z]{4}$/i.test(location);
 }
 
 // Returns a list of results, each { label, text, checkChar }. There are
@@ -232,29 +236,39 @@ function wordAt(location: string, i: number): string {
 
 // Locations one mistake away from the given one (a single character
 // misheard, or two characters swapped) that share its check character,
-// so the headset would have accepted either. Each is
-// { location, text, checkChar, reason }.
+// so the headset would have accepted either. A four letter location has a
+// Store and an RFC check character, and is compared with other four letter
+// locations on both.
 function similarLocations(location: string): SimilarLocation[] {
   location = location.toUpperCase().substring(0, 4);
 
-  if (!isLocation(location)) {
+  const isRfc = isRfcLocation(location);
+
+  if (!isRfc && !isLocation(location)) {
     return [];
   }
 
-  const checkChar = checkCharStore(location).checkChar;
+  const checks: [string, (location: string) => string][] = isRfc
+    ? [['Store', candidate => checkCharStore(candidate).checkChar], ['RFC', candidate => checkCharRFC(candidate).checkChar]]
+    : [['Store', candidate => checkCharStore(candidate).checkChar]];
+  const fits = isRfc ? isRfcLocation : isLocation;
+  const word = (location: string, i: number) => isRfc ? speak(location[i]) : wordAt(location, i);
   const found = new Map<string, SimilarLocation>();
 
   function consider(candidate: string, reason: string): void {
-    if (candidate !== location && !found.has(candidate) && isLocation(candidate) &&
-        checkCharStore(candidate).checkChar === checkChar) {
-      found.set(candidate, { location: candidate, reason, ...checkCharStore(candidate) });
+    if (candidate === location || found.has(candidate) || !fits(candidate)) return;
+
+    const labels = checks.filter(([, checkChar]) => checkChar(candidate) === checkChar(location)).map(([label]) => label);
+
+    if (labels.length) {
+      found.set(candidate, { location: candidate, text: checkCharStore(candidate).text, reason, labels: isRfc ? labels : [] });
     }
   }
 
   for (let i = 0; i < 4; i++) {
     for (const char of locationChars) {
       const candidate = location.substring(0, i) + char + location.substring(i + 1);
-      consider(candidate, wordAt(candidate, i) + ' heard as ' + wordAt(location, i));
+      consider(candidate, word(candidate, i) + ' heard as ' + word(location, i));
     }
   }
 
@@ -265,7 +279,7 @@ function similarLocations(location: string): SimilarLocation[] {
 
     if (/\d/.test(chars[i]) === /\d/.test(chars[i + 1])) {
       [chars[i], chars[i + 1]] = [chars[i + 1], chars[i]];
-      consider(chars.join(''), wordAt(location, i) + ' and ' + wordAt(location, i + 1) + ' swapped');
+      consider(chars.join(''), word(location, i) + ' and ' + word(location, i + 1) + ' swapped');
     }
   }
 

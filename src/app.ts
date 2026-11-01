@@ -179,7 +179,9 @@ function renderSimilar(similar: SimilarLocation[]): void {
 
   list.replaceChildren(...similar.map(function (result) {
     const item = create('li');
-    item.append(create('strong', '', result.location), ' “' + result.text + '”', create('small', '', result.reason));
+    const reason = result.labels.length ? result.reason + ' · same ' + result.labels.join(' and ') : result.reason;
+
+    item.append(create('strong', '', result.location), ' “' + result.text + '”', create('small', '', reason));
     return item;
   }));
 
