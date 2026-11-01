@@ -14,20 +14,38 @@ function find<T extends HTMLElement>(selector: string): T {
 }
 
 const input = find<HTMLInputElement>('#location-name');
-const locationTextOutput = find('.location-text');
 const locationText = find('#location-text');
 const checkCharOutput = find('#check-char');
 const reverseResultsOutput = find('#reverse-lookup-results');
 const similarOutput = find('#similar-locations');
 let lastTrackedLocation: string | null = null;
 
-function renderLines(element: HTMLElement, lines: string[]): void {
-  element.replaceChildren();
+interface Row {
+  label: string | null;
+  value: string;
+}
 
-  lines.forEach(function (line, i) {
-    if (i > 0) element.appendChild(document.createElement('br'));
-    element.appendChild(document.createTextNode(line));
-  });
+// One row per result, so a four letter location shows its store and RFC
+// answers one above the other with their labels kept small.
+function renderRows(element: HTMLElement, rows: Row[]): void {
+  element.replaceChildren(...rows.map(function (row) {
+    const line = document.createElement('div');
+    line.className = 'row';
+
+    if (row.label) {
+      const label = document.createElement('span');
+      label.className = 'row-label';
+      label.textContent = row.label;
+      line.append(label, ' ');
+    }
+
+    const value = document.createElement('span');
+    value.className = 'row-value';
+    value.textContent = row.value;
+    line.appendChild(value);
+
+    return line;
+  }));
 }
 
 // Locations the headset would also accept for this one, so stock voiced
@@ -61,32 +79,67 @@ function showSimilarLocations(value: string): void {
   similarOutput.style.display = 'block';
 }
 
+function plural(count: number, noun: string): string {
+  return count.toLocaleString('en-GB') + ' ' + noun + (count === 1 ? '' : 's');
+}
+
 function showReverseLookup(checkChar: string): void {
   const results = CheckCheck.reverseLookup(checkChar);
+  const aisles = Object.keys(results).sort();
+  const total = aisles.reduce(function (sum, aisle) {
+    return sum + results[aisle].length;
+  }, 0);
 
-  locationTextOutput.style.display = 'none';
+  locationText.style.display = 'none';
   checkCharOutput.style.display = 'none';
   similarOutput.style.display = 'none';
   reverseResultsOutput.style.display = 'block';
 
-  reverseResultsOutput.replaceChildren(...Object.keys(results).sort().map(function (aisle) {
+  const heading = document.createElement('p');
+  const count = document.createElement('strong');
+  const grid = document.createElement('div');
+
+  heading.className = 'reverse-heading';
+  count.textContent = plural(total, 'shelf location');
+  heading.append(
+    count,
+    ' have the check character ' + checkChar.toUpperCase() + '. Tap an aisle to see which shelves they are.'
+  );
+  grid.className = 'aisles';
+
+  grid.replaceChildren(...aisles.map(function (aisle) {
     const details = document.createElement('details');
     const summary = document.createElement('summary');
-    const locations = document.createElement('p');
+    const caption = document.createElement('span');
+    const number = document.createElement('span');
+    const size = document.createElement('small');
+    const locations = document.createElement('ul');
 
-    summary.textContent = aisle;
-    locations.textContent = results[aisle].join(', ');
+    caption.className = 'aisle-caption';
+    caption.textContent = 'Aisle';
+    number.className = 'aisle-number';
+    number.textContent = aisle;
+    size.textContent = plural(results[aisle].length, 'location');
+    summary.append(caption, number, size);
+
+    locations.replaceChildren(...results[aisle].map(function (location) {
+      const item = document.createElement('li');
+      item.textContent = location;
+      return item;
+    }));
 
     details.append(summary, locations);
     return details;
   }));
+
+  reverseResultsOutput.replaceChildren(heading, grid);
 }
 
 function showCheckChar(value: string): void {
   const results = CheckCheck.getCheckChar(value);
   const location = value.toUpperCase().substring(0, 4);
 
-  locationTextOutput.style.display = 'block';
+  locationText.style.display = 'block';
   checkCharOutput.style.display = 'block';
   reverseResultsOutput.style.display = 'none';
 
@@ -99,11 +152,11 @@ function showCheckChar(value: string): void {
     });
   }
 
-  renderLines(locationText, results.map(function (result) {
-    return (result.label ? result.label + ': ' : '') + '“' + result.text + '”';
+  renderRows(locationText, results.map(function (result) {
+    return { label: result.label, value: '“' + result.text + '”' };
   }));
-  renderLines(checkCharOutput, results.map(function (result) {
-    return (result.label ? result.label + ': ' : '') + result.checkChar;
+  renderRows(checkCharOutput, results.map(function (result) {
+    return { label: result.label, value: result.checkChar };
   }));
   showSimilarLocations(value);
 }
