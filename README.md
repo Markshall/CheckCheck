@@ -35,6 +35,8 @@ While a location is half typed the label says to keep typing, and it says when w
 
 If another location has the same check character and is only one mistake away (a misheard character, e.g. `07AZ` and `J7AZ`, or two swapped, e.g. `L10A` and `L01A`), it's listed underneath. The headset accepts either, so stock voiced to one may really be at the other.
 
+Lookups you've stayed on for a moment are listed under the box while it's empty, with their check characters, so they can be read or tapped again. They're kept in the browser's local storage and never leave the phone.
+
 Type a check character instead (e.g. `NOVEMBER`) to list every store location from `00AA` to `99ZZ` that uses it, grouped by aisle. The start of one (e.g. `NOV`) offers it as a button, and the aisle box jumps to one aisle.
 
 ## Offline
