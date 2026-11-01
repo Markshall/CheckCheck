@@ -56,7 +56,7 @@ Each event has the same name all the way through, so they're easy to follow in T
 The trigger has to match the name the page pushes, or the tag never fires. GA4 only shows the parameters in reports once they're registered as custom dimensions (Admin → Custom definitions).
 
 ## Offline
-CheckCheck works with no signal once it has been opened, and phones can add it to the home screen. `public/sw.js` is a service worker that caches the page, its built CSS and JS, and the font (served from `assets/` rather than Google Fonts). The page comes from the network when it can, so a deploy shows up straight away, and from the cache when the network is down or takes more than 3 seconds. It only runs in the built app, not the dev server.
+CheckCheck works with no signal once it has been opened, and phones can add it to the home screen. `public/sw.js` is a service worker that caches the page, its built CSS and JS, and the font (served from `assets/` rather than Google Fonts). The page comes from the network when it can, so a deploy shows up straight away, and from the cache when the network is down or takes more than 3 seconds. Cached files are matched on their URL alone (`ignoreVary`), as the page asks for its CSS and JS with an `Origin` header that the cached copies don't have. It only runs in the built app, not the dev server.
 
 The icons in `public/icons/` are drawn in `icon.svg`. `icon-maskable-512.png` is the same drawing scaled to 80%, so Android can crop it to a circle.
 
