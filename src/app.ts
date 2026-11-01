@@ -1,4 +1,6 @@
 import * as CheckCheck from './checkchar.ts';
+import { lookup, filterAisles } from './lookup.ts';
+import type { View } from './lookup.ts';
 
 declare global {
   interface Window {
@@ -13,12 +15,31 @@ function find<T extends HTMLElement>(selector: string): T {
   return element;
 }
 
+function create<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string, text?: string): HTMLElementTagNameMap[K] {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+
 const input = find<HTMLInputElement>('#location-name');
 const locationText = find('#location-text');
 const checkCharOutput = find('#check-char');
-const reverseResultsOutput = find('#reverse-lookup-results');
+const noteOutput = find('#input-note');
+const suggestionsOutput = find('#suggestions');
 const similarOutput = find('#similar-locations');
+const reverseResultsOutput = find('#reverse-lookup-results');
 let lastTrackedLocation: string | null = null;
+let shownCheckChar: string | null = null;
+
+const notes = {
+  unknown: 'That isn’t a usual location, so check what you’ve typed.',
+  extra: 'Only the first four characters count.'
+};
+
+function show(element: HTMLElement, visible: boolean): void {
+  element.hidden = !visible;
+}
 
 interface Row {
   label: string | null;
@@ -28,120 +49,134 @@ interface Row {
 // One row per result, so a four letter location shows its store and RFC
 // answers one above the other with their labels kept small.
 function renderRows(element: HTMLElement, rows: Row[]): void {
+  element.classList.remove('is-hint', 'is-error');
   element.replaceChildren(...rows.map(function (row) {
-    const line = document.createElement('div');
-    line.className = 'row';
+    const line = create('div', 'row');
 
-    if (row.label) {
-      const label = document.createElement('span');
-      label.className = 'row-label';
-      label.textContent = row.label;
-      line.append(label, ' ');
-    }
-
-    const value = document.createElement('span');
-    value.className = 'row-value';
-    value.textContent = row.value;
-    line.appendChild(value);
+    if (row.label) line.append(create('span', 'row-label', row.label), ' ');
+    line.appendChild(create('span', 'row-value', row.value));
 
     return line;
   }));
 }
 
+// Placeholder text on the label, e.g. KEEP TYPING… while a location is
+// half typed, and CHECK CHARACTER in the strip until there is one.
+function renderHint(text: string, isError = false): void {
+  locationText.classList.add('is-hint');
+  locationText.classList.toggle('is-error', isError);
+  locationText.textContent = text;
+  checkCharOutput.classList.add('is-hint');
+  checkCharOutput.textContent = 'Check character';
+}
+
+function renderSuggestions(suggestions: string[]): void {
+  show(suggestionsOutput, suggestions.length > 0);
+  if (!suggestions.length) return;
+
+  suggestionsOutput.replaceChildren(
+    create('span', '', 'Find every location with'),
+    ...suggestions.map(function (word) {
+      const button = create('button', 'suggestion', word);
+      button.type = 'button';
+      button.addEventListener('click', function () {
+        input.value = word;
+        update();
+      });
+      return button;
+    })
+  );
+}
+
 // Locations the headset would also accept for this one, so stock voiced
 // here may really be there (or the other way round).
-function showSimilarLocations(value: string): void {
-  const results = CheckCheck.similarLocations(value);
+function renderSimilar(similar: CheckCheck.SimilarLocation[]): void {
+  show(similarOutput, similar.length > 0);
+  if (!similar.length) return;
 
-  if (!results.length) {
-    similarOutput.style.display = 'none';
-    similarOutput.replaceChildren();
-    return;
-  }
+  const list = create('ul');
 
-  const heading = document.createElement('p');
-  const list = document.createElement('ul');
-
-  heading.textContent = 'Same check character, easily confused with:';
-  list.replaceChildren(...results.map(function (result) {
-    const item = document.createElement('li');
-    const location = document.createElement('strong');
-    const reason = document.createElement('small');
-
-    location.textContent = result.location;
-    reason.textContent = result.reason;
-
-    item.append(location, ' “' + result.text + '”', reason);
+  list.replaceChildren(...similar.map(function (result) {
+    const item = create('li');
+    item.append(create('strong', '', result.location), ' “' + result.text + '”', create('small', '', result.reason));
     return item;
   }));
 
-  similarOutput.replaceChildren(heading, list);
-  similarOutput.style.display = 'block';
+  similarOutput.replaceChildren(create('p', '', 'Same check character, easily confused with:'), list);
 }
 
 function plural(count: number, noun: string): string {
   return count.toLocaleString('en-GB') + ' ' + noun + (count === 1 ? '' : 's');
 }
 
-function showReverseLookup(checkChar: string): void {
-  const results = CheckCheck.reverseLookup(checkChar);
-  const aisles = Object.keys(results).sort();
-  const total = aisles.reduce(function (sum, aisle) {
-    return sum + results[aisle].length;
-  }, 0);
+function renderAisle(aisle: string, locations: string[], open: boolean): HTMLDetailsElement {
+  const details = create('details');
+  const summary = create('summary');
+  const list = create('ul');
 
-  locationText.style.display = 'none';
-  checkCharOutput.style.display = 'none';
-  similarOutput.style.display = 'none';
-  reverseResultsOutput.style.display = 'block';
-
-  const heading = document.createElement('p');
-  const count = document.createElement('strong');
-  const grid = document.createElement('div');
-
-  heading.className = 'reverse-heading';
-  count.textContent = plural(total, 'shelf location');
-  heading.append(
-    count,
-    ' have the check character ' + checkChar.toUpperCase() + '. Tap an aisle to see which shelves they are.'
+  summary.append(
+    create('span', 'aisle-caption', 'Aisle'),
+    create('span', 'aisle-number', aisle),
+    create('small', '', plural(locations.length, 'location'))
   );
-  grid.className = 'aisles';
+  list.replaceChildren(...locations.map(location => create('li', '', location)));
 
-  grid.replaceChildren(...aisles.map(function (aisle) {
-    const details = document.createElement('details');
-    const summary = document.createElement('summary');
-    const caption = document.createElement('span');
-    const number = document.createElement('span');
-    const size = document.createElement('small');
-    const locations = document.createElement('ul');
-
-    caption.className = 'aisle-caption';
-    caption.textContent = 'Aisle';
-    number.className = 'aisle-number';
-    number.textContent = aisle;
-    size.textContent = plural(results[aisle].length, 'location');
-    summary.append(caption, number, size);
-
-    locations.replaceChildren(...results[aisle].map(function (location) {
-      const item = document.createElement('li');
-      item.textContent = location;
-      return item;
-    }));
-
-    details.append(summary, locations);
-    return details;
-  }));
-
-  reverseResultsOutput.replaceChildren(heading, grid);
+  details.open = open;
+  details.append(summary, list);
+  return details;
 }
 
-function showCheckChar(value: string): void {
-  const results = CheckCheck.getCheckChar(value);
-  const location = value.toUpperCase().substring(0, 4);
+function renderReverse(view: Extract<View, { kind: 'checkChar' }>): void {
+  // Typing in the box fires for every key, so keep the aisle box (and what's
+  // typed in it) while the check character stays the same.
+  if (view.checkChar === shownCheckChar) return;
+  shownCheckChar = view.checkChar;
 
-  locationText.style.display = 'block';
-  checkCharOutput.style.display = 'block';
-  reverseResultsOutput.style.display = 'none';
+  const aisles = Object.keys(view.aisles).sort();
+  const heading = create('p', 'reverse-heading');
+  const filter = create('div', 'aisle-filter');
+  const filterLabel = create('label', '', 'Jump to aisle');
+  const filterInput = create('input');
+  const grid = create('div', 'aisles');
+
+  heading.append(
+    create('strong', '', plural(view.total, 'shelf location')),
+    ' have the check character ' + view.checkChar + '. Tap an aisle to see which shelves they are.'
+  );
+
+  filterLabel.htmlFor = 'aisle-filter';
+  Object.assign(filterInput, {
+    id: 'aisle-filter',
+    type: 'text',
+    inputMode: 'numeric',
+    maxLength: 2,
+    placeholder: 'All',
+    autocomplete: 'off'
+  });
+  filter.append(filterLabel, filterInput);
+
+  function renderGrid(): void {
+    const query = filterInput.value.replace(/\D/g, '');
+    const shown = filterAisles(aisles, query);
+
+    if (!shown.length) {
+      grid.replaceChildren(create('p', 'aisles-empty', 'No locations in aisle ' + query + ' use ' + view.checkChar + '.'));
+      return;
+    }
+
+    // A whole aisle number opens that aisle.
+    const openOne = query.length === 2 && shown.length === 1;
+    grid.replaceChildren(...shown.map(aisle => renderAisle(aisle, view.aisles[aisle], openOne)));
+  }
+
+  filterInput.addEventListener('input', renderGrid);
+  renderGrid();
+
+  reverseResultsOutput.replaceChildren(heading, filter, grid);
+}
+
+function track(value: string): void {
+  const location = value.toUpperCase().substring(0, 4);
 
   if (CheckCheck.isRfcLocation(location) && location !== lastTrackedLocation) {
     lastTrackedLocation = location;
@@ -151,29 +186,56 @@ function showCheckChar(value: string): void {
       'locationName': location
     });
   }
-
-  renderRows(locationText, results.map(function (result) {
-    return { label: result.label, value: '“' + result.text + '”' };
-  }));
-  renderRows(checkCharOutput, results.map(function (result) {
-    return { label: result.label, value: result.checkChar };
-  }));
-  showSimilarLocations(value);
 }
 
-input.addEventListener('input', function () {
-  const value = input.value.trim();
+function render(view: View): void {
+  const isCheckChar = view.kind === 'checkChar';
 
-  if (CheckCheck.phonetic.includes(value.toUpperCase())) {
-    showReverseLookup(value);
-  } else {
-    showCheckChar(value);
+  show(locationText, !isCheckChar);
+  show(checkCharOutput, !isCheckChar);
+  show(reverseResultsOutput, isCheckChar);
+  show(noteOutput, view.kind === 'location' && view.note !== null);
+  renderSuggestions(view.kind === 'partial' || view.kind === 'location' ? view.suggestions : []);
+  renderSimilar(view.kind === 'location' ? view.similar : []);
+
+  if (!isCheckChar) shownCheckChar = null;
+
+  switch (view.kind) {
+    case 'empty':
+      renderHint('Type a shelf location');
+      break;
+    case 'partial':
+      renderHint('Keep typing…');
+      break;
+    case 'invalid':
+      renderHint('That isn’t a location', true);
+      break;
+    case 'location':
+      renderRows(locationText, view.results.map(result => ({ label: result.label, value: '“' + result.text + '”' })));
+      renderRows(checkCharOutput, view.results.map(result => ({ label: result.label, value: result.checkChar })));
+      if (view.note) noteOutput.textContent = notes[view.note];
+      break;
+    case 'checkChar':
+      renderReverse(view);
+      break;
   }
-});
+}
+
+function update(): void {
+  const view = lookup(input.value);
+
+  if (view.kind === 'location') track(input.value.trim());
+  render(view);
+}
+
+input.addEventListener('input', update);
 
 checkCharOutput.addEventListener('click', function () {
   input.focus();
 });
+
+// The browser may refill the box when coming back to the page.
+update();
 
 // Cache the app so it opens with no signal (see public/sw.js). Not in
 // development, where the cache would serve stale code.

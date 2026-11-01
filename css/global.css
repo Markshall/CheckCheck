@@ -30,6 +30,8 @@ body {
 	padding: 0 16px;
 }
 
+[hidden] { display: none !important; }
+
 a { color: var(--red); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
@@ -140,6 +142,24 @@ main {
 				padding-top: 6px;
 			}
 
+		/* Before there's a check character to show. */
+		.location-text.is-hint {
+			opacity: 0.6;
+		}
+
+		.location-text.is-error {
+			opacity: 1;
+			font-weight: 600;
+		}
+
+		.check-char.is-hint {
+			padding: 14px 10px;
+			font-size: 14px;
+			letter-spacing: 0.14em;
+			line-height: 1.4;
+			color: rgba(239, 220, 5, 0.6);
+		}
+
 		/* STORE / RFC labels on four letter locations. */
 		.row-label {
 			display: block;
@@ -163,6 +183,51 @@ main {
 	white-space: nowrap;
 }
 
+.input-note {
+	max-width: 440px;
+	margin: 14px auto 0;
+	padding: 8px 14px;
+	border-left: 4px solid var(--label-yellow);
+	border-radius: 0 4px 4px 0;
+	background-color: #fdf9d6;
+	font-size: 15px;
+	line-height: 1.4;
+	text-align: left;
+}
+
+/* Check characters the input could be the start of. */
+
+.suggestions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 8px;
+	max-width: 440px;
+	margin: 14px auto 0;
+	font-size: 15px;
+	color: var(--muted);
+}
+
+	.suggestion {
+		border: 0;
+		border-radius: 4px;
+		padding: 6px 12px;
+		background-color: var(--label-black);
+		color: var(--label-yellow);
+		font-family: inherit;
+		font-size: 15px;
+		font-weight: 600;
+		line-height: 1.2;
+		letter-spacing: 0.04em;
+		cursor: pointer;
+	}
+
+	.suggestion:focus-visible {
+		outline: 2px solid var(--red);
+		outline-offset: 2px;
+	}
+
 /* Easily confused locations */
 
 .similar-locations {
@@ -175,7 +240,6 @@ main {
 	font-size: 16px;
 	line-height: 1.4;
 	text-align: left;
-	display: none;
 }
 
 	.similar-locations p {
@@ -203,11 +267,10 @@ main {
 /* Reverse lookup: every aisle as a tile, opened in place to list its
    locations. */
 
-#reverse-lookup-results {
+.reverse-lookup-results {
 	margin: 24px auto 0;
 	max-width: 640px;
 	text-align: left;
-	display: none;
 }
 
 .reverse-heading {
@@ -221,6 +284,44 @@ main {
 		color: var(--ink);
 		font-weight: 600;
 	}
+
+.aisle-filter {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 14px;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+	.aisle-filter input {
+		width: 4.5em;
+		height: 40px;
+		border: 1px solid var(--rule);
+		border-radius: 4px;
+		background-color: #fff;
+		font: inherit;
+		font-size: 18px;
+		text-align: center;
+		color: var(--ink);
+	}
+
+	.aisle-filter input::placeholder {
+		color: var(--muted);
+		font-weight: 400;
+	}
+
+	.aisle-filter input:focus {
+		border-color: var(--ink);
+	}
+
+.aisles-empty {
+	grid-column: 1 / -1;
+	text-align: center;
+	color: var(--muted);
+	font-size: 16px;
+}
 
 .aisles {
 	display: grid;

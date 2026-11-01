@@ -47,19 +47,21 @@
         <div class="location-box">
           <div class="location-box-main">
             <label for="location-name" class="visually-hidden">Shelf location or check character</label>
-            <input type="text" class="location-name" name="location-name" id="location-name" placeholder="NULL" maxlength="8" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+            <input type="text" class="location-name" name="location-name" id="location-name" placeholder="10AK" maxlength="8" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
 
-            <div class="location-text" id="location-text">&ldquo;NULL&rdquo;</div>
+            <div class="location-text is-hint" id="location-text">Type a shelf location</div>
 
-            <div id="check-char" class="check-char" role="status">
-              NULL
-            </div>
+            <div id="check-char" class="check-char is-hint" role="status">Check character</div>
           </div>
         </div>
 
-        <div id="similar-locations" class="similar-locations" aria-live="polite"></div>
+        <p id="input-note" class="input-note" role="status" hidden></p>
 
-        <div id="reverse-lookup-results"></div>
+        <div id="suggestions" class="suggestions" hidden></div>
+
+        <div id="similar-locations" class="similar-locations" aria-live="polite" hidden></div>
+
+        <div id="reverse-lookup-results" class="reverse-lookup-results" hidden></div>
       </main>
 
       <footer>
