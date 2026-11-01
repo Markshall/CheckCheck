@@ -39,6 +39,8 @@ Lookups you've stayed on for a moment are listed under the box while it's empty,
 
 Type a check character instead (e.g. `NOVEMBER`) to list every location that uses it, in each format in the table above except four letters (there are 456,976 of those). Shelves from `00AA` to `99ZZ` are shown by aisle, and the other kinds (jewellery, linbin and so on) open when tapped. The start of one (e.g. `NOV`) offers it as a button, and the aisle box jumps to one aisle. `X-RAY` can be typed as `XRAY`. `ECHO`, `GOLF`, `KILO`, `LIMA`, `MIKE`, `PAPA`, `ZULU` and `XRAY` are four letter locations as well as check characters, so they show both.
 
+The page follows the phone's dark mode. The label stays yellow and black, the way it's printed.
+
 ## Analytics
 Each lookup is sent to Google Tag Manager once it has stayed in the box for 1.5 seconds, or straight away when it's tapped or the keyboard's Done key is pressed, so the steps on the way (`1`, `10`, `10A`) aren't. A location sends `checkcheck_input` with `locationName`, and a check character sends `checkcheck_reverse_lookup` with `checkChar`. A word like `GOLF` sends both.
 

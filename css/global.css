@@ -6,20 +6,58 @@
 @import '@fontsource/source-sans-3/latin-600.css';
 
 :root {
+	color-scheme: light dark;
 	--red: #e53a40;
 	--red-dark: #c72228;
 	--label-yellow: #efdc05;
 	--label-black: #000;
+	--page: #fff;
+	--header: var(--red);
 	--ink: #090707;
 	--muted: #6c6a6a;
+	--link: var(--red);
 	--surface: #f4f3f1;
 	--rule: #e2e0dd;
+	--field: #fff;
+	--note-background: #fdf9d6;
+	--warning-background: #fdf0f0;
+	/* Edges of yellow things on the page, e.g. an open aisle. */
+	--keyline: var(--label-black);
+	--label-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 6px 18px rgba(0, 0, 0, 0.1);
+	/* Edge of the black check character chips, which needs no edge on white. */
+	--chip-edge: transparent;
+	--inworkat: #04071b;
+	--inworkat-accent: #2269f7;
+}
+
+/* Stockrooms are often dim. The label stays yellow and black, as printed,
+   and the header's red is deeper so the label is the brightest thing on
+   the page (theme-color in index.html matches it). */
+@media (prefers-color-scheme: dark) {
+	:root {
+		--page: #141313;
+		--header: #a32227;
+		--ink: #f1efec;
+		--muted: #a8a5a1;
+		--link: #ff7377;
+		--surface: #242221;
+		--rule: #403d3b;
+		--field: #1d1c1b;
+		--note-background: #2f2b0c;
+		--warning-background: #351a1b;
+		--keyline: var(--label-yellow);
+		/* A shadow can't be seen on a dark page. */
+		--label-shadow: none;
+		--chip-edge: rgba(239, 220, 5, 0.45);
+		--inworkat: #fff;
+		--inworkat-accent: #6d9cff;
+	}
 }
 
 body {
 	font: 400 18px/1.6 'Source Sans 3', 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	color: var(--ink);
-	background-color: #fff;
+	background-color: var(--page);
 	-webkit-text-size-adjust: 100%;
 }
 
@@ -32,13 +70,13 @@ body {
 
 [hidden] { display: none !important; }
 
-a { color: var(--red); text-decoration: none; }
+a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* Header */
 
 header {
-	background-color: var(--red);
+	background-color: var(--header);
 	padding-top: env(safe-area-inset-top);
 }
 
@@ -73,11 +111,12 @@ main {
 
 .location-box {
 	background-color: var(--label-yellow);
+	color: var(--label-black);
 	max-width: 440px;
 	margin: 0 auto;
 	padding: 8px;
 	border-radius: 2px;
-	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 6px 18px rgba(0, 0, 0, 0.1);
+	box-shadow: var(--label-shadow);
 }
 
 	.location-box-main {
@@ -205,7 +244,7 @@ main {
 	padding: 8px 14px;
 	border-left: 4px solid var(--label-yellow);
 	border-radius: 0 4px 4px 0;
-	background-color: #fdf9d6;
+	background-color: var(--note-background);
 	font-size: 15px;
 	line-height: 1.4;
 	text-align: left;
@@ -227,6 +266,7 @@ main {
 
 	.suggestion {
 		border: 0;
+		box-shadow: inset 0 0 0 1px var(--chip-edge);
 		border-radius: 4px;
 		padding: 6px 12px;
 		background-color: var(--label-black);
@@ -241,6 +281,7 @@ main {
 
 	/* A location, e.g. 01AK for 1AK, looks like the label. */
 	.suggestion.is-location {
+		box-shadow: none;
 		padding: 4px 10px;
 		border: 2px solid var(--label-black);
 		border-radius: 2px;
@@ -280,7 +321,7 @@ main {
 		border: 0;
 		background: none;
 		padding: 4px 0;
-		color: var(--red);
+		color: var(--link);
 		font-family: inherit;
 		font-size: 15px;
 		cursor: pointer;
@@ -357,7 +398,7 @@ main {
 	padding: 14px 16px;
 	border-left: 4px solid var(--red);
 	border-radius: 0 4px 4px 0;
-	background-color: #fdf0f0;
+	background-color: var(--warning-background);
 	font-size: 16px;
 	line-height: 1.4;
 	text-align: left;
@@ -421,7 +462,7 @@ main {
 		height: 40px;
 		border: 1px solid var(--rule);
 		border-radius: 4px;
-		background-color: #fff;
+		background-color: var(--field);
 		font: inherit;
 		font-size: 18px;
 		text-align: center;
@@ -582,13 +623,14 @@ details.location-group {
 		gap: 6px;
 		padding: 8px 12px;
 		background-color: var(--label-yellow);
-		border-color: var(--label-black);
+		border-color: var(--keyline);
 		border-radius: 4px 4px 0 0;
+		color: var(--label-black);
 	}
 
 	.aisles details[open] .aisle-caption,
 	.aisles details[open] summary small {
-		color: var(--ink);
+		color: var(--label-black);
 	}
 
 	.aisles details[open] .aisle-caption {
@@ -610,7 +652,7 @@ details.location-group {
 		grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
 		gap: 4px;
 		padding: 10px;
-		border: 1px solid var(--label-black);
+		border: 1px solid var(--keyline);
 		border-top: 0;
 		border-radius: 0 0 4px 4px;
 		font-family: Monaco, Consolas, monospace;
@@ -641,11 +683,11 @@ footer {
 
 .inworkat {
 	font-weight: 600;
-	color: #04071b;
+	color: var(--inworkat);
 }
 
 .inworkat span {
-	color: #2269f7;
+	color: var(--inworkat-accent);
 }
 
 footer .adspace {
