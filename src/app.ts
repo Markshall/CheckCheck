@@ -360,7 +360,7 @@ function track(value: string, view: Settled): void {
 
   window.dataLayer = window.dataLayer || [];
   if (view.kind === 'location' || view.location) {
-    window.dataLayer.push({ event: 'checkcheck_input', locationName: value });
+    window.dataLayer.push({ event: 'checkcheck_lookup', locationName: value });
   }
   if (view.kind === 'checkChar') {
     window.dataLayer.push({ event: 'checkcheck_reverse_lookup', checkChar: view.checkChar });
