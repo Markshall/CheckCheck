@@ -87,5 +87,8 @@ The upload uses `rsync --delete`, so anything in the `check/` folder that isn't 
 
 `public/.htaccess` sets cache headers. Built CSS and JS go in `assets/` with a content hash in their names, so they're cached for good and a change gets a new URL. Browsers check for a new `index.html` every time, and Cloudflare keeps it for up to 4 hours. After the upload, any changed file that keeps its URL (`index.html`, `logo.png`) is purged from Cloudflare's cache. The purge only runs when both Cloudflare settings are set. Old links to `index.php` redirect to `/check/`.
 
+## Privacy
+The page loads Google Tag Manager and AdSense. In the UK, EEA and Switzerland, [Consent Mode](https://developers.google.com/tag-platform/security/guides/consent) defaults (at the top of `index.html`) stop them storing anything until the visitor agrees in Google's consent message. That message is set up in AdSense under Privacy & messaging, not in this repo.
+
 ## Issues
 Any issues should be reported to markeriksson94@live.co.uk or [filed here](https://github.com/Markshall/CheckCheck/issues).
