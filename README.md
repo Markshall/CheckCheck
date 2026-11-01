@@ -31,13 +31,13 @@ Type a location into the box and its check character is shown underneath. Letter
 
 Four letters (e.g. `ABCD`) show both the store and the RFC check character.
 
-While a location is half typed the label says to keep typing, and it says when what's typed can't be a location (e.g. `XQ9`). A location in none of the formats above, or with more than four characters, still gets a check character, with a note underneath.
+While a location is half typed the label says to keep typing, and it says when what's typed can't be a location (e.g. `XQ9`). An aisle typed without its 0 (e.g. `1AK` or `L1A`) offers the location with it (`01AK`, `L01A`) as a button. A location in none of the formats above, or with more than four characters, still gets a check character, with a note underneath.
 
 If another location has the same check character and is only one mistake away (a misheard character, e.g. `07AZ` and `J7AZ`, or two swapped, e.g. `L10A` and `L01A`), it's listed underneath. The headset accepts either, so stock voiced to one may really be at the other. Four letter locations are compared with other four letter locations on both their Store and RFC check characters. Swapping the middle two letters (e.g. `ABCD` and `ACBD`) never changes either, so almost every one has a match.
 
 Lookups you've stayed on for a moment are listed under the box while it's empty, with their check characters, so they can be read or tapped again. They're kept in the browser's local storage and never leave the phone.
 
-Type a check character instead (e.g. `NOVEMBER`) to list every location that uses it, in each format in the table above except four letters (there are 456,976 of those). Shelves from `00AA` to `99ZZ` are shown by aisle, and the other kinds (jewellery, linbin and so on) open when tapped. The start of one (e.g. `NOV`) offers it as a button, and the aisle box jumps to one aisle.
+Type a check character instead (e.g. `NOVEMBER`) to list every location that uses it, in each format in the table above except four letters (there are 456,976 of those). Shelves from `00AA` to `99ZZ` are shown by aisle, and the other kinds (jewellery, linbin and so on) open when tapped. The start of one (e.g. `NOV`) offers it as a button, and the aisle box jumps to one aisle. `X-RAY` can be typed as `XRAY`. `ECHO`, `GOLF`, `KILO`, `LIMA`, `MIKE`, `PAPA`, `ZULU` and `XRAY` are four letter locations as well as check characters, so they show both.
 
 ## Offline
 CheckCheck works with no signal once it has been opened, and phones can add it to the home screen. `public/sw.js` is a service worker that caches the page, its built CSS and JS, and the font (served from `assets/` rather than Google Fonts). The page comes from the network when it can, so a deploy shows up straight away, and from the cache when the network is down or takes more than 3 seconds. It only runs in the built app, not the dev server.

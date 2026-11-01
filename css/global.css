@@ -223,6 +223,15 @@ main {
 		cursor: pointer;
 	}
 
+	/* A location, e.g. 01AK for 1AK, looks like the label. */
+	.suggestion.is-location {
+		padding: 4px 10px;
+		border: 2px solid var(--label-black);
+		border-radius: 2px;
+		background-color: var(--label-yellow);
+		color: var(--label-black);
+	}
+
 	.suggestion:focus-visible {
 		outline: 2px solid var(--red);
 		outline-offset: 2px;

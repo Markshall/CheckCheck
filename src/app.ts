@@ -99,14 +99,15 @@ function renderHint(text: string, isError = false): void {
   checkCharOutput.textContent = 'Check character';
 }
 
-function renderSuggestions(suggestions: string[]): void {
-  show(suggestionsOutput, suggestions.length > 0);
-  if (!suggestions.length) return;
+// Buttons that fill the box, e.g. NOVEMBER for NOV, or 01AK for 1AK.
+function renderSuggestions(caption: string, words: string[], className = ''): void {
+  show(suggestionsOutput, words.length > 0);
+  if (!words.length) return;
 
   suggestionsOutput.replaceChildren(
-    create('span', '', 'Find every location with'),
-    ...suggestions.map(function (word) {
-      const button = create('button', 'suggestion', word);
+    create('span', '', caption),
+    ...words.map(function (word) {
+      const button = create('button', ('suggestion ' + className).trim(), word);
       button.type = 'button';
       button.addEventListener('click', function () {
         input.value = word;
@@ -148,7 +149,7 @@ function renderRecent(visible: boolean): void {
     button.type = 'button';
     if (view.kind === 'checkChar') {
       button.classList.add('is-check-char');
-      button.append(create('span', 'recent-caption', 'Every location with'), create('span', 'recent-location', value));
+      button.append(create('span', 'recent-caption', 'Every location with'), create('span', 'recent-location', view.checkChar));
     } else if (view.kind === 'location') {
       button.append(
         create('span', 'recent-location', value),
@@ -293,17 +294,30 @@ function renderReverse(view: Extract<View, { kind: 'checkChar' }>): void {
 }
 
 function render(view: View): void {
-  const isCheckChar = view.kind === 'checkChar';
+  // A check character like GOLF is a four letter location too, so it
+  // shows on the label as well as listing its locations.
+  const match = view.kind === 'location' ? view : view.kind === 'checkChar' ? view.location : null;
+  const showLabel = view.kind !== 'checkChar' || match !== null;
 
-  show(locationText, !isCheckChar);
-  show(checkCharOutput, !isCheckChar);
-  show(reverseResultsOutput, isCheckChar);
+  show(locationText, showLabel);
+  show(checkCharOutput, showLabel);
+  show(reverseResultsOutput, view.kind === 'checkChar');
   show(noteOutput, view.kind === 'location' && view.note !== null);
-  renderSuggestions(view.kind === 'partial' || view.kind === 'location' ? view.suggestions : []);
-  renderSimilar(view.kind === 'location' ? view.similar : []);
+  renderSimilar(match ? match.similar : []);
   renderRecent(view.kind === 'empty');
 
-  if (!isCheckChar) shownCheckChar = null;
+  if (view.kind === 'invalid' && view.didYouMean) {
+    renderSuggestions('Did you mean', [view.didYouMean], 'is-location');
+  } else {
+    renderSuggestions('Find every location with', view.kind === 'partial' || view.kind === 'location' ? view.suggestions : []);
+  }
+
+  if (match) {
+    renderRows(locationText, match.results.map(result => ({ label: result.label, value: '“' + result.text + '”' })));
+    renderRows(checkCharOutput, match.results.map(result => ({ label: result.label, value: result.checkChar })));
+  }
+
+  if (view.kind !== 'checkChar') shownCheckChar = null;
 
   switch (view.kind) {
     case 'empty':
@@ -316,8 +330,6 @@ function render(view: View): void {
       renderHint('That isn’t a location', true);
       break;
     case 'location':
-      renderRows(locationText, view.results.map(result => ({ label: result.label, value: '“' + result.text + '”' })));
-      renderRows(checkCharOutput, view.results.map(result => ({ label: result.label, value: result.checkChar })));
       if (view.note) noteOutput.textContent = notes[view.note];
       break;
     case 'checkChar':

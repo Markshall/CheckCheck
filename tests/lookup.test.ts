@@ -14,14 +14,23 @@ test('the start of a location asks for more', () => {
 });
 
 test('input that can never be a location', () => {
-  for (const value of ['!!', 'XQ9', '1A', '1-', 'J1+', 'C1']) {
-    assert.deepEqual(lookup(value), { kind: 'invalid' }, value);
+  for (const value of ['!!', 'XQ9', '1A', '1-', 'J1+', 'C1', 'L1+']) {
+    assert.deepEqual(lookup(value), { kind: 'invalid', didYouMean: null }, value);
+  }
+});
+
+test('a missing 0 in the aisle is suggested', () => {
+  const cases = { '1AK': '01AK', '1ak': '01AK', '7A+': '07A+', '7A-': '07A-', 'L1A': 'L01A', 'Z9Z': 'Z09Z' };
+
+  for (const [value, didYouMean] of Object.entries(cases)) {
+    assert.deepEqual(lookup(value), { kind: 'invalid', didYouMean }, value);
   }
 });
 
 test('the start of a check character suggests it', () => {
   assert.deepEqual(lookup('NOV'), { kind: 'partial', suggestions: ['NOVEMBER'] });
   assert.deepEqual(lookup('x-'), { kind: 'partial', suggestions: ['X-RAY'] });
+  assert.deepEqual(lookup('XR'), { kind: 'partial', suggestions: ['X-RAY'] });
   assert.deepEqual(lookup('N'), { kind: 'partial', suggestions: [] });
 
   const view = lookup('NOVE');
@@ -65,6 +74,33 @@ test('a check character lists its locations', () => {
   assert.equal(view.checkChar, 'NOVEMBER');
   assert.equal(view.total, view.groups.reduce((sum, group) => sum + group.total, 0));
   assert.ok(view.groups[0].kind === 'shelf' && view.groups[0].aisles['10'].includes('10AK'));
+  assert.equal(view.location, null);
+});
+
+test('X-RAY can be typed without its hyphen', () => {
+  for (const value of ['X-RAY', 'xray']) {
+    const view = lookup(value);
+    assert.ok(view.kind === 'checkChar' && view.checkChar === 'X-RAY', value);
+  }
+});
+
+test('check characters that are also four letter locations show both', () => {
+  for (const value of ['ECHO', 'GOLF', 'KILO', 'LIMA', 'MIKE', 'PAPA', 'ZULU', 'XRAY']) {
+    const view = lookup(value);
+    assert.equal(view.kind, 'checkChar', value);
+    if (view.kind !== 'checkChar') continue;
+
+    assert.ok(view.location, value);
+    assert.deepEqual(view.location.results.map(result => result.label), ['Store', 'RFC'], value);
+  }
+
+  const golf = lookup('GOLF');
+  assert.ok(golf.kind === 'checkChar' && golf.location?.similar.some(result => result.location === 'GLOF'));
+
+  for (const value of ['NOVEMBER', 'X-RAY', 'ALPHA']) {
+    const view = lookup(value);
+    assert.ok(view.kind === 'checkChar' && view.location === null, value);
+  }
 });
 
 test('filtering aisles', () => {
