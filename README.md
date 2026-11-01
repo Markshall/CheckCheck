@@ -35,6 +35,11 @@ If another location has the same check character and is only one mistake away (a
 
 Type a check character instead (e.g. `NOVEMBER`) to list every store location from `00AA` to `99ZZ` that uses it, grouped by aisle.
 
+## Offline
+CheckCheck works with no signal once it has been opened, and phones can add it to the home screen. `public/sw.js` is a service worker that caches the page, its built CSS and JS, and the font (served from `assets/` rather than Google Fonts). The page comes from the network when it can, so a deploy shows up straight away, and from the cache when the network is down or takes more than 3 seconds. It only runs in the built app, not the dev server.
+
+The icons in `public/icons/` are drawn in `icon.svg`. `icon-maskable-512.png` is the same drawing scaled to 80%, so Android can crop it to a circle.
+
 ## How it works
 CheckCheck takes the location the user enters and splits it digit by digit.  Argos use a formula which determines check characters for locations which involves quite a bit of maths, I simply took this and used it to my advantage to make this app.
 
@@ -85,7 +90,7 @@ npm run deploy           # build + upload
 
 The upload uses `rsync --delete`, so anything in the `check/` folder that isn't in `dist/` is removed. `deploy.sh` refuses to run unless `DEPLOY_PATH` ends in `/check`, so it can't wipe the portfolio by mistake.
 
-`public/.htaccess` sets cache headers. Built CSS and JS go in `assets/` with a content hash in their names, so they're cached for good and a change gets a new URL. Browsers check for a new `index.html` every time, and Cloudflare keeps it for up to 4 hours. After the upload, any changed file that keeps its URL (`index.html`, `logo.png`) is purged from Cloudflare's cache. The purge only runs when both Cloudflare settings are set. Old links to `index.php` redirect to `/check/`.
+`public/.htaccess` sets cache headers. Built CSS and JS go in `assets/` with a content hash in their names, so they're cached for good and a change gets a new URL. Browsers check for a new `index.html` every time, and Cloudflare keeps it for up to 4 hours. `sw.js` and `manifest.webmanifest` are checked like `index.html`, and the icons are cached for a day like the logo. After the upload, any changed file that keeps its URL (`index.html`, `sw.js`, the icons) is purged from Cloudflare's cache. The purge only runs when both Cloudflare settings are set. Old links to `index.php` redirect to `/check/`.
 
 ## Issues
 Any issues should be reported to markeriksson94@live.co.uk or [filed here](https://github.com/Markshall/CheckCheck/issues).

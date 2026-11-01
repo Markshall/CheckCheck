@@ -1,5 +1,10 @@
 @charset "utf-8";
 
+/* Served with the app rather than from Google Fonts, so it works offline. */
+@import '@fontsource/source-sans-3/latin-300.css';
+@import '@fontsource/source-sans-3/latin-400.css';
+@import '@fontsource/source-sans-3/latin-600.css';
+
 :root {
 	--red: #e53a40;
 	--red-dark: #c72228;

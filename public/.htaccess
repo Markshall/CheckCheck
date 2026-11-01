@@ -11,6 +11,9 @@ RedirectMatch 301 ^(.*/)index\.php$ $1
 # No folder listing for the built assets. It gets the portfolio's 404 page.
 RedirectMatch 404 /assets/$
 
+# Apache doesn't know the web app manifest's type by default.
+AddType application/manifest+json .webmanifest
+
 <IfModule mod_headers.c>
   # Browsers check for a new page every time (a cheap 304 when nothing has
   # changed), so they never pair an old page with deleted assets. Cloudflare
@@ -25,9 +28,15 @@ RedirectMatch 404 /assets/$
     Header set Cache-Control "public, max-age=31536000, immutable"
   </If>
 
-  # The logo keeps its URL. A day is short enough for a change to show up
-  # soon, and the deploy purges it from Cloudflare when it changes.
-  <Files "logo.png">
+  # The service worker and manifest keep their URLs, so they're checked like
+  # the page. A stale service worker would keep serving an old version.
+  <FilesMatch "^(sw\.js|manifest\.webmanifest)$">
+    Header set Cache-Control "public, max-age=0, must-revalidate, s-maxage=14400"
+  </FilesMatch>
+
+  # The logo and icons keep their URLs. A day is short enough for a change to
+  # show up soon, and the deploy purges them from Cloudflare when they change.
+  <FilesMatch "^(logo\.png|icon[^/]*\.(png|svg)|apple-touch-icon\.png)$">
     Header set Cache-Control "public, max-age=86400"
-  </Files>
+  </FilesMatch>
 </IfModule>
