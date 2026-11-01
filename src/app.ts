@@ -1,0 +1,123 @@
+import * as CheckCheck from './checkchar.ts';
+
+declare global {
+  interface Window {
+    // Google Tag Manager's queue (see index.html).
+    dataLayer?: Record<string, unknown>[];
+  }
+}
+
+function find<T extends HTMLElement>(selector: string): T {
+  const element = document.querySelector<T>(selector);
+  if (!element) throw new Error(`${selector} is missing from the page`);
+  return element;
+}
+
+const input = find<HTMLInputElement>('#location-name');
+const locationTextOutput = find('.location-text');
+const locationText = find('#location-text');
+const checkCharOutput = find('#check-char');
+const reverseResultsOutput = find('#reverse-lookup-results');
+const similarOutput = find('#similar-locations');
+let lastTrackedLocation: string | null = null;
+
+function renderLines(element: HTMLElement, lines: string[]): void {
+  element.replaceChildren();
+
+  lines.forEach(function (line, i) {
+    if (i > 0) element.appendChild(document.createElement('br'));
+    element.appendChild(document.createTextNode(line));
+  });
+}
+
+// Locations the headset would also accept for this one, so stock voiced
+// here may really be there (or the other way round).
+function showSimilarLocations(value: string): void {
+  const results = CheckCheck.similarLocations(value);
+
+  if (!results.length) {
+    similarOutput.style.display = 'none';
+    similarOutput.replaceChildren();
+    return;
+  }
+
+  const heading = document.createElement('p');
+  const list = document.createElement('ul');
+
+  heading.textContent = 'Same check character, easily confused with:';
+  list.replaceChildren(...results.map(function (result) {
+    const item = document.createElement('li');
+    const location = document.createElement('strong');
+    const reason = document.createElement('small');
+
+    location.textContent = result.location;
+    reason.textContent = result.reason;
+
+    item.append(location, ' “' + result.text + '”', reason);
+    return item;
+  }));
+
+  similarOutput.replaceChildren(heading, list);
+  similarOutput.style.display = 'block';
+}
+
+function showReverseLookup(checkChar: string): void {
+  const results = CheckCheck.reverseLookup(checkChar);
+
+  locationTextOutput.style.display = 'none';
+  checkCharOutput.style.display = 'none';
+  similarOutput.style.display = 'none';
+  reverseResultsOutput.style.display = 'block';
+
+  reverseResultsOutput.replaceChildren(...Object.keys(results).sort().map(function (aisle) {
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    const locations = document.createElement('p');
+
+    summary.textContent = aisle;
+    locations.textContent = results[aisle].join(', ');
+
+    details.append(summary, locations);
+    return details;
+  }));
+}
+
+function showCheckChar(value: string): void {
+  const results = CheckCheck.getCheckChar(value);
+  const location = value.toUpperCase().substring(0, 4);
+
+  locationTextOutput.style.display = 'block';
+  checkCharOutput.style.display = 'block';
+  reverseResultsOutput.style.display = 'none';
+
+  if (CheckCheck.isRfcLocation(location) && location !== lastTrackedLocation) {
+    lastTrackedLocation = location;
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      'event': 'checkcheck_input',
+      'locationName': location
+    });
+  }
+
+  renderLines(locationText, results.map(function (result) {
+    return (result.label ? result.label + ': ' : '') + '“' + result.text + '”';
+  }));
+  renderLines(checkCharOutput, results.map(function (result) {
+    return (result.label ? result.label + ': ' : '') + result.checkChar;
+  }));
+  showSimilarLocations(value);
+}
+
+input.addEventListener('input', function () {
+  const value = input.value.trim();
+
+  if (CheckCheck.phonetic.includes(value.toUpperCase())) {
+    showReverseLookup(value);
+  } else {
+    showCheckChar(value);
+  }
+});
+
+checkCharOutput.addEventListener('click', function () {
+  input.focus();
+});

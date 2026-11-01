@@ -1,6 +1,6 @@
-const test = require('node:test');
-const assert = require('node:assert/strict');
-const CheckCheck = require('../js/checkchar.js');
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import * as CheckCheck from '../src/checkchar.ts';
 
 test('store check characters', () => {
   const cases = {
@@ -119,7 +119,7 @@ test('similar locations from issue #5', () => {
 });
 
 test('similar locations include security and swapped characters', () => {
-  const locations = input => CheckCheck.similarLocations(input).map(r => r.location);
+  const locations = (input: string) => CheckCheck.similarLocations(input).map(r => r.location);
 
   assert.deepEqual(locations('97AZ'), ['S7AZ']);
   assert.deepEqual(locations('10AN'), ['10NA']);
