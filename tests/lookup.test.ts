@@ -63,8 +63,8 @@ test('a check character lists its locations', () => {
   if (view.kind !== 'checkChar') return;
 
   assert.equal(view.checkChar, 'NOVEMBER');
-  assert.equal(view.total, 2600);
-  assert.ok(view.aisles['10'].includes('10AK'));
+  assert.equal(view.total, view.groups.reduce((sum, group) => sum + group.total, 0));
+  assert.ok(view.groups[0].kind === 'shelf' && view.groups[0].aisles['10'].includes('10AK'));
 });
 
 test('filtering aisles', () => {

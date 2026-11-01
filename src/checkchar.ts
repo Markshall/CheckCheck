@@ -20,8 +20,19 @@ export interface SimilarLocation extends CheckCharResult {
   reason: string;
 }
 
-// Store locations grouped by aisle, e.g. { '10': ['10AK', '10BF'] }.
+// Locations grouped by aisle, e.g. { '10': ['10AK', '10BF'] }. Locations
+// with no aisle (CA12, DPA) are under ''.
 export type LocationsByAisle = Record<string, string[]>;
+
+export type LocationKind = 'shelf' | 'afterBefore' | 'jewellery' | 'security' | 'linbin' | 'bulk' | 'cashOffice' | 'collectionPoint' | 'other';
+
+// Every location of one kind with a check character, e.g. the jewellery
+// locations that use NOVEMBER.
+export interface LocationGroup {
+  kind: LocationKind;
+  total: number;
+  aisles: LocationsByAisle;
+}
 
 function getPhonetic(char: string): string | undefined {
   return /^[A-Z]$/.test(char) ? phonetic[char.charCodeAt(0) - 65] : undefined;
@@ -130,30 +141,76 @@ function checkCharRFC(location: string): CheckCharResult {
   };
 }
 
-let reverseIndex: Record<string, LocationsByAisle> | null = null;
+// The check character the headset expects in store, including the fixed ones.
+function storeCheckChar(location: string): string {
+  return fixedCheckChars[location] ?? checkCharStore(location).checkChar;
+}
 
-// Every store location 00AA-99ZZ grouped by check character, then by
-// aisle. Built on first use and reused after that.
-function reverseLookup(checkChar: string): LocationsByAisle {
-  if (!reverseIndex) {
-    reverseIndex = {};
+const letters = phonetic.map(word => word[0]);
+const singleDigits = numbers.map((_, i) => String(i));
+const aisleNumbers = Array.from({ length: 100 }, (_, i) => String(i).padStart(2, '0'));
 
-    for (let i = 0; i <= 99; i++) {
-      const aisle = i.toString().padStart(2, '0');
+// Every location in the formats in the README, with its kind and aisle, in
+// the order they're listed. Four letter RFC locations are left out, as
+// there are 456,976 of them.
+function* allLocations(): Generator<[LocationKind, string, string]> {
+  for (const aisle of aisleNumbers) {
+    for (const bay of letters) {
+      for (const shelf of letters) yield ['shelf', aisle, aisle + bay + shelf];
+    }
+  }
 
-      for (const first of phonetic) {
-        for (const second of phonetic) {
-          const location = aisle + first[0] + second[0];
-          const char = checkCharStore(location).checkChar;
+  for (const aisle of aisleNumbers) {
+    for (const bay of letters) {
+      for (const sign of ['+', '-']) yield ['afterBefore', aisle, aisle + bay + sign];
+    }
+  }
 
-          const aisles = (reverseIndex[char] ??= {});
-          (aisles[aisle] ??= []).push(location);
-        }
+  for (const [kind, prefix] of [['jewellery', 'J'], ['security', 'S']] as const) {
+    for (const aisle of singleDigits) {
+      for (const bay of letters) {
+        for (const shelf of letters) yield [kind, aisle, prefix + aisle + bay + shelf];
       }
     }
   }
 
-  return reverseIndex[checkChar.toUpperCase()] || {};
+  for (const [kind, prefix] of [['linbin', 'L'], ['bulk', 'Z']] as const) {
+    for (const aisle of aisleNumbers) {
+      for (const bay of letters) yield [kind, aisle, prefix + aisle + bay];
+    }
+  }
+
+  for (const [kind, prefix] of [['cashOffice', 'CA'], ['collectionPoint', 'CP']] as const) {
+    for (const number of aisleNumbers) yield [kind, '', prefix + number];
+  }
+
+  for (const location of ['RETS', 'DPA', 'SOB']) yield ['other', '', location];
+}
+
+let reverseIndex: Record<string, LocationGroup[]> | null = null;
+
+// Every location with a check character, grouped by kind (in the order of
+// allLocations) and then by aisle. Built on first use and reused after that.
+function reverseLookup(checkChar: string): LocationGroup[] {
+  if (!reverseIndex) {
+    const index: Record<string, Map<LocationKind, LocationGroup>> = {};
+
+    for (const [kind, aisle, location] of allLocations()) {
+      const groups = (index[storeCheckChar(location)] ??= new Map());
+      let group = groups.get(kind);
+
+      if (!group) {
+        group = { kind, total: 0, aisles: {} };
+        groups.set(kind, group);
+      }
+      group.total++;
+      (group.aisles[aisle] ??= []).push(location);
+    }
+
+    reverseIndex = Object.fromEntries(Object.entries(index).map(([char, groups]) => [char, [...groups.values()]]));
+  }
+
+  return reverseIndex[checkChar.toUpperCase()] ?? [];
 }
 
 const locationPatterns = [
@@ -215,4 +272,4 @@ function similarLocations(location: string): SimilarLocation[] {
   return Array.from(found.values());
 }
 
-export { phonetic, numbers, isRfcLocation, getCheckChar, checkCharStore, checkCharRFC, reverseLookup, similarLocations };
+export { phonetic, numbers, isRfcLocation, getCheckChar, checkCharStore, checkCharRFC, storeCheckChar, reverseLookup, similarLocations };

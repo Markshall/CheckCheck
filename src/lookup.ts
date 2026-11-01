@@ -1,7 +1,7 @@
 // Decides what the page shows for whatever is typed in the box, without
 // touching the page, so it can be tested. src/app.ts draws the result.
 import * as CheckCheck from './checkchar.ts';
-import type { LabelledResult, LocationsByAisle, SimilarLocation } from './checkchar.ts';
+import type { LabelledResult, LocationGroup, SimilarLocation } from './checkchar.ts';
 
 export type View =
   // Nothing typed yet.
@@ -19,7 +19,7 @@ export type View =
       note: Note | null;
     }
   // A check character, e.g. NOVEMBER: every location that uses it.
-  | { kind: 'checkChar'; checkChar: string; aisles: LocationsByAisle; total: number };
+  | { kind: 'checkChar'; checkChar: string; groups: LocationGroup[]; total: number };
 
 // 'unknown': it has a check character but isn't a location format we know,
 // e.g. 1A2B. 'extra': only the first four characters count, e.g. 10AKX.
@@ -69,10 +69,10 @@ export function lookup(input: string): View {
   if (!value) return { kind: 'empty' };
 
   if (CheckCheck.phonetic.includes(value)) {
-    const aisles = CheckCheck.reverseLookup(value);
-    const total = Object.values(aisles).reduce((sum, locations) => sum + locations.length, 0);
+    const groups = CheckCheck.reverseLookup(value);
+    const total = groups.reduce((sum, group) => sum + group.total, 0);
 
-    return { kind: 'checkChar', checkChar: value, aisles, total };
+    return { kind: 'checkChar', checkChar: value, groups, total };
   }
 
   const suggestions = suggestionsFor(value);

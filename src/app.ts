@@ -1,4 +1,5 @@
 import * as CheckCheck from './checkchar.ts';
+import type { LocationGroup, LocationKind, SimilarLocation } from './checkchar.ts';
 import { lookup, filterAisles } from './lookup.ts';
 import type { View } from './lookup.ts';
 import { addRecent, loadRecent, saveRecent } from './recent.ts';
@@ -45,8 +46,28 @@ const notes = {
   extra: 'Only the first four characters count.'
 };
 
+const groupNames: Record<LocationKind, string> = {
+  shelf: 'Shelves',
+  afterBefore: 'After and before',
+  jewellery: 'Jewellery',
+  security: 'Security',
+  linbin: 'Linbin',
+  bulk: 'Bulk',
+  cashOffice: 'Cash office',
+  collectionPoint: 'Collection point',
+  other: 'Other'
+};
+
+// Kinds with enough locations in an aisle to show each aisle as a tile.
+// The rest are one list.
+const tiledKinds: LocationKind[] = ['shelf', 'jewellery', 'security'];
+
 function show(element: HTMLElement, visible: boolean): void {
   element.hidden = !visible;
+}
+
+function plural(count: number, noun: string): string {
+  return count.toLocaleString('en-GB') + ' ' + noun + (count === 1 ? '' : 's');
 }
 
 interface Row {
@@ -150,7 +171,7 @@ function renderRecent(visible: boolean): void {
 
 // Locations the headset would also accept for this one, so stock voiced
 // here may really be there (or the other way round).
-function renderSimilar(similar: CheckCheck.SimilarLocation[]): void {
+function renderSimilar(similar: SimilarLocation[]): void {
   show(similarOutput, similar.length > 0);
   if (!similar.length) return;
 
@@ -163,10 +184,6 @@ function renderSimilar(similar: CheckCheck.SimilarLocation[]): void {
   }));
 
   similarOutput.replaceChildren(create('p', '', 'Same check character, easily confused with:'), list);
-}
-
-function plural(count: number, noun: string): string {
-  return count.toLocaleString('en-GB') + ' ' + noun + (count === 1 ? '' : 's');
 }
 
 function renderAisle(aisle: string, locations: string[], open: boolean): HTMLDetailsElement {
@@ -186,22 +203,62 @@ function renderAisle(aisle: string, locations: string[], open: boolean): HTMLDet
   return details;
 }
 
+// One kind of location, e.g. jewellery, showing only the aisles that match
+// the aisle box. null when none do.
+function renderGroup(group: LocationGroup, query: string): HTMLElement | null {
+  const aisles = filterAisles(Object.keys(group.aisles).sort(), query);
+  if (!aisles.length) return null;
+
+  const count = aisles.reduce((sum, aisle) => sum + group.aisles[aisle].length, 0);
+  let body: HTMLElement;
+
+  if (tiledKinds.includes(group.kind)) {
+    // A whole aisle number opens that aisle.
+    body = create('div', 'aisles');
+    body.replaceChildren(...aisles.map(aisle => renderAisle(aisle, group.aisles[aisle], aisle === query)));
+  } else {
+    body = create('ul', 'location-list');
+    body.replaceChildren(...aisles.flatMap(aisle => group.aisles[aisle]).map(location => create('li', '', location)));
+  }
+
+  const name = create('span', 'group-name', groupNames[group.kind]);
+  const total = create('small', '', plural(count, 'location'));
+
+  // Shelves are what's looked for most, so they're always open. The rest
+  // open once the aisle box narrows them down.
+  if (group.kind === 'shelf') {
+    const section = create('section', 'location-group');
+    const heading = create('h3', 'group-heading');
+
+    heading.append(name, total);
+    section.append(heading, body);
+    return section;
+  }
+
+  const details = create('details', 'location-group');
+  const summary = create('summary', 'group-heading');
+
+  summary.append(name, total);
+  details.open = query !== '';
+  details.append(summary, body);
+  return details;
+}
+
 function renderReverse(view: Extract<View, { kind: 'checkChar' }>): void {
   // Typing in the box fires for every key, so keep the aisle box (and what's
   // typed in it) while the check character stays the same.
   if (view.checkChar === shownCheckChar) return;
   shownCheckChar = view.checkChar;
 
-  const aisles = Object.keys(view.aisles).sort();
   const heading = create('p', 'reverse-heading');
   const filter = create('div', 'aisle-filter');
   const filterLabel = create('label', '', 'Jump to aisle');
   const filterInput = create('input');
-  const grid = create('div', 'aisles');
+  const groups = create('div', 'location-groups');
 
   heading.append(
-    create('strong', '', plural(view.total, 'shelf location')),
-    ' have the check character ' + view.checkChar + '. Tap an aisle to see which shelves they are.'
+    create('strong', '', plural(view.total, 'location')),
+    ' have the check character ' + view.checkChar + '. Tap an aisle or a group to see which they are.'
   );
 
   filterLabel.htmlFor = 'aisle-filter';
@@ -215,37 +272,22 @@ function renderReverse(view: Extract<View, { kind: 'checkChar' }>): void {
   });
   filter.append(filterLabel, filterInput);
 
-  function renderGrid(): void {
+  function renderGroups(): void {
     const query = filterInput.value.replace(/\D/g, '');
-    const shown = filterAisles(aisles, query);
+    const shown = view.groups.map(group => renderGroup(group, query)).filter(group => group !== null);
 
     if (!shown.length) {
-      grid.replaceChildren(create('p', 'aisles-empty', 'No locations in aisle ' + query + ' use ' + view.checkChar + '.'));
+      groups.replaceChildren(create('p', 'aisles-empty', 'No locations in aisle ' + query + ' use ' + view.checkChar + '.'));
       return;
     }
 
-    // A whole aisle number opens that aisle.
-    const openOne = query.length === 2 && shown.length === 1;
-    grid.replaceChildren(...shown.map(aisle => renderAisle(aisle, view.aisles[aisle], openOne)));
+    groups.replaceChildren(...shown);
   }
 
-  filterInput.addEventListener('input', renderGrid);
-  renderGrid();
+  filterInput.addEventListener('input', renderGroups);
+  renderGroups();
 
-  reverseResultsOutput.replaceChildren(heading, filter, grid);
-}
-
-function track(value: string): void {
-  const location = value.toUpperCase().substring(0, 4);
-
-  if (CheckCheck.isRfcLocation(location) && location !== lastTrackedLocation) {
-    lastTrackedLocation = location;
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-      'event': 'checkcheck_input',
-      'locationName': location
-    });
-  }
+  reverseResultsOutput.replaceChildren(heading, filter, groups);
 }
 
 function render(view: View): void {
@@ -279,6 +321,19 @@ function render(view: View): void {
     case 'checkChar':
       renderReverse(view);
       break;
+  }
+}
+
+function track(value: string): void {
+  const location = value.toUpperCase().substring(0, 4);
+
+  if (CheckCheck.isRfcLocation(location) && location !== lastTrackedLocation) {
+    lastTrackedLocation = location;
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      'event': 'checkcheck_input',
+      'locationName': location
+    });
   }
 }
 

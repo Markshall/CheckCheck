@@ -37,7 +37,7 @@ If another location has the same check character and is only one mistake away (a
 
 Lookups you've stayed on for a moment are listed under the box while it's empty, with their check characters, so they can be read or tapped again. They're kept in the browser's local storage and never leave the phone.
 
-Type a check character instead (e.g. `NOVEMBER`) to list every store location from `00AA` to `99ZZ` that uses it, grouped by aisle. The start of one (e.g. `NOV`) offers it as a button, and the aisle box jumps to one aisle.
+Type a check character instead (e.g. `NOVEMBER`) to list every location that uses it, in each format in the table above except four letters (there are 456,976 of those). Shelves from `00AA` to `99ZZ` are shown by aisle, and the other kinds (jewellery, linbin and so on) open when tapped. The start of one (e.g. `NOV`) offers it as a button, and the aisle box jumps to one aisle.
 
 ## Offline
 CheckCheck works with no signal once it has been opened, and phones can add it to the home screen. `public/sw.js` is a service worker that caches the page, its built CSS and JS, and the font (served from `assets/` rather than Google Fonts). The page comes from the network when it can, so a deploy shows up straight away, and from the cache when the network is down or takes more than 3 seconds. It only runs in the built app, not the dev server.

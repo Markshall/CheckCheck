@@ -419,6 +419,82 @@ main {
 	font-size: 16px;
 }
 
+/* Each kind of location, e.g. jewellery. Shelves are always open, and the
+   rest open when tapped. */
+
+.location-group + .location-group {
+	margin-top: 10px;
+}
+
+.group-heading {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	margin-bottom: 8px;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+	.group-heading small {
+		margin-left: auto;
+		font-size: 14px;
+		font-weight: 400;
+		color: var(--muted);
+	}
+
+details.location-group {
+	border-top: 1px solid var(--rule);
+	padding-top: 10px;
+}
+
+	details.location-group > summary {
+		cursor: pointer;
+		list-style: none;
+		user-select: none;
+	}
+
+	details.location-group > summary::-webkit-details-marker {
+		display: none;
+	}
+
+	/* A chevron that turns when the group opens. */
+	details.location-group > summary::before {
+		content: '';
+		align-self: center;
+		width: 7px;
+		height: 7px;
+		border-right: 2px solid var(--muted);
+		border-bottom: 2px solid var(--muted);
+		transform: rotate(-45deg);
+		transition: transform 0.15s;
+	}
+
+	details.location-group[open] > summary::before {
+		transform: rotate(45deg);
+	}
+
+	details.location-group:not([open]) > summary {
+		margin-bottom: 0;
+	}
+
+	details.location-group > summary:focus-visible {
+		outline: 2px solid var(--red);
+		outline-offset: 2px;
+	}
+
+.location-list {
+	list-style: none;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+	gap: 4px;
+	padding: 10px;
+	border: 1px solid var(--rule);
+	border-radius: 4px;
+	font-family: Monaco, Consolas, monospace;
+	font-size: 14px;
+	text-align: center;
+}
+
 .aisles {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
@@ -549,6 +625,12 @@ footer {
 
 footer .adspace {
 	margin: 16px auto 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	details.location-group > summary::before {
+		transition: none;
+	}
 }
 
 @media only screen and (max-width: 650px) {
