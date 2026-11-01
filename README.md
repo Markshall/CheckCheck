@@ -31,9 +31,11 @@ Type a location into the box and its check character is shown underneath. Letter
 
 Four letters (e.g. `ABCD`) show both the store and the RFC check character.
 
+While a location is half typed the label says to keep typing, and it says when what's typed can't be a location (e.g. `XQ9`). A location in none of the formats above, or with more than four characters, still gets a check character, with a note underneath.
+
 If another location has the same check character and is only one mistake away (a misheard character, e.g. `07AZ` and `J7AZ`, or two swapped, e.g. `L10A` and `L01A`), it's listed underneath. The headset accepts either, so stock voiced to one may really be at the other.
 
-Type a check character instead (e.g. `NOVEMBER`) to list every store location from `00AA` to `99ZZ` that uses it, grouped by aisle.
+Type a check character instead (e.g. `NOVEMBER`) to list every store location from `00AA` to `99ZZ` that uses it, grouped by aisle. The start of one (e.g. `NOV`) offers it as a button, and the aisle box jumps to one aisle.
 
 ## Offline
 CheckCheck works with no signal once it has been opened, and phones can add it to the home screen. `public/sw.js` is a service worker that caches the page, its built CSS and JS, and the font (served from `assets/` rather than Google Fonts). The page comes from the network when it can, so a deploy shows up straight away, and from the cache when the network is down or takes more than 3 seconds. It only runs in the built app, not the dev server.
@@ -43,7 +45,7 @@ The icons in `public/icons/` are drawn in `icon.svg`. `icon-maskable-512.png` is
 ## How it works
 CheckCheck takes the location the user enters and splits it digit by digit.  Argos use a formula which determines check characters for locations which involves quite a bit of maths, I simply took this and used it to my advantage to make this app.
 
-The formulas live in `src/checkchar.ts`, which doesn't touch the page, and `src/app.ts` wires them up to it.
+The formulas live in `src/checkchar.ts`. `src/lookup.ts` decides what to show for what's typed, and `src/app.ts` draws it on the page. Only `app.ts` touches the page, so the other two are tested directly.
 
 ## Development
 The app is written in TypeScript and built with [Vite](https://vite.dev). Run the dev server in Docker:
