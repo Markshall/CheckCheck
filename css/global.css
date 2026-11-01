@@ -120,11 +120,22 @@ main {
 			letter-spacing: 0.02em;
 		}
 
+			.row {
+				display: block;
+			}
+
 			.location-text .row + .row {
 				margin-top: 4px;
 			}
 
+		/* A button: tapping it selects the location, ready for the next. */
 		.check-char {
+			display: block;
+			width: 100%;
+			border: 0;
+			border-radius: 0;
+			font-family: inherit;
+			text-align: center;
 			background-color: var(--label-black);
 			color: var(--label-yellow);
 			padding: 6px 10px 8px;
@@ -133,7 +144,12 @@ main {
 			text-transform: uppercase;
 			font-weight: 600;
 			letter-spacing: 0.02em;
-			cursor: text;
+			cursor: pointer;
+		}
+
+		.check-char:focus-visible {
+			outline: 3px solid var(--red);
+			outline-offset: 2px;
 		}
 
 			.check-char .row + .row {

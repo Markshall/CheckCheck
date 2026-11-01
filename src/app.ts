@@ -1,6 +1,6 @@
 import type { LocationGroup, LocationKind, SimilarLocation } from './checkchar.ts';
 import { lookup, filterAisles } from './lookup.ts';
-import type { View } from './lookup.ts';
+import type { LocationMatch, View } from './lookup.ts';
 import { addRecent, loadRecent, saveRecent } from './recent.ts';
 
 declare global {
@@ -25,7 +25,8 @@ function create<K extends keyof HTMLElementTagNameMap>(tag: K, className?: strin
 
 const input = find<HTMLInputElement>('#location-name');
 const locationText = find('#location-text');
-const checkCharOutput = find('#check-char');
+const checkCharOutput = find<HTMLButtonElement>('#check-char');
+const statusOutput = find('#lookup-status');
 const noteOutput = find('#input-note');
 const suggestionsOutput = find('#suggestions');
 const recentOutput = find('#recent');
@@ -75,11 +76,12 @@ interface Row {
 }
 
 // One row per result, so a four letter location shows its store and RFC
-// answers one above the other with their labels kept small.
+// answers one above the other with their labels kept small. Spans, as the
+// check character strip is a button.
 function renderRows(element: HTMLElement, rows: Row[]): void {
   element.classList.remove('is-hint', 'is-error');
   element.replaceChildren(...rows.map(function (row) {
-    const line = create('div', 'row');
+    const line = create('span', 'row');
 
     if (row.label) line.append(create('span', 'row-label', row.label), ' ');
     line.appendChild(create('span', 'row-value', row.value));
@@ -96,6 +98,20 @@ function renderHint(text: string, isError = false): void {
   locationText.textContent = text;
   checkCharOutput.classList.add('is-hint');
   checkCharOutput.textContent = 'Check character';
+}
+
+// What a screen reader announces: the answer, not every keystroke's hint.
+function announce(text: string): void {
+  if (statusOutput.textContent !== text) statusOutput.textContent = text;
+}
+
+function announcement(view: View, match: LocationMatch | null): string {
+  const parts = match
+    ? match.results.map(result => (result.label ? result.label + ' check character ' : 'Check character ') + result.checkChar)
+    : [];
+
+  if (view.kind === 'checkChar') parts.push(plural(view.total, 'location') + ' have the check character ' + view.checkChar);
+  return parts.join('. ');
 }
 
 // Buttons that fill the box, e.g. NOVEMBER for NOV, or 01AK for 1AK.
@@ -262,10 +278,12 @@ function renderReverse(view: Extract<View, { kind: 'checkChar' }>): void {
     id: 'aisle-filter',
     type: 'text',
     inputMode: 'numeric',
+    enterKeyHint: 'done',
     maxLength: 2,
     placeholder: 'All',
     autocomplete: 'off'
   });
+  dismissKeyboardOnEnter(filterInput);
   filter.append(filterLabel, filterInput);
 
   function renderGroups(): void {
@@ -298,6 +316,7 @@ function render(view: View): void {
   show(noteOutput, view.kind === 'location' && view.note !== null);
   renderSimilar(match ? match.similar : []);
   renderRecent(view.kind === 'empty');
+  announce(announcement(view, match));
 
   if (view.kind === 'invalid' && view.didYouMean) {
     renderSuggestions('Did you mean', [view.didYouMean], 'is-location');
@@ -361,7 +380,8 @@ function settle(value: string, view: Settled): void {
   }
 }
 
-// now: settle straight away, for a tap, rather than after SETTLE_AFTER.
+// now: settle straight away, for a tap or the Done key, rather than after
+// SETTLE_AFTER.
 function update(now = false): void {
   const value = input.value.trim().toUpperCase();
   const view = lookup(value);
@@ -378,10 +398,24 @@ function update(now = false): void {
   }
 }
 
-input.addEventListener('input', () => update());
+// The keyboard's Done (enterkeyhint) puts it away, so the results under
+// the box can be seen.
+function dismissKeyboardOnEnter(field: HTMLInputElement, onEnter?: () => void): void {
+  field.addEventListener('keydown', function (event) {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    onEnter?.();
+    field.blur();
+  });
+}
 
+input.addEventListener('input', () => update());
+dismissKeyboardOnEnter(input, () => update(true));
+
+// Tapping the strip selects what's typed, ready for the next location.
 checkCharOutput.addEventListener('click', function () {
   input.focus();
+  input.select();
 });
 
 // The browser may refill the box when coming back to the page.
