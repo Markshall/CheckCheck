@@ -81,10 +81,19 @@ then open http://localhost:5174. Or, with Node 24 or later, run `npm install` an
 npm test
 ```
 
+runs the unit tests in `tests/` with Node's test runner. They cover everything but `src/app.ts` and the service worker.
+
+```
+npx playwright install chromium   # once
+npm run test:e2e
+```
+
+builds the app and runs the browser tests in `e2e/` with [Playwright](https://playwright.dev), in Chromium sized like a phone. They type in the box, open links, and check the app still works with the network turned off once it has been opened. Requests to anywhere but the test server are blocked, so they don't send lookups to Tag Manager or load ads.
+
 ## Deploying
 CheckCheck is served at [www.mark-eriksson.com/check/](https://www.mark-eriksson.com/check/), inside the portfolio's web root, so the portfolio's `.htaccess` applies here too. It leaves `/check/` out of its Content-Security-Policy and caching rules, and the portfolio's deploy leaves the `check/` folder alone.
 
-Pull requests into `master` run `.github/workflows/check.yml`, which runs the tests, type checks and builds the app, but never deploys. Only the merge deploys. [Dependabot](https://docs.github.com/en/code-security/dependabot) (`.github/dependabot.yml`) opens dependency PRs every Monday, and they go through the same check.
+Pull requests into `master` run `.github/workflows/check.yml`, which runs the unit tests, type checks and builds the app, then runs the browser tests, but never deploys. If a browser test fails, its trace is attached to the run (open it with `npx playwright show-trace`). Only the merge deploys. [Dependabot](https://docs.github.com/en/code-security/dependabot) (`.github/dependabot.yml`) opens dependency PRs every Monday, and they go through the same check.
 
 Pushing to `master` runs `.github/workflows/deploy.yml` when the push touches something that affects the built app (`index.html`, `css/`, `src/`, `public/`, dependencies, the Vite or TypeScript config, or the deploy scripts and workflow). README-only commits don't deploy. You can also run it by hand from the Actions tab. The workflow tests, type checks and builds the app, then uploads `dist/` with rsync over SSH. The server's SSH port is firewalled, so the runner joins the tailnet first and connects to the server's Tailscale address, the same way the portfolio deploys. It needs these repository secrets:
 
