@@ -1,100 +1,152 @@
 @charset "utf-8";
 
+:root {
+	--red: #e53a40;
+	--red-dark: #c72228;
+	--label-yellow: #efdc05;
+	--label-black: #000;
+	--ink: #090707;
+	--muted: #6c6a6a;
+	--surface: #f4f3f1;
+	--rule: #e2e0dd;
+}
+
 body {
 	font: 400 18px/1.6 'Source Sans 3', 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	color: #090707;
+	color: var(--ink);
 	background-color: #fff;
+	-webkit-text-size-adjust: 100%;
 }
 
 .container {
 	margin: 0 auto;
 	max-width: 960px;
 	width: 100%;
+	padding: 0 16px;
 }
 
-a { color: #e53a40; text-decoration: none; }
+a { color: var(--red); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
+/* Header */
+
 header {
-	background-color: #e53a40;
+	background-color: var(--red);
+	padding-top: env(safe-area-inset-top);
 }
 
 	header .logo {
-		display: block;
+		display: inline-block;
 		color: #fff;
-		text-decoration: none;
-		width: 170px;
-		text-align: center;
-		background-color: #c72228;
-		padding: 15px;
-		font-size: 20px;
-		font-weight: 300;
+		padding: 14px 0;
+		font-size: 22px;
+		font-weight: 600;
+		letter-spacing: 0.01em;
 	}
 
-.lead-text {
-	font-size: 17px;
-	max-width: 70ch;
-	margin: 0 auto;
-}
-
-.lead-text p {
-	margin-bottom: 10px;
-}
-
-.inworkat {
-	font-weight: 600;
-	color: #04071b;
-}
-
-.inworkat span {
-	color: #2269f7;
-}
+	header .logo:hover {
+		text-decoration: none;
+	}
 
 main {
-	padding: 25px;
+	padding: 28px 0 40px;
 	text-align: center;
 }
 
+.lead-text {
+	font-size: 17px;
+	color: var(--muted);
+	max-width: 40ch;
+	margin: 0 auto 20px;
+	line-height: 1.45;
+}
+
+/* The stockroom label: yellow with a black keyline and a black check
+   character strip, the way it's printed on the shelf. */
+
 .location-box {
-	background-color: #efdc05;
-	max-width: 420px;
-	margin: 25px auto 0;
-	padding: 7px;
+	background-color: var(--label-yellow);
+	max-width: 440px;
+	margin: 0 auto;
+	padding: 8px;
+	border-radius: 2px;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 6px 18px rgba(0, 0, 0, 0.1);
 }
 
 	.location-box-main {
-		border: 1px solid #000;
+		border: 2px solid var(--label-black);
 	}
 
 		.location-name {
 			display: block;
 			width: 100%;
-			height: 70px;
-			font-size: 58px;
+			height: 84px;
+			padding: 0 8px;
+			font-size: 64px;
+			line-height: 1;
 			border: 0;
+			border-radius: 0;
 			font-family: inherit;
 			background-color: transparent;
+			color: var(--label-black);
+			caret-color: var(--label-black);
 			text-align: center;
 			font-weight: 600;
+			letter-spacing: 0.02em;
 			text-transform: uppercase;
 		}
 
 		.location-name::placeholder {
 			color: inherit;
-			opacity: 0.4;
+			opacity: 0.3;
+		}
+
+		.location-name:focus {
+			background-color: rgba(255, 255, 255, 0.25);
 		}
 
 		.location-text {
-			margin: 9px 0 5px;
+			padding: 2px 10px 10px;
+			font-size: 16px;
+			line-height: 1.35;
 			text-transform: uppercase;
+			letter-spacing: 0.02em;
 		}
 
+			.location-text .row + .row {
+				margin-top: 4px;
+			}
+
 		.check-char {
-			background-color: #000;
-			color: #efdc05;
-			font-size: 39px;
+			background-color: var(--label-black);
+			color: var(--label-yellow);
+			padding: 6px 10px 8px;
+			font-size: 42px;
+			line-height: 1.2;
 			text-transform: uppercase;
 			font-weight: 600;
+			letter-spacing: 0.02em;
+			cursor: text;
+		}
+
+			.check-char .row + .row {
+				border-top: 1px solid rgba(239, 220, 5, 0.35);
+				margin-top: 6px;
+				padding-top: 6px;
+			}
+
+		/* STORE / RFC labels on four letter locations. */
+		.row-label {
+			display: block;
+			font-size: 12px;
+			font-weight: 600;
+			letter-spacing: 0.12em;
+			line-height: 1.4;
+			opacity: 0.75;
+		}
+
+		.location-text .row-label {
+			font-size: 11px;
 		}
 
 .visually-hidden {
@@ -106,30 +158,31 @@ main {
 	white-space: nowrap;
 }
 
+/* Easily confused locations */
+
 .similar-locations {
-	margin: 15px auto 0;
-	max-width: 420px;
-	padding: 12px 15px;
-	border-left: 4px solid #e53a40;
+	margin: 20px auto 0;
+	max-width: 440px;
+	padding: 14px 16px;
+	border-left: 4px solid var(--red);
+	border-radius: 0 4px 4px 0;
 	background-color: #fdf0f0;
 	font-size: 16px;
+	line-height: 1.4;
 	text-align: left;
 	display: none;
 }
 
 	.similar-locations p {
-		margin-bottom: 5px;
 		font-weight: 600;
 	}
 
 	.similar-locations ul {
 		list-style: none;
-		margin: 0;
-		padding: 0;
 	}
 
 	.similar-locations li {
-		margin-top: 8px;
+		margin-top: 10px;
 	}
 
 	.similar-locations strong {
@@ -138,59 +191,179 @@ main {
 
 	.similar-locations small {
 		display: block;
-		color: #6c6a6a;
+		color: var(--muted);
 		font-size: 14px;
 	}
 
+/* Reverse lookup: every aisle as a tile, opened in place to list its
+   locations. */
+
 #reverse-lookup-results {
-	margin: 20px auto 0;
-	background-color: #efefef;
-	padding: 20px;
-	border-radius: 5px;
-	max-width: 620px;
+	margin: 24px auto 0;
+	max-width: 640px;
 	text-align: left;
 	display: none;
 }
 
-details {
-	margin-bottom: 20px;
+.reverse-heading {
+	font-size: 16px;
+	color: var(--muted);
+	margin-bottom: 12px;
+	text-align: center;
 }
 
-summary {
-	cursor: pointer;
+	.reverse-heading strong {
+		color: var(--ink);
+		font-weight: 600;
+	}
+
+.aisles {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+	gap: 6px;
 }
 
-details p {
-	font-family: Monaco, Consolas, monospace;
-	color: #2d2d2d;
-	font-size: 13px;
-	letter-spacing: 2px;
-	padding-left: 20px;
-}
+	.aisles details[open] {
+		grid-column: 1 / -1;
+	}
+
+	.aisles summary {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 6px 4px 7px;
+		border-radius: 4px;
+		background-color: var(--surface);
+		border: 1px solid var(--rule);
+		cursor: pointer;
+		list-style: none;
+		line-height: 1.2;
+		user-select: none;
+	}
+
+	.aisles summary::-webkit-details-marker {
+		display: none;
+	}
+
+	.aisles summary:hover {
+		border-color: var(--ink);
+	}
+
+	.aisles summary:focus-visible {
+		outline: 2px solid var(--red);
+		outline-offset: 1px;
+	}
+
+	.aisle-caption {
+		font-size: 10px;
+		font-weight: 600;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--muted);
+	}
+
+	.aisle-number {
+		font-size: 22px;
+		font-weight: 600;
+		margin: 1px 0 2px;
+	}
+
+	.aisles summary small {
+		font-size: 12px;
+		color: var(--muted);
+	}
+
+	.aisles details[open] summary {
+		flex-direction: row;
+		align-items: baseline;
+		gap: 6px;
+		padding: 8px 12px;
+		background-color: var(--label-yellow);
+		border-color: var(--label-black);
+		border-radius: 4px 4px 0 0;
+	}
+
+	.aisles details[open] .aisle-caption,
+	.aisles details[open] summary small {
+		color: var(--ink);
+	}
+
+	.aisles details[open] .aisle-caption {
+		font-size: 13px;
+	}
+
+	.aisles details[open] .aisle-number {
+		margin: 0;
+	}
+
+	.aisles details[open] summary small {
+		margin-left: auto;
+		font-size: 14px;
+	}
+
+	.aisles ul {
+		list-style: none;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+		gap: 4px;
+		padding: 10px;
+		border: 1px solid var(--label-black);
+		border-top: 0;
+		border-radius: 0 0 4px 4px;
+		font-family: Monaco, Consolas, monospace;
+		font-size: 14px;
+		text-align: center;
+	}
+
+/* Footer */
 
 footer {
+	border-top: 1px solid var(--rule);
+	padding: 24px 0 calc(24px + env(safe-area-inset-bottom));
 	font-size: 16px;
-	color: #6c6a6a;
+	line-height: 1.5;
+	color: var(--muted);
 	font-weight: 300;
 	text-align: center;
 }
 
-footer .adspace {
-	margin: 15px auto 0;
-}
-
-@media only screen and (max-width: 650px) {
-	.container {
-		max-width: 99%;
+	footer p + p {
+		margin-top: 10px;
 	}
 
-	header .logo {
-		width: 100%;
-		font-size: 24px;
+	footer .promo {
+		color: var(--ink);
 		font-weight: 400;
 	}
 
+.inworkat {
+	font-weight: 600;
+	color: #04071b;
+}
+
+.inworkat span {
+	color: #2269f7;
+}
+
+footer .adspace {
+	margin: 16px auto 0;
+}
+
+@media only screen and (max-width: 650px) {
 	header .container {
-		max-width: 100%;
+		text-align: center;
+	}
+
+	main {
+		padding-top: 20px;
+	}
+
+	.location-name {
+		font-size: 56px;
+		height: 76px;
+	}
+
+	.check-char {
+		font-size: 38px;
 	}
 }
