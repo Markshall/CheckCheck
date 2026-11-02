@@ -135,6 +135,23 @@ button { -webkit-tap-highlight-color: transparent; }
 	color: var(--muted);
 }
 
+/* Shown only in a browser too old to run the app, which may be Internet
+   Explorer, so no custom properties: it doesn't know them. */
+.browser-note {
+	display: none;
+	padding: 14px 16px;
+	background-color: #efdc05;
+	color: #000;
+	font-size: 17px;
+	font-weight: 700;
+	line-height: 1.4;
+	text-align: center;
+}
+
+.is-old-browser .browser-note {
+	display: block;
+}
+
 /* App bar: stays at the top, over the floor as it scrolls away. */
 
 .app-bar {
@@ -271,7 +288,11 @@ button { -webkit-tap-highlight-color: transparent; }
 	.floor-bay::before {
 		content: '';
 		position: absolute;
-		inset: -24px;
+		/* Not inset, which Safari before 14.1 doesn't know. */
+		top: -24px;
+		right: -24px;
+		bottom: -24px;
+		left: -24px;
 		padding: 12px;
 		background: repeating-linear-gradient(-45deg, var(--label-yellow) 0 12px, #141414 12px 24px);
 		-webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -354,6 +375,9 @@ button { -webkit-tap-highlight-color: transparent; }
 			width: 100%;
 			height: 88px;
 			padding: 0 8px;
+			/* A fixed size first, for browsers without container units (Safari
+			   before 16, Chrome before 105), which drop the second. */
+			font-size: 56px;
 			font-size: min(66px, 19cqw);
 			line-height: 1;
 			border: 0;
@@ -370,6 +394,7 @@ button { -webkit-tap-highlight-color: transparent; }
 
 		/* A check character, e.g. NOVEMBER, is longer than a location. */
 		.location-name.is-long {
+			font-size: 42px;
 			font-size: min(56px, 14.5cqw);
 		}
 

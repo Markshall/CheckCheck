@@ -76,6 +76,8 @@ then open http://localhost:5174. Or, with Node 24 or later, run `npm install` an
 
 `npm run build` type checks the code and writes the built app to `dist/`, and `npm run preview` serves it. `npm run typecheck` only type checks.
 
+The build supports browsers from late 2020 on: Safari 14 (iOS 14), Chrome and Edge 87, and Firefox 78 (`build.target` in `vite.config.ts`). Internet Explorer can't run it, so a script in `index.html`'s `<head>` spots it, or any browser too old, and shows a message saying to open the page in Edge, Chrome or Safari. Newer CSS has a fallback before it for those browsers, e.g. a fixed font size before one in container units (`cqw`), and the targets stop the CSS minifier removing them.
+
 ## Tests
 ```
 npm test

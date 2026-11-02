@@ -8,6 +8,16 @@
     <meta name="theme-color" content="#e53a40">
     <title>CheckCheck</title>
 
+    <!-- Marks a browser too old to run the app (Internet Explorer, or one
+         from before late 2020: see build.target in vite.config.ts), so it
+         shows #browser-note. replaceChildren is the newest thing the app
+         uses. Plain old JavaScript, so Internet Explorer can run it. -->
+    <script>
+      if (!window.Element || !Element.prototype.replaceChildren) {
+        document.documentElement.className += ' is-old-browser';
+      }
+    </script>
+
     <!-- Sets the light or dark theme before the page is drawn, so a dark one
          doesn't flash white. src/theme.ts has the same rules and colours, and
          takes over once it loads. -->
@@ -87,6 +97,13 @@
         </button>
       </div>
     </header>
+
+    <!-- Only shown in a browser too old to run the app (see is-old-browser
+         in the <head>), where typing in the box would do nothing. -->
+    <p id="browser-note" class="browser-note">
+      This browser is too old for CheckCheck, so it can’t look up locations.
+      Open this page in Edge, Chrome or Safari instead.
+    </p>
 
     <!-- The label, stuck to the floor of a bulk bay like it is in the
          stockroom. -->

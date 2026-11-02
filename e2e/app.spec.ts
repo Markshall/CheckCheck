@@ -43,6 +43,17 @@ test('tapping an example looks it up', async ({ page }) => {
   await expect(page.locator('#examples')).toBeHidden();
 });
 
+test('only a browser too old to run the app says so', async ({ page, context }) => {
+  await page.goto('./');
+  await expect(page.locator('#browser-note')).toBeHidden();
+
+  // Like Internet Explorer, or a browser from before late 2020.
+  await context.addInitScript(() => { delete (Element.prototype as Partial<Element>).replaceChildren; });
+  const old = await context.newPage();
+  await old.goto('./');
+  await expect(old.locator('#browser-note')).toBeVisible();
+});
+
 test('a link opens straight to its lookup', async ({ page }) => {
   await page.goto('./#J1PG');
 
