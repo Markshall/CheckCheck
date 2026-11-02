@@ -8,6 +8,16 @@
     <meta name="theme-color" content="#e53a40">
     <title>CheckCheck</title>
 
+    <!-- Marks a browser too old to run the app (Internet Explorer, or one
+         from before late 2020: see build.target in vite.config.ts), so it
+         shows #browser-note. replaceChildren is the newest thing the app
+         uses. Plain old JavaScript, so Internet Explorer can run it. -->
+    <script>
+      if (!window.Element || !Element.prototype.replaceChildren) {
+        document.documentElement.className += ' is-old-browser';
+      }
+    </script>
+
     <!-- Sets the light or dark theme before the page is drawn, so a dark one
          doesn't flash white. src/theme.ts has the same rules and colours, and
          takes over once it loads. -->
@@ -62,9 +72,16 @@
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-PV3S2MV"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
-    <header>
+    <header class="app-bar">
       <div class="container">
-        <a href="./" class="logo">
+        <a href="./" class="brand">
+          <svg class="brand-mark" viewBox="0 0 512 512" aria-hidden="true">
+            <rect width="512" height="512" rx="112"/>
+            <g fill="none" stroke-width="34">
+              <path id="brand-c" d="M292 112C268 100 244 94 218 94C160 94 134 146 134 208C134 272 162 324 220 324C246 324 270 318 294 306"/>
+              <use href="#brand-c" x="82" y="96"/>
+            </g>
+          </svg>
           CheckCheck
         </a>
 
@@ -81,36 +98,74 @@
       </div>
     </header>
 
-    <div class="container">
-      <main>
-        <p class="lead-text">Enter a shelf location to find its check character, or enter a check character to find all locations with it.</p>
+    <!-- Only shown in a browser too old to run the app (see is-old-browser
+         in the <head>), where typing in the box would do nothing. -->
+    <p id="browser-note" class="browser-note">
+      This browser is too old for CheckCheck, so it can’t look up locations.
+      Open this page in Edge, Chrome or Safari instead.
+    </p>
 
-        <div class="location-box">
-          <div class="location-box-main">
-            <label for="location-name" class="visually-hidden">Shelf location or check character</label>
-            <input type="text" class="location-name" name="location-name" id="location-name" placeholder="10AK" maxlength="8" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+    <!-- The label, stuck to the floor of a bulk bay like it is in the
+         stockroom. -->
+    <section class="hero">
+      <div class="container">
+        <p class="lead-text">Type a shelf location to find its check character, or a check character to find every location with it.</p>
 
-            <div class="location-text is-hint" id="location-text">Type a shelf location</div>
+        <div class="floor-bay">
+          <!-- Wear on the tape, shown when the hero has has-worn. -->
+          <div class="floor-wear" aria-hidden="true"></div>
 
-            <button type="button" id="check-char" class="check-char is-hint" aria-describedby="check-char-help">Check character</button>
-            <span id="check-char-help" class="visually-hidden">Selects the location, ready to type the next one.</span>
+          <div class="location-box">
+            <div class="location-box-main">
+              <label for="location-name" class="visually-hidden">Shelf location or check character</label>
+              <input type="text" class="location-name" name="location-name" id="location-name" placeholder="10AK" maxlength="8" enterkeyhint="done" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+
+              <div class="location-text is-hint" id="location-text">Type a shelf location</div>
+
+              <button type="button" id="check-char" class="check-char is-hint" aria-describedby="check-char-help">Check character</button>
+              <span id="check-char-help" class="visually-hidden">Selects the location, ready to type the next one.</span>
+            </div>
           </div>
         </div>
+      </div>
+    </section>
 
+    <main class="sheet">
+      <div class="container">
         <p id="lookup-status" class="visually-hidden" role="status"></p>
 
         <p id="input-note" class="input-note" role="status" hidden></p>
 
         <div id="suggestions" class="suggestions" hidden></div>
 
-        <section id="recent" class="recent" aria-label="Recent lookups" hidden></section>
-
         <div id="similar-locations" class="similar-locations" aria-live="polite" hidden></div>
 
-        <div id="reverse-lookup-results" class="reverse-lookup-results" hidden></div>
-      </main>
+        <section id="recent" class="recent" aria-label="Recent lookups" hidden></section>
 
-      <footer>
+        <!-- Shown while the box is empty. Tapping one looks it up. -->
+        <section id="examples" class="examples" aria-labelledby="examples-heading">
+          <h2 id="examples-heading" class="section-heading">What you can type</h2>
+          <ul class="example-list">
+            <li><button type="button" class="example" data-example="10AK"><span class="example-label">10AK</span><span class="example-name">Shelf</span></button></li>
+            <li><button type="button" class="example" data-example="10A+"><span class="example-label">10A+</span><span class="example-name">After / before</span></button></li>
+            <li><button type="button" class="example" data-example="J1PG"><span class="example-label">J1PG</span><span class="example-name">Jewellery</span></button></li>
+            <li><button type="button" class="example" data-example="S1PG"><span class="example-label">S1PG</span><span class="example-name">Security</span></button></li>
+            <li><button type="button" class="example" data-example="L10A"><span class="example-label">L10A</span><span class="example-name">Linbin</span></button></li>
+            <li><button type="button" class="example" data-example="Z10A"><span class="example-label">Z10A</span><span class="example-name">Bulk</span></button></li>
+            <li><button type="button" class="example" data-example="CA12"><span class="example-label">CA12</span><span class="example-name">Cash office</span></button></li>
+            <li><button type="button" class="example" data-example="CP12"><span class="example-label">CP12</span><span class="example-name">Collection point</span></button></li>
+            <li><button type="button" class="example" data-example="RETS"><span class="example-label">RETS</span><span class="example-name">Returns</span></button></li>
+            <li><button type="button" class="example" data-example="ABCD"><span class="example-label">ABCD</span><span class="example-name">Four letters</span></button></li>
+            <li class="example-wide"><button type="button" class="example is-check-char" data-example="NOVEMBER"><span class="example-label">NOVEMBER</span><span class="example-name">A check character, to list every location with it</span></button></li>
+          </ul>
+        </section>
+
+        <div id="reverse-lookup-results" class="reverse-lookup-results" hidden></div>
+      </div>
+    </main>
+
+    <footer>
+      <div class="container">
         <p class="promo">
           Try the all new
           <a href="https://www.inwork.at/?ref=checkcheck&amp;utm_campaign=inworkatv2" class="inworkat" target="_blank" rel="noopener">InWork<span>At</span></a>
@@ -132,7 +187,7 @@
           (adsbygoogle = window.adsbygoogle || []).push({});
           </script>
         </div>
-      </footer>
-    </div>
+      </div>
+    </footer>
   </body>
 </html>

@@ -33,6 +33,7 @@ const statusOutput = find('#lookup-status');
 const noteOutput = find('#input-note');
 const suggestionsOutput = find('#suggestions');
 const recentOutput = find('#recent');
+const examplesOutput = find('#examples');
 const similarOutput = find('#similar-locations');
 const reverseResultsOutput = find('#reverse-lookup-results');
 let lastTracked: string | null = null;
@@ -153,7 +154,7 @@ function renderRecent(visible: boolean): void {
     saveRecent(recent);
     renderRecent(false);
   });
-  header.append(create('h2', 'recent-heading', 'Recent'), clear);
+  header.append(create('h2', 'section-heading', 'Recent'), clear);
 
   list.replaceChildren(...recent.map(function (value) {
     const view = lookup(value);
@@ -194,11 +195,14 @@ function renderSimilar(similar: SimilarLocation[]): void {
     const item = create('li');
     const reason = result.labels.length ? result.reason + ' · same ' + result.labels.join(' and ') : result.reason;
 
-    item.append(create('strong', '', result.location), ' “' + result.text + '”', create('small', '', reason));
+    const text = create('span', 'similar-text');
+
+    text.append('“' + result.text + '”', create('small', '', reason));
+    item.append(create('strong', 'similar-location', result.location), text);
     return item;
   }));
 
-  similarOutput.replaceChildren(create('p', '', 'Same check character, easily confused with:'), list);
+  similarOutput.replaceChildren(create('p', 'similar-heading', 'Same check character, easily confused with'), list);
 }
 
 function renderAisle(aisle: string, locations: string[], open: boolean): HTMLDetailsElement {
@@ -272,8 +276,8 @@ function renderReverse(view: Extract<View, { kind: 'checkChar' }>): void {
   const groups = create('div', 'location-groups');
 
   heading.append(
-    create('strong', '', plural(view.total, 'location')),
-    ' have the check character ' + view.checkChar + '. Tap an aisle or a group to see which they are.'
+    create('strong', 'reverse-total', view.total.toLocaleString('en-GB')),
+    create('span', 'reverse-text', (view.total === 1 ? ' location has' : ' locations have') + ' the check character ' + view.checkChar + '. Tap an aisle or a group to see which they are.')
   );
 
   filterLabel.htmlFor = 'aisle-filter';
@@ -319,6 +323,7 @@ function render(view: View): void {
   show(noteOutput, view.kind === 'location' && view.note !== null);
   renderSimilar(match ? match.similar : []);
   renderRecent(view.kind === 'empty');
+  show(examplesOutput, view.kind === 'empty');
   announce(announcement(view, match));
 
   if (view.kind === 'invalid' && view.didYouMean) {
@@ -389,6 +394,7 @@ function update(now = false): void {
   const value = input.value.trim().toUpperCase();
   const view = lookup(value);
 
+  input.classList.toggle('is-long', value.length > 5);
   render(view);
   updateLink(value);
 
@@ -414,6 +420,16 @@ function dismissKeyboardOnEnter(field: HTMLInputElement, onEnter?: () => void): 
 }
 
 input.addEventListener('input', () => update());
+
+// An example looks itself up, as if it was typed, and the page goes back
+// up to the label to show it.
+document.querySelectorAll<HTMLButtonElement>('[data-example]').forEach(function (button) {
+  button.addEventListener('click', function () {
+    input.value = button.dataset.example ?? '';
+    update(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
 dismissKeyboardOnEnter(input, () => update(true));
 
 // Tapping the strip selects what's typed, ready for the next location.

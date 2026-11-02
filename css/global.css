@@ -4,6 +4,7 @@
 @import '@fontsource/source-sans-3/latin-300.css';
 @import '@fontsource/source-sans-3/latin-400.css';
 @import '@fontsource/source-sans-3/latin-600.css';
+@import '@fontsource/source-sans-3/latin-700.css';
 
 :root {
 	color-scheme: light;
@@ -11,46 +12,85 @@
 	--red-dark: #c72228;
 	--label-yellow: #efdc05;
 	--label-black: #000;
-	--page: #fff;
+	/* The app bar. themeColors in src/theme.ts matches it, for the
+	   phone's status bar. */
 	--header: var(--red);
+	--page: #f3f2ef;
+	--card: #fff;
 	--ink: #090707;
 	--muted: #6c6a6a;
-	--link: var(--red);
-	--surface: #f4f3f1;
-	--rule: #e2e0dd;
-	--field: #fff;
+	--link: var(--red-dark);
+	--surface: #f1f0ed;
+	--rule: #e4e2de;
+	--field: #f1f0ed;
 	--note-background: #fdf9d6;
-	--warning-background: #fdf0f0;
+	/* Amber rather than red: a match to watch out for, not an error. */
+	--warning: var(--ink);
+	--warning-icon: #f59a0b;
+	--warning-background: var(--card);
 	/* Edges of yellow things on the page, e.g. an open aisle. */
 	--keyline: var(--label-black);
-	--label-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 6px 18px rgba(0, 0, 0, 0.1);
+	--card-shadow: 0 1px 2px rgba(20, 10, 10, 0.06), 0 4px 14px rgba(20, 10, 10, 0.05);
+	--label-shadow: 0 2px 3px rgba(0, 0, 0, 0.18), 0 14px 30px rgba(60, 0, 0, 0.3);
 	/* Edge of the black check character chips, which needs no edge on white. */
 	--chip-edge: transparent;
+	/* The stockroom floor the label is stuck to, in a bulk bay. */
+	--floor: #a9a7a2;
+	--floor-ink: #1d1c1b;
+	/* Concrete: fine dark and light grit, and bigger bits of aggregate. */
+	--floor-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='d'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  .9 0 0 0 -.5'/%3E%3C/filter%3E%3Cfilter id='l'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 .9 0 0 -.55'/%3E%3C/filter%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.32' numOctaves='1' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .34  0 0 0 0 .31  0 0 0 0 .28  5 0 0 0 -3.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23a%29'/%3E%3Crect width='100%25' height='100%25' filter='url%28%23d%29'/%3E%3Crect width='100%25' height='100%25' filter='url%28%23l%29'/%3E%3C/svg%3E");
+	/* Overhead lights on the bay, falling off towards the edges. */
+	--floor-light: rgba(255, 255, 255, 0.24);
+	--floor-shade: rgba(35, 30, 25, 0.24);
+	/* Saw cut joints between the slabs: a dark cut with a lit edge. */
+	--floor-joint: rgba(45, 40, 35, 0.4);
+	--floor-joint-edge: rgba(255, 255, 255, 0.4);
+	--floor-scuff: rgba(40, 34, 30, 0.2);
+	--floor-stain: rgba(60, 50, 40, 0.1);
+	/* Worn tape (has-worn): where it's worn through, and the back of a
+	   peeling corner. */
+	--tape-wear: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.05' numOctaves='4' seed='6' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -30 0 0 0 21.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23w%29'/%3E%3C/svg%3E");
+	--tape-back: #ece6b8;
+	--tape-back-shade: #cfc78a;
+	--radius: 16px;
 	--inworkat: #04071b;
 	--inworkat-accent: #2269f7;
 }
 
 /* Stockrooms are often dim. The label stays yellow and black, as printed,
-   and the header's red is deeper so the label is the brightest thing on
-   the page (themeColors in src/theme.ts matches it). data-theme is set by
-   the script in index.html's <head>, from the phone's setting or the
-   theme button. */
+   and the red is deeper so the label is the brightest thing on the page.
+   data-theme is set by the script in index.html's <head>, from the phone's
+   setting or the theme button. */
 :root[data-theme="dark"] {
 	color-scheme: dark;
-	--page: #141313;
 	--header: #a32227;
+	--page: #121111;
+	--card: #1d1c1b;
 	--ink: #f1efec;
 	--muted: #a8a5a1;
-	--link: #ff7377;
-	--surface: #242221;
-	--rule: #403d3b;
-	--field: #1d1c1b;
+	--link: #ff8a8e;
+	--surface: #292726;
+	--rule: #363331;
+	--field: #292726;
 	--note-background: #2f2b0c;
-	--warning-background: #351a1b;
+	--warning: #ffad4d;
+	--warning-background: #2e2111;
 	--keyline: var(--label-yellow);
-	/* A shadow can't be seen on a dark page. */
-	--label-shadow: none;
+	/* No shadow, but one that can still be listed after another. */
+	--card-shadow: 0 0 transparent;
+	--label-shadow: 0 2px 3px rgba(0, 0, 0, 0.35), 0 14px 30px rgba(0, 0, 0, 0.45);
 	--chip-edge: rgba(239, 220, 5, 0.45);
+	--floor: #2e2d2b;
+	--floor-ink: #d9d6d2;
+	--floor-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='d'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.1 0 0 0 -.5'/%3E%3C/filter%3E%3Cfilter id='l'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 .45 0 0 -.55'/%3E%3C/filter%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.32' numOctaves='1' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4  0 0 0 0 .38  0 0 0 0 .36  3 0 0 0 -2.05'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23a%29'/%3E%3Crect width='100%25' height='100%25' filter='url%28%23d%29'/%3E%3Crect width='100%25' height='100%25' filter='url%28%23l%29'/%3E%3C/svg%3E");
+	--floor-light: rgba(255, 255, 255, 0.06);
+	--floor-shade: rgba(0, 0, 0, 0.45);
+	--floor-joint: rgba(0, 0, 0, 0.6);
+	--floor-joint-edge: rgba(255, 255, 255, 0.07);
+	--floor-scuff: rgba(0, 0, 0, 0.45);
+	--floor-stain: rgba(0, 0, 0, 0.25);
+	--tape-back: #8f8a6a;
+	--tape-back-shade: #6d684c;
 	--inworkat: #fff;
 	--inworkat-accent: #6d9cff;
 }
@@ -60,11 +100,12 @@ body {
 	color: var(--ink);
 	background-color: var(--page);
 	-webkit-text-size-adjust: 100%;
+	-webkit-tap-highlight-color: transparent;
 }
 
 .container {
 	margin: 0 auto;
-	max-width: 960px;
+	max-width: 560px;
 	width: 100%;
 	padding: 0 16px;
 }
@@ -74,31 +115,82 @@ body {
 a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-/* Header */
+button { -webkit-tap-highlight-color: transparent; }
 
-header {
-	background-color: var(--header);
-	padding-top: env(safe-area-inset-top);
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
 }
 
-	header .logo {
-		display: inline-block;
-		color: #fff;
-		padding: 14px 0;
-		font-size: 22px;
-		font-weight: 600;
-		letter-spacing: 0.01em;
-	}
+/* Small caps headings over each part of the page, e.g. RECENT. */
+.section-heading {
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--muted);
+}
 
-	header .logo:hover {
-		text-decoration: none;
-	}
+/* Shown only in a browser too old to run the app, which may be Internet
+   Explorer, so no custom properties: it doesn't know them. */
+.browser-note {
+	display: none;
+	padding: 14px 16px;
+	background-color: #efdc05;
+	color: #000;
+	font-size: 17px;
+	font-weight: 700;
+	line-height: 1.4;
+	text-align: center;
+}
 
-	header .container {
+.is-old-browser .browser-note {
+	display: block;
+}
+
+/* App bar: stays at the top, over the floor as it scrolls away. */
+
+.app-bar {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background-color: var(--header);
+	padding-top: env(safe-area-inset-top);
+	color: #fff;
+}
+
+	.app-bar .container {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 12px;
+		min-height: 56px;
+	}
+
+	.brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		color: #fff;
+		font-size: 21px;
+		font-weight: 700;
+		letter-spacing: 0.005em;
+	}
+
+	.brand:hover {
+		text-decoration: none;
+	}
+
+	/* The app icon's two Cs, yellow on black like the check character. */
+	.brand-mark {
+		width: 30px;
+		height: 30px;
+		fill: var(--label-black);
+		stroke: var(--label-yellow);
 	}
 
 	.theme-toggle {
@@ -106,19 +198,20 @@ header {
 		align-items: center;
 		gap: 6px;
 		min-height: 36px;
-		padding: 4px 12px 4px 9px;
-		border: 1px solid rgba(255, 255, 255, 0.55);
+		padding: 4px 13px 4px 10px;
+		border: 0;
 		border-radius: 999px;
-		background: none;
+		background-color: rgba(0, 0, 0, 0.16);
 		color: #fff;
 		font-family: inherit;
 		font-size: 15px;
+		font-weight: 600;
 		line-height: 1;
 		cursor: pointer;
 	}
 
 	.theme-toggle:hover {
-		background-color: rgba(255, 255, 255, 0.12);
+		background-color: rgba(0, 0, 0, 0.26);
 	}
 
 	.theme-toggle:focus-visible {
@@ -146,42 +239,146 @@ header {
 		display: inline;
 	}
 
-main {
-	padding: 28px 0 40px;
+/* Hero: the label stuck to the stockroom floor in a bulk bay, where
+   these labels are, on hazard tape marking the edge of the bay. */
+
+.hero {
+	color: var(--floor-ink);
+	padding: 18px 0 60px;
 	text-align: center;
+	overflow-x: clip;
+	background-color: var(--floor);
+	background-image:
+		/* Light from above, and the edges in shade. */
+		radial-gradient(ellipse 70% 60% at 50% 58%, var(--floor-light), transparent 70%),
+		radial-gradient(ellipse 130% 110% at 50% 50%, transparent 50%, var(--floor-shade)),
+		/* The curved tyre marks of pallet trucks, each a pair of wheels. */
+		radial-gradient(ellipse 95% 70% at 10% 120%, transparent 57%, var(--floor-scuff) 59%, transparent 61.5%),
+		radial-gradient(ellipse 95% 70% at 14% 124%, transparent 57%, var(--floor-scuff) 59%, transparent 61.5%),
+		radial-gradient(ellipse 85% 65% at 102% -16%, transparent 60%, var(--floor-scuff) 62%, transparent 64%),
+		radial-gradient(ellipse 85% 65% at 106% -12%, transparent 60%, var(--floor-scuff) 62%, transparent 64%),
+		/* Joints between the slabs, one each way. */
+		linear-gradient(90deg, var(--floor-joint) 0 2px, var(--floor-joint-edge) 2px 3px, transparent 3px),
+		linear-gradient(var(--floor-joint) 0 2px, var(--floor-joint-edge) 2px 3px, transparent 3px),
+		var(--floor-texture),
+		radial-gradient(ellipse 60% 40% at 78% 30%, var(--floor-stain), transparent),
+		radial-gradient(ellipse 50% 45% at 18% 70%, var(--floor-stain), transparent);
+	background-size: auto, auto, auto, auto, auto, auto, 3px 100%, 100% 3px, auto, auto, auto;
+	background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, calc(50% - 158px) 0, 0 34%, 0 0, 0 0, 0 0;
+	background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat, no-repeat;
+	box-shadow: inset 0 18px 24px -18px rgba(0, 0, 0, 0.35);
 }
 
 .lead-text {
-	font-size: 17px;
-	color: var(--muted);
-	max-width: 40ch;
-	margin: 0 auto 20px;
+	max-width: 34ch;
+	margin: 0 auto 36px;
+	font-size: 16px;
+	font-weight: 600;
 	line-height: 1.45;
+}
+
+.floor-bay {
+	position: relative;
+	max-width: 440px;
+	margin: 0 auto;
+}
+
+	/* Hazard tape marking out the bay around the label. Only the border
+	   is drawn: the mask cuts the middle out. */
+	.floor-bay::before {
+		content: '';
+		position: absolute;
+		/* Not inset, which Safari before 14.1 doesn't know. */
+		top: -24px;
+		right: -24px;
+		bottom: -24px;
+		left: -24px;
+		padding: 12px;
+		background: repeating-linear-gradient(-45deg, var(--label-yellow) 0 12px, #141414 12px 24px);
+		-webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+		-webkit-mask-composite: xor;
+		mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+		opacity: 0.9;
+	}
+
+/* Worn tape, not switched on yet: add has-worn to the hero in index.html.
+   Patchy, with a peeling corner, a tear and a tyre mark over it. */
+
+.hero.has-worn .floor-bay::before {
+	-webkit-mask: var(--tape-wear), linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+	-webkit-mask-composite: source-in, xor;
+	mask: var(--tape-wear) add, linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+	mask-composite: intersect, exclude;
+}
+
+.hero.has-worn .floor-wear {
+	display: block;
+	position: absolute;
+	inset: -24px;
+	pointer-events: none;
+	/* A tyre mark running over the bottom left of the tape. */
+	background: radial-gradient(ellipse 70% 60% at 0% 120%, transparent 66%, var(--floor-scuff) 68%, var(--floor-scuff) 69.5%, transparent 71.5%);
+}
+
+	/* The top right corner peeling back, showing clean floor under it. */
+	.hero.has-worn .floor-wear::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 34px;
+		height: 34px;
+		background:
+			linear-gradient(225deg, transparent 50%, var(--tape-back) 50%, var(--tape-back-shade) 75%, transparent 75%),
+			linear-gradient(225deg, var(--floor) 50%, transparent 50%);
+		filter: drop-shadow(-2px 2px 2px rgba(0, 0, 0, 0.3));
+	}
+
+	/* A tear across the bottom of the tape. */
+	.hero.has-worn .floor-wear::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 64%;
+		width: 22px;
+		height: 12px;
+		background-color: var(--floor);
+		background-image: var(--floor-texture);
+		clip-path: polygon(0 0, 30% 0, 20% 25%, 45% 40%, 30% 65%, 55% 80%, 45% 100%, 100% 100%, 85% 75%, 100% 55%, 80% 35%, 95% 15%, 75% 0, 0 0);
+	}
+
+.floor-wear {
+	display: none;
 }
 
 /* The stockroom label: yellow with a black keyline and a black check
    character strip, the way it's printed on the shelf. */
 
 .location-box {
+	position: relative;
 	background-color: var(--label-yellow);
 	color: var(--label-black);
-	max-width: 440px;
-	margin: 0 auto;
 	padding: 8px;
-	border-radius: 2px;
+	border-radius: 3px;
 	box-shadow: var(--label-shadow);
+	text-align: center;
 }
 
 	.location-box-main {
 		border: 2px solid var(--label-black);
+		/* So the box's text can be sized to the label's width. */
+		container-type: inline-size;
 	}
 
 		.location-name {
 			display: block;
 			width: 100%;
-			height: 84px;
+			height: 88px;
 			padding: 0 8px;
-			font-size: 64px;
+			/* A fixed size first, for browsers without container units (Safari
+			   before 16, Chrome before 105), which drop the second. */
+			font-size: 56px;
+			font-size: min(66px, 19cqw);
 			line-height: 1;
 			border: 0;
 			border-radius: 0;
@@ -190,26 +387,34 @@ main {
 			color: var(--label-black);
 			caret-color: var(--label-black);
 			text-align: center;
-			font-weight: 600;
+			font-weight: 700;
 			letter-spacing: 0.02em;
 			text-transform: uppercase;
 		}
 
+		/* A check character, e.g. NOVEMBER, is longer than a location. */
+		.location-name.is-long {
+			font-size: 42px;
+			font-size: min(56px, 14.5cqw);
+		}
+
 		.location-name::placeholder {
 			color: inherit;
-			opacity: 0.3;
+			opacity: 0.25;
 		}
 
 		.location-name:focus {
-			background-color: rgba(255, 255, 255, 0.25);
+			outline: none;
+			background-color: rgba(255, 255, 255, 0.28);
 		}
 
 		.location-text {
 			padding: 2px 10px 10px;
 			font-size: 16px;
+			font-weight: 600;
 			line-height: 1.35;
 			text-transform: uppercase;
-			letter-spacing: 0.02em;
+			letter-spacing: 0.03em;
 		}
 
 			.row {
@@ -234,14 +439,14 @@ main {
 			font-size: 42px;
 			line-height: 1.2;
 			text-transform: uppercase;
-			font-weight: 600;
-			letter-spacing: 0.02em;
+			font-weight: 700;
+			letter-spacing: 0.03em;
 			cursor: pointer;
 		}
 
 		.check-char:focus-visible {
-			outline: 3px solid var(--red);
-			outline-offset: 2px;
+			outline: 3px solid #fff;
+			outline-offset: 3px;
 		}
 
 			.check-char .row + .row {
@@ -252,18 +457,19 @@ main {
 
 		/* Before there's a check character to show. */
 		.location-text.is-hint {
+			font-weight: 400;
 			opacity: 0.6;
 		}
 
 		.location-text.is-error {
 			opacity: 1;
-			font-weight: 600;
+			font-weight: 700;
 		}
 
 		.check-char.is-hint {
 			padding: 14px 10px;
 			font-size: 14px;
-			letter-spacing: 0.14em;
+			letter-spacing: 0.16em;
 			line-height: 1.4;
 			color: rgba(239, 220, 5, 0.6);
 		}
@@ -272,7 +478,7 @@ main {
 		.row-label {
 			display: block;
 			font-size: 12px;
-			font-weight: 600;
+			font-weight: 700;
 			letter-spacing: 0.12em;
 			line-height: 1.4;
 			opacity: 0.75;
@@ -282,25 +488,41 @@ main {
 			font-size: 11px;
 		}
 
-.visually-hidden {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	overflow: hidden;
-	clip: rect(0 0 0 0);
-	white-space: nowrap;
+/* The sheet everything else sits on, pulled up over the red like an app's
+   bottom sheet. */
+
+.sheet {
+	position: relative;
+	margin-top: -22px;
+	padding: 20px 0 36px;
+	border-radius: 24px 24px 0 0;
+	background-color: var(--page);
+	/* Only upwards, onto the floor. */
+	box-shadow: 0 -10px 16px -8px rgba(0, 0, 0, 0.2);
+}
+
+	.sheet .container > * + * {
+		margin-top: 14px;
+	}
+
+	/* The visually hidden status is first, and takes no room. */
+	.sheet .container > .visually-hidden + * {
+		margin-top: 0;
+	}
+
+.card {
+	border-radius: var(--radius);
+	background-color: var(--card);
+	box-shadow: var(--card-shadow);
 }
 
 .input-note {
-	max-width: 440px;
-	margin: 14px auto 0;
-	padding: 8px 14px;
-	border-left: 4px solid var(--label-yellow);
-	border-radius: 0 4px 4px 0;
+	padding: 12px 16px;
+	border-radius: var(--radius);
 	background-color: var(--note-background);
+	box-shadow: inset 4px 0 0 var(--label-yellow);
 	font-size: 15px;
 	line-height: 1.4;
-	text-align: left;
 }
 
 /* Check characters the input could be the start of. */
@@ -311,8 +533,6 @@ main {
 	justify-content: center;
 	align-items: center;
 	gap: 8px;
-	max-width: 440px;
-	margin: 14px auto 0;
 	font-size: 15px;
 	color: var(--muted);
 }
@@ -320,13 +540,13 @@ main {
 	.suggestion {
 		border: 0;
 		box-shadow: inset 0 0 0 1px var(--chip-edge);
-		border-radius: 4px;
-		padding: 6px 12px;
+		border-radius: 999px;
+		padding: 7px 14px;
 		background-color: var(--label-black);
 		color: var(--label-yellow);
 		font-family: inherit;
 		font-size: 15px;
-		font-weight: 600;
+		font-weight: 700;
 		line-height: 1.2;
 		letter-spacing: 0.04em;
 		cursor: pointer;
@@ -335,9 +555,9 @@ main {
 	/* A location, e.g. 01AK for 1AK, looks like the label. */
 	.suggestion.is-location {
 		box-shadow: none;
-		padding: 4px 10px;
+		padding: 5px 12px;
 		border: 2px solid var(--label-black);
-		border-radius: 2px;
+		border-radius: 3px;
 		background-color: var(--label-yellow);
 		color: var(--label-black);
 	}
@@ -347,118 +567,39 @@ main {
 		outline-offset: 2px;
 	}
 
-/* Recent lookups, each a small copy of the label. */
-
-.recent {
-	max-width: 440px;
-	margin: 22px auto 0;
-	text-align: left;
-}
-
-.recent-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: baseline;
-	margin-bottom: 8px;
-}
-
-	.recent-heading {
-		font-size: 12px;
-		font-weight: 600;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-		color: var(--muted);
-	}
-
-	.recent-clear {
-		border: 0;
-		background: none;
-		padding: 4px 0;
-		color: var(--link);
-		font-family: inherit;
-		font-size: 15px;
-		cursor: pointer;
-	}
-
-.recent-list {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
-	gap: 8px;
-}
-
-	.recent-item {
-		display: flex;
-		flex-direction: column;
-		border: 2px solid var(--label-black);
-		border-radius: 2px;
-		padding: 0;
-		background-color: var(--label-yellow);
-		box-shadow: 0 0 0 3px var(--label-yellow);
-		margin: 3px;
-		font-family: inherit;
-		text-transform: uppercase;
-		cursor: pointer;
-		overflow: hidden;
-	}
-
-	.recent-item:focus-visible {
-		outline: 2px solid var(--red);
-		outline-offset: 4px;
-	}
-
-	.recent-location {
-		padding: 4px 8px;
-		font-size: 22px;
-		font-weight: 600;
-		line-height: 1.2;
-		color: var(--label-black);
-	}
-
-	.recent-item.is-check-char {
-		justify-content: center;
-		background-color: var(--label-black);
-	}
-
-		.recent-item.is-check-char .recent-location {
-			color: var(--label-yellow);
-		}
-
-	.recent-caption {
-		padding-top: 4px;
-		font-size: 10px;
-		font-weight: 600;
-		letter-spacing: 0.1em;
-		color: var(--label-yellow);
-		opacity: 0.7;
-	}
-
-	.recent-check-char {
-		flex-grow: 1;
-		padding: 2px 8px 3px;
-		background-color: var(--label-black);
-		color: var(--label-yellow);
-		font-size: 13px;
-		font-weight: 600;
-		letter-spacing: 0.04em;
-		line-height: 1.3;
-	}
-
 /* Easily confused locations */
 
 .similar-locations {
-	margin: 20px auto 0;
-	max-width: 440px;
-	padding: 14px 16px;
-	border-left: 4px solid var(--red);
-	border-radius: 0 4px 4px 0;
+	padding: 14px 16px 16px;
+	border-radius: var(--radius);
 	background-color: var(--warning-background);
+	box-shadow: var(--card-shadow);
 	font-size: 16px;
 	line-height: 1.4;
-	text-align: left;
 }
 
-	.similar-locations p {
-		font-weight: 600;
+	.similar-heading {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		font-weight: 700;
+		color: var(--warning);
+	}
+
+	/* A warning sign, like the ones on the stockroom wall. */
+	.similar-heading::before {
+		content: '!';
+		flex: none;
+		display: grid;
+		place-items: end center;
+		width: 26px;
+		height: 23px;
+		padding-bottom: 2px;
+		clip-path: polygon(50% 0, 100% 100%, 0 100%);
+		background-color: var(--warning-icon);
+		color: #1a1000;
+		font-size: 15px;
+		line-height: 1;
 	}
 
 	.similar-locations ul {
@@ -466,11 +607,30 @@ main {
 	}
 
 	.similar-locations li {
-		margin-top: 10px;
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		margin-top: 12px;
 	}
 
-	.similar-locations strong {
-		font-weight: 600;
+	/* The other location, as a small copy of the label. */
+	.similar-location {
+		flex: none;
+		min-width: 72px;
+		padding: 2px 8px;
+		border: 2px solid var(--label-black);
+		border-radius: 3px;
+		background-color: var(--label-yellow);
+		box-shadow: 0 0 0 3px var(--label-yellow);
+		margin: 3px;
+		color: var(--label-black);
+		font-size: 20px;
+		font-weight: 700;
+		text-align: center;
+	}
+
+	.similar-text {
+		min-width: 0;
 	}
 
 	.similar-locations small {
@@ -479,45 +639,229 @@ main {
 		font-size: 14px;
 	}
 
+/* Recent lookups, each a small copy of the label, in a row that scrolls
+   sideways. */
+
+.recent-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 6px;
+}
+
+	.recent-clear {
+		border: 0;
+		background: none;
+		padding: 4px 0;
+		color: var(--link);
+		font-family: inherit;
+		font-size: 15px;
+		font-weight: 600;
+		cursor: pointer;
+	}
+
+.recent-list {
+	display: flex;
+	gap: 10px;
+	margin: 0 -16px;
+	padding: 4px 16px 10px;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	scroll-padding: 0 16px;
+	scrollbar-width: none;
+}
+
+.recent-list::-webkit-scrollbar {
+	display: none;
+}
+
+	.recent-item {
+		flex: none;
+		display: flex;
+		flex-direction: column;
+		min-width: 128px;
+		border: 2px solid var(--label-black);
+		border-radius: 3px;
+		padding: 0;
+		background-color: var(--label-yellow);
+		box-shadow: 0 0 0 4px var(--label-yellow), var(--card-shadow);
+		margin: 4px;
+		font-family: inherit;
+		text-transform: uppercase;
+		cursor: pointer;
+		overflow: hidden;
+		scroll-snap-align: start;
+	}
+
+	.recent-item:focus-visible {
+		outline: 2px solid var(--red);
+		outline-offset: 6px;
+	}
+
+	.recent-location {
+		padding: 6px 12px 4px;
+		font-size: 24px;
+		font-weight: 700;
+		line-height: 1.2;
+		color: var(--label-black);
+	}
+
+	.recent-item.is-check-char {
+		justify-content: center;
+		background-color: var(--label-black);
+		box-shadow: 0 0 0 4px var(--label-black), inset 0 0 0 1px var(--chip-edge);
+	}
+
+		.recent-item.is-check-char .recent-location {
+			color: var(--label-yellow);
+		}
+
+	.recent-caption {
+		padding: 6px 12px 0;
+		font-size: 10px;
+		font-weight: 700;
+		letter-spacing: 0.1em;
+		color: var(--label-yellow);
+		opacity: 0.7;
+	}
+
+	.recent-check-char {
+		flex-grow: 1;
+		padding: 3px 12px 4px;
+		background-color: var(--label-black);
+		color: var(--label-yellow);
+		font-size: 14px;
+		font-weight: 700;
+		letter-spacing: 0.04em;
+		line-height: 1.3;
+	}
+
+/* Examples of what can be typed, shown while the box is empty. */
+
+.examples .section-heading {
+	margin-bottom: 10px;
+}
+
+.example-list {
+	list-style: none;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+	gap: 8px;
+}
+
+	.example-wide {
+		grid-column: 1 / -1;
+	}
+
+	.example {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		width: 100%;
+		height: 100%;
+		padding: 10px 12px;
+		border: 0;
+		border-radius: 12px;
+		background-color: var(--card);
+		box-shadow: var(--card-shadow);
+		color: var(--ink);
+		font-family: inherit;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.example:hover {
+		box-shadow: inset 0 0 0 1px var(--rule), var(--card-shadow);
+	}
+
+	.example:focus-visible {
+		outline: 2px solid var(--red);
+		outline-offset: 2px;
+	}
+
+	.example-label {
+		flex: none;
+		min-width: 64px;
+		padding: 1px 6px;
+		border: 2px solid var(--label-black);
+		border-radius: 2px;
+		background-color: var(--label-yellow);
+		box-shadow: 0 0 0 2px var(--label-yellow);
+		margin: 2px;
+		color: var(--label-black);
+		font-size: 17px;
+		font-weight: 700;
+		line-height: 1.3;
+		text-align: center;
+	}
+
+	.example.is-check-char .example-label {
+		padding: 3px 10px;
+		border: 0;
+		border-radius: 999px;
+		background-color: var(--label-black);
+		box-shadow: inset 0 0 0 1px var(--chip-edge);
+		color: var(--label-yellow);
+		letter-spacing: 0.04em;
+	}
+
+	.example-name {
+		font-size: 15px;
+		line-height: 1.3;
+		color: var(--muted);
+	}
+
 /* Reverse lookup: every aisle as a tile, opened in place to list its
    locations. */
 
-.reverse-lookup-results {
-	margin: 24px auto 0;
-	max-width: 640px;
-	text-align: left;
+.reverse-lookup-results > * + * {
+	margin-top: 14px;
 }
 
 .reverse-heading {
-	font-size: 16px;
-	color: var(--muted);
-	margin-bottom: 12px;
-	text-align: center;
+	padding: 16px 18px;
+	border-radius: var(--radius);
+	background-color: var(--label-black);
+	box-shadow: inset 0 0 0 1px var(--chip-edge);
+	color: rgba(239, 220, 5, 0.75);
+	font-size: 15px;
+	line-height: 1.4;
 }
 
-	.reverse-heading strong {
-		color: var(--ink);
-		font-weight: 600;
+	.reverse-total {
+		display: block;
+		color: var(--label-yellow);
+		font-size: 40px;
+		font-weight: 700;
+		line-height: 1.1;
+		letter-spacing: 0.01em;
 	}
 
 .aisle-filter {
 	display: flex;
-	justify-content: center;
 	align-items: center;
-	gap: 10px;
-	margin-bottom: 14px;
+	gap: 12px;
+	padding: 8px 8px 8px 16px;
+	border-radius: var(--radius);
+	background-color: var(--card);
+	box-shadow: var(--card-shadow);
 	font-size: 16px;
 	font-weight: 600;
 }
 
+	.aisle-filter label {
+		flex: 1;
+	}
+
 	.aisle-filter input {
-		width: 4.5em;
-		height: 40px;
-		border: 1px solid var(--rule);
-		border-radius: 4px;
+		width: 5em;
+		height: 42px;
+		border: 2px solid transparent;
+		border-radius: 10px;
 		background-color: var(--field);
 		font: inherit;
 		font-size: 18px;
+		font-weight: 700;
 		text-align: center;
 		color: var(--ink);
 	}
@@ -528,18 +872,28 @@ main {
 	}
 
 	.aisle-filter input:focus {
+		outline: none;
 		border-color: var(--ink);
 	}
 
 .aisles-empty {
-	grid-column: 1 / -1;
+	padding: 24px 16px;
+	border-radius: var(--radius);
+	background-color: var(--card);
 	text-align: center;
 	color: var(--muted);
 	font-size: 16px;
 }
 
-/* Each kind of location, e.g. jewellery. Shelves are always open, and the
-   rest open when tapped. */
+/* Each kind of location, e.g. jewellery, as a card. Shelves are always
+   open, and the rest open when tapped. */
+
+.location-group {
+	padding: 14px;
+	border-radius: var(--radius);
+	background-color: var(--card);
+	box-shadow: var(--card-shadow);
+}
 
 .location-group + .location-group {
 	margin-top: 10px;
@@ -549,9 +903,9 @@ main {
 	display: flex;
 	align-items: baseline;
 	gap: 8px;
-	margin-bottom: 8px;
-	font-size: 16px;
-	font-weight: 600;
+	margin-bottom: 12px;
+	font-size: 17px;
+	font-weight: 700;
 }
 
 	.group-heading small {
@@ -561,45 +915,42 @@ main {
 		color: var(--muted);
 	}
 
-details.location-group {
-	border-top: 1px solid var(--rule);
-	padding-top: 10px;
+details.location-group > summary {
+	cursor: pointer;
+	list-style: none;
+	user-select: none;
 }
 
-	details.location-group > summary {
-		cursor: pointer;
-		list-style: none;
-		user-select: none;
-	}
+details.location-group > summary::-webkit-details-marker {
+	display: none;
+}
 
-	details.location-group > summary::-webkit-details-marker {
-		display: none;
-	}
+/* A chevron that turns when the group opens. */
+details.location-group > summary::before {
+	content: '';
+	align-self: center;
+	width: 7px;
+	height: 7px;
+	margin: 0 4px 0 2px;
+	border-right: 2px solid var(--muted);
+	border-bottom: 2px solid var(--muted);
+	transform: rotate(-45deg);
+	transition: transform 0.15s;
+}
 
-	/* A chevron that turns when the group opens. */
-	details.location-group > summary::before {
-		content: '';
-		align-self: center;
-		width: 7px;
-		height: 7px;
-		border-right: 2px solid var(--muted);
-		border-bottom: 2px solid var(--muted);
-		transform: rotate(-45deg);
-		transition: transform 0.15s;
-	}
+details.location-group[open] > summary::before {
+	transform: rotate(45deg);
+}
 
-	details.location-group[open] > summary::before {
-		transform: rotate(45deg);
-	}
+details.location-group:not([open]) > summary {
+	margin-bottom: 0;
+}
 
-	details.location-group:not([open]) > summary {
-		margin-bottom: 0;
-	}
-
-	details.location-group > summary:focus-visible {
-		outline: 2px solid var(--red);
-		outline-offset: 2px;
-	}
+details.location-group > summary:focus-visible {
+	outline: 2px solid var(--red);
+	outline-offset: 4px;
+	border-radius: 4px;
+}
 
 .location-list {
 	list-style: none;
@@ -607,8 +958,8 @@ details.location-group {
 	grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
 	gap: 4px;
 	padding: 10px;
-	border: 1px solid var(--rule);
-	border-radius: 4px;
+	border-radius: 10px;
+	background-color: var(--surface);
 	font-family: Monaco, Consolas, monospace;
 	font-size: 14px;
 	text-align: center;
@@ -616,7 +967,7 @@ details.location-group {
 
 .aisles {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
 	gap: 6px;
 }
 
@@ -628,10 +979,10 @@ details.location-group {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 6px 4px 7px;
-		border-radius: 4px;
+		padding: 7px 4px 8px;
+		border-radius: 10px;
 		background-color: var(--surface);
-		border: 1px solid var(--rule);
+		border: 2px solid transparent;
 		cursor: pointer;
 		list-style: none;
 		line-height: 1.2;
@@ -643,7 +994,7 @@ details.location-group {
 	}
 
 	.aisles summary:hover {
-		border-color: var(--ink);
+		border-color: var(--rule);
 	}
 
 	.aisles summary:focus-visible {
@@ -653,15 +1004,15 @@ details.location-group {
 
 	.aisle-caption {
 		font-size: 10px;
-		font-weight: 600;
+		font-weight: 700;
 		letter-spacing: 0.12em;
 		text-transform: uppercase;
 		color: var(--muted);
 	}
 
 	.aisle-number {
-		font-size: 22px;
-		font-weight: 600;
+		font-size: 24px;
+		font-weight: 700;
 		margin: 1px 0 2px;
 	}
 
@@ -670,6 +1021,7 @@ details.location-group {
 		color: var(--muted);
 	}
 
+	/* An open aisle is a label too. */
 	.aisles details[open] summary {
 		flex-direction: row;
 		align-items: baseline;
@@ -677,7 +1029,7 @@ details.location-group {
 		padding: 8px 12px;
 		background-color: var(--label-yellow);
 		border-color: var(--keyline);
-		border-radius: 4px 4px 0 0;
+		border-radius: 10px 10px 0 0;
 		color: var(--label-black);
 	}
 
@@ -705,9 +1057,9 @@ details.location-group {
 		grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
 		gap: 4px;
 		padding: 10px;
-		border: 1px solid var(--keyline);
+		border: 2px solid var(--keyline);
 		border-top: 0;
-		border-radius: 0 0 4px 4px;
+		border-radius: 0 0 10px 10px;
 		font-family: Monaco, Consolas, monospace;
 		font-size: 14px;
 		text-align: center;
@@ -716,26 +1068,28 @@ details.location-group {
 /* Footer */
 
 footer {
-	border-top: 1px solid var(--rule);
-	padding: 24px 0 calc(24px + env(safe-area-inset-bottom));
-	font-size: 16px;
+	padding: 8px 0 calc(28px + env(safe-area-inset-bottom));
+	font-size: 15px;
 	line-height: 1.5;
 	color: var(--muted);
-	font-weight: 300;
 	text-align: center;
 }
 
 	footer p + p {
-		margin-top: 10px;
+		margin-top: 12px;
 	}
 
 	footer .promo {
+		padding: 14px 16px;
+		border-radius: var(--radius);
+		background-color: var(--card);
+		box-shadow: var(--card-shadow);
 		color: var(--ink);
-		font-weight: 400;
+		font-size: 16px;
 	}
 
 .inworkat {
-	font-weight: 600;
+	font-weight: 700;
 	color: var(--inworkat);
 }
 
@@ -753,28 +1107,19 @@ footer .adspace {
 	}
 }
 
-@media only screen and (max-width: 650px) {
-	/* The logo stays in the middle, with the theme button on the right. */
-	header .container {
-		position: relative;
-		justify-content: center;
+@media only screen and (max-width: 560px) {
+	/* Room either side of the label for the tape round it. */
+	.floor-bay {
+		margin: 0 16px;
 	}
+}
 
-	.theme-toggle {
-		position: absolute;
-		right: 16px;
-	}
-
-	main {
-		padding-top: 20px;
-	}
-
+@media only screen and (max-width: 400px) {
 	.location-name {
-		font-size: 56px;
-		height: 76px;
+		height: 78px;
 	}
 
 	.check-char {
-		font-size: 38px;
+		font-size: 36px;
 	}
 }
