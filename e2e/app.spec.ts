@@ -34,6 +34,15 @@ test('a location shows its check character', async ({ page }) => {
   await expect(checkChar(page)).toHaveText('NOVEMBER');
 });
 
+test('tapping an example looks it up', async ({ page }) => {
+  await page.goto('./');
+  await page.getByRole('button', { name: 'J1PG Jewellery' }).click();
+
+  await expect(box(page)).toHaveValue('J1PG');
+  await expect(checkChar(page)).toHaveText('ECHO');
+  await expect(page.locator('#examples')).toBeHidden();
+});
+
 test('a link opens straight to its lookup', async ({ page }) => {
   await page.goto('./#J1PG');
 
