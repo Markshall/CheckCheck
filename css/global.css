@@ -12,8 +12,8 @@
 	--red-dark: #c72228;
 	--label-yellow: #efdc05;
 	--label-black: #000;
-	/* The app bar and the shelf the label sits on. themeColors in
-	   src/theme.ts matches it, for the phone's status bar. */
+	/* The app bar. themeColors in src/theme.ts matches it, for the
+	   phone's status bar. */
 	--header: var(--red);
 	--page: #f3f2ef;
 	--card: #fff;
@@ -34,10 +34,19 @@
 	--label-shadow: 0 2px 3px rgba(0, 0, 0, 0.18), 0 14px 30px rgba(60, 0, 0, 0.3);
 	/* Edge of the black check character chips, which needs no edge on white. */
 	--chip-edge: transparent;
-	/* The steel shelf edge behind the label. */
-	--beam-top: #c9ced3;
-	--beam-bottom: #8a9198;
-	--beam-hole: rgba(30, 32, 36, 0.55);
+	/* The stockroom floor the label is stuck to, in a bulk bay. */
+	--floor: #a9a7a2;
+	--floor-ink: #1d1c1b;
+	/* Concrete: fine dark and light grit, and bigger bits of aggregate. */
+	--floor-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='d'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  .9 0 0 0 -.5'/%3E%3C/filter%3E%3Cfilter id='l'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 .9 0 0 -.55'/%3E%3C/filter%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.32' numOctaves='1' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .34  0 0 0 0 .31  0 0 0 0 .28  5 0 0 0 -3.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23a%29'/%3E%3Crect width='100%25' height='100%25' filter='url%28%23d%29'/%3E%3Crect width='100%25' height='100%25' filter='url%28%23l%29'/%3E%3C/svg%3E");
+	/* Overhead lights on the bay, falling off towards the edges. */
+	--floor-light: rgba(255, 255, 255, 0.24);
+	--floor-shade: rgba(35, 30, 25, 0.24);
+	/* Saw cut joints between the slabs: a dark cut with a lit edge. */
+	--floor-joint: rgba(45, 40, 35, 0.4);
+	--floor-joint-edge: rgba(255, 255, 255, 0.4);
+	--floor-scuff: rgba(40, 34, 30, 0.2);
+	--floor-stain: rgba(60, 50, 40, 0.1);
 	--radius: 16px;
 	--inworkat: #04071b;
 	--inworkat-accent: #2269f7;
@@ -66,9 +75,15 @@
 	--card-shadow: 0 0 transparent;
 	--label-shadow: 0 2px 3px rgba(0, 0, 0, 0.35), 0 14px 30px rgba(0, 0, 0, 0.45);
 	--chip-edge: rgba(239, 220, 5, 0.45);
-	--beam-top: #6c7278;
-	--beam-bottom: #3c4145;
-	--beam-hole: rgba(0, 0, 0, 0.6);
+	--floor: #2e2d2b;
+	--floor-ink: #d9d6d2;
+	--floor-texture: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='d'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1.1 0 0 0 -.5'/%3E%3C/filter%3E%3Cfilter id='l'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='2' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 .45 0 0 -.55'/%3E%3C/filter%3E%3Cfilter id='a'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.32' numOctaves='1' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .4  0 0 0 0 .38  0 0 0 0 .36  3 0 0 0 -2.05'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23a%29'/%3E%3Crect width='100%25' height='100%25' filter='url%28%23d%29'/%3E%3Crect width='100%25' height='100%25' filter='url%28%23l%29'/%3E%3C/svg%3E");
+	--floor-light: rgba(255, 255, 255, 0.06);
+	--floor-shade: rgba(0, 0, 0, 0.45);
+	--floor-joint: rgba(0, 0, 0, 0.6);
+	--floor-joint-edge: rgba(255, 255, 255, 0.07);
+	--floor-scuff: rgba(0, 0, 0, 0.45);
+	--floor-stain: rgba(0, 0, 0, 0.25);
 	--inworkat: #fff;
 	--inworkat-accent: #6d9cff;
 }
@@ -113,8 +128,7 @@ button { -webkit-tap-highlight-color: transparent; }
 	color: var(--muted);
 }
 
-/* App bar: stays at the top, the same red as the shelf under it, so the
-   two read as one. */
+/* App bar: stays at the top, over the floor as it scrolls away. */
 
 .app-bar {
 	position: sticky;
@@ -201,44 +215,62 @@ button { -webkit-tap-highlight-color: transparent; }
 		display: inline;
 	}
 
-/* Hero: the label on a steel shelf edge, against the red. */
+/* Hero: the label stuck to the stockroom floor in a bulk bay, where
+   these labels are, on hazard tape marking the edge of the bay. */
 
 .hero {
-	background-color: var(--header);
-	color: #fff;
-	padding: 4px 0 48px;
+	color: var(--floor-ink);
+	padding: 18px 0 60px;
 	text-align: center;
 	overflow-x: clip;
+	background-color: var(--floor);
+	background-image:
+		/* Light from above, and the edges in shade. */
+		radial-gradient(ellipse 70% 60% at 50% 58%, var(--floor-light), transparent 70%),
+		radial-gradient(ellipse 130% 110% at 50% 50%, transparent 50%, var(--floor-shade)),
+		/* The curved tyre marks of pallet trucks, each a pair of wheels. */
+		radial-gradient(ellipse 95% 70% at 10% 120%, transparent 57%, var(--floor-scuff) 59%, transparent 61.5%),
+		radial-gradient(ellipse 95% 70% at 14% 124%, transparent 57%, var(--floor-scuff) 59%, transparent 61.5%),
+		radial-gradient(ellipse 85% 65% at 102% -16%, transparent 60%, var(--floor-scuff) 62%, transparent 64%),
+		radial-gradient(ellipse 85% 65% at 106% -12%, transparent 60%, var(--floor-scuff) 62%, transparent 64%),
+		/* Joints between the slabs, one each way. */
+		linear-gradient(90deg, var(--floor-joint) 0 2px, var(--floor-joint-edge) 2px 3px, transparent 3px),
+		linear-gradient(var(--floor-joint) 0 2px, var(--floor-joint-edge) 2px 3px, transparent 3px),
+		var(--floor-texture),
+		radial-gradient(ellipse 60% 40% at 78% 30%, var(--floor-stain), transparent),
+		radial-gradient(ellipse 50% 45% at 18% 70%, var(--floor-stain), transparent);
+	background-size: auto, auto, auto, auto, auto, auto, 3px 100%, 100% 3px, auto, auto, auto;
+	background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, calc(50% - 158px) 0, 0 34%, 0 0, 0 0, 0 0;
+	background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat, no-repeat;
+	box-shadow: inset 0 18px 24px -18px rgba(0, 0, 0, 0.35);
 }
 
 .lead-text {
 	max-width: 34ch;
-	margin: 0 auto 22px;
+	margin: 0 auto 36px;
 	font-size: 16px;
+	font-weight: 600;
 	line-height: 1.45;
-	color: rgba(255, 255, 255, 0.88);
 }
 
-.shelf {
+.floor-bay {
 	position: relative;
 	max-width: 440px;
 	margin: 0 auto;
 }
 
-	/* The shelf edge runs the width of the screen behind the label, with
-	   the slots shelving has along it. */
-	.shelf::before {
+	/* Hazard tape marking out the bay around the label. Only the border
+	   is drawn: the mask cuts the middle out. */
+	.floor-bay::before {
 		content: '';
 		position: absolute;
-		top: 50%;
-		left: 50%;
-		width: 100vw;
-		height: 64px;
-		transform: translate(-50%, -50%);
-		background:
-			repeating-linear-gradient(90deg, transparent 0 22px, var(--beam-hole) 22px 30px) center / 100% 14px no-repeat,
-			linear-gradient(var(--beam-top), var(--beam-bottom));
-		box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 4px 10px rgba(0, 0, 0, 0.2);
+		inset: -24px;
+		padding: 12px;
+		background: repeating-linear-gradient(-45deg, var(--label-yellow) 0 12px, #141414 12px 24px);
+		-webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+		-webkit-mask-composite: xor;
+		mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+		opacity: 0.9;
 	}
 
 /* The stockroom label: yellow with a black keyline and a black check
@@ -256,6 +288,8 @@ button { -webkit-tap-highlight-color: transparent; }
 
 	.location-box-main {
 		border: 2px solid var(--label-black);
+		/* So the box's text can be sized to the label's width. */
+		container-type: inline-size;
 	}
 
 		.location-name {
@@ -263,7 +297,7 @@ button { -webkit-tap-highlight-color: transparent; }
 			width: 100%;
 			height: 88px;
 			padding: 0 8px;
-			font-size: 66px;
+			font-size: min(66px, 19cqw);
 			line-height: 1;
 			border: 0;
 			border-radius: 0;
@@ -275,6 +309,11 @@ button { -webkit-tap-highlight-color: transparent; }
 			font-weight: 700;
 			letter-spacing: 0.02em;
 			text-transform: uppercase;
+		}
+
+		/* A check character, e.g. NOVEMBER, is longer than a location. */
+		.location-name.is-long {
+			font-size: min(56px, 14.5cqw);
 		}
 
 		.location-name::placeholder {
@@ -376,6 +415,8 @@ button { -webkit-tap-highlight-color: transparent; }
 	padding: 20px 0 36px;
 	border-radius: 24px 24px 0 0;
 	background-color: var(--page);
+	/* Only upwards, onto the floor. */
+	box-shadow: 0 -10px 16px -8px rgba(0, 0, 0, 0.2);
 }
 
 	.sheet .container > * + * {
@@ -985,15 +1026,14 @@ footer .adspace {
 }
 
 @media only screen and (max-width: 560px) {
-	/* Room either side of the label to see the shelf edge it's on. */
-	.shelf {
-		margin: 0 12px;
+	/* Room either side of the label for the tape round it. */
+	.floor-bay {
+		margin: 0 16px;
 	}
 }
 
 @media only screen and (max-width: 400px) {
 	.location-name {
-		font-size: 56px;
 		height: 78px;
 	}
 

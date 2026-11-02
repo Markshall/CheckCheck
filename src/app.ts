@@ -394,6 +394,7 @@ function update(now = false): void {
   const value = input.value.trim().toUpperCase();
   const view = lookup(value);
 
+  input.classList.toggle('is-long', value.length > 5);
   render(view);
   updateLink(value);
 
