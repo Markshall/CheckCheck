@@ -47,6 +47,11 @@
 	--floor-joint-edge: rgba(255, 255, 255, 0.4);
 	--floor-scuff: rgba(40, 34, 30, 0.2);
 	--floor-stain: rgba(60, 50, 40, 0.1);
+	/* Worn tape (has-worn): where it's worn through, and the back of a
+	   peeling corner. */
+	--tape-wear: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.05' numOctaves='4' seed='6' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  -30 0 0 0 21.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url%28%23w%29'/%3E%3C/svg%3E");
+	--tape-back: #ece6b8;
+	--tape-back-shade: #cfc78a;
 	--radius: 16px;
 	--inworkat: #04071b;
 	--inworkat-accent: #2269f7;
@@ -84,6 +89,8 @@
 	--floor-joint-edge: rgba(255, 255, 255, 0.07);
 	--floor-scuff: rgba(0, 0, 0, 0.45);
 	--floor-stain: rgba(0, 0, 0, 0.25);
+	--tape-back: #8f8a6a;
+	--tape-back-shade: #6d684c;
 	--inworkat: #fff;
 	--inworkat-accent: #6d9cff;
 }
@@ -272,6 +279,56 @@ button { -webkit-tap-highlight-color: transparent; }
 		mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
 		opacity: 0.9;
 	}
+
+/* Worn tape, not switched on yet: add has-worn to the hero in index.html.
+   Patchy, with a peeling corner, a tear and a tyre mark over it. */
+
+.hero.has-worn .floor-bay::before {
+	-webkit-mask: var(--tape-wear), linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+	-webkit-mask-composite: source-in, xor;
+	mask: var(--tape-wear) add, linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+	mask-composite: intersect, exclude;
+}
+
+.hero.has-worn .floor-wear {
+	display: block;
+	position: absolute;
+	inset: -24px;
+	pointer-events: none;
+	/* A tyre mark running over the bottom left of the tape. */
+	background: radial-gradient(ellipse 70% 60% at 0% 120%, transparent 66%, var(--floor-scuff) 68%, var(--floor-scuff) 69.5%, transparent 71.5%);
+}
+
+	/* The top right corner peeling back, showing clean floor under it. */
+	.hero.has-worn .floor-wear::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 34px;
+		height: 34px;
+		background:
+			linear-gradient(225deg, transparent 50%, var(--tape-back) 50%, var(--tape-back-shade) 75%, transparent 75%),
+			linear-gradient(225deg, var(--floor) 50%, transparent 50%);
+		filter: drop-shadow(-2px 2px 2px rgba(0, 0, 0, 0.3));
+	}
+
+	/* A tear across the bottom of the tape. */
+	.hero.has-worn .floor-wear::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 64%;
+		width: 22px;
+		height: 12px;
+		background-color: var(--floor);
+		background-image: var(--floor-texture);
+		clip-path: polygon(0 0, 30% 0, 20% 25%, 45% 40%, 30% 65%, 55% 80%, 45% 100%, 100% 100%, 85% 75%, 100% 55%, 80% 35%, 95% 15%, 75% 0, 0 0);
+	}
+
+.floor-wear {
+	display: none;
+}
 
 /* The stockroom label: yellow with a black keyline and a black check
    character strip, the way it's printed on the shelf. */
