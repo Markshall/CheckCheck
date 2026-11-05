@@ -450,17 +450,20 @@ function updateLink(value: string): void {
 }
 
 // A link like /check/#10AK looks it up straight away, as if it was tapped.
-function openLink(): void {
-  input.value = fromHash(location.hash);
+// A hash that isn't a lookup (e.g. #google_vignette) leaves the box as it is.
+function openLink(): boolean {
+  const value = fromHash(location.hash);
+  if (value === null) return false;
+
+  input.value = value;
   update(true);
+  return true;
 }
 
 window.addEventListener('hashchange', openLink);
 
 // Otherwise the browser may refill the box when coming back to the page.
-if (location.hash) {
-  openLink();
-} else {
+if (!location.hash || !openLink()) {
   update();
 }
 

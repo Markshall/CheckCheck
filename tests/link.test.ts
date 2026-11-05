@@ -16,8 +16,10 @@ test('a link with nothing after its # opens an empty box', () => {
   assert.equal(fromHash('#'), '');
 });
 
-test('a link is cut to what fits in the box', () => {
-  assert.equal(fromHash('#NOVEMBERX'), 'NOVEMBER');
+test('a hash longer than fits in the box is not a lookup', () => {
+  assert.equal(fromHash('#NOVEMBERX'), null);
+  assert.equal(fromHash('#google_vignette'), null);
+  assert.equal(fromHash('#NOVEMBER'), 'NOVEMBER');
 });
 
 test('a broken escape is used as it is', () => {

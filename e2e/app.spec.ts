@@ -81,6 +81,24 @@ test('a link opened while the page is open looks it up', async ({ page }) => {
   await expect(page.locator('#reverse-lookup-results')).toContainText('have the check character NOVEMBER');
 });
 
+// AdSense adds #google_vignette when it shows a vignette ad.
+test('an ad hash leaves the lookup as it is', async ({ page }) => {
+  await page.goto('./');
+  await box(page).fill('10AK');
+  const before = await checkChar(page).textContent();
+
+  await page.evaluate(() => { location.hash = 'google_vignette'; });
+
+  await expect(box(page)).toHaveValue('10AK');
+  await expect(checkChar(page)).toHaveText(before ?? '');
+});
+
+test('a page opened with an ad hash starts empty', async ({ page }) => {
+  await page.goto('./#google_vignette');
+
+  await expect(box(page)).toHaveValue('');
+});
+
 test('a link is remembered in recent lookups', async ({ page }) => {
   await page.goto('./#L10A');
   await expect(checkChar(page)).toHaveText('GOLF');
