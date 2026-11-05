@@ -6,8 +6,11 @@
 // The longest thing that can be typed in the box (NOVEMBER).
 export const MAX_LENGTH = 8;
 
-// What to put in the box for a link's hash ('#10AK', or '' for none).
-export function fromHash(hash: string): string {
+// What to put in the box for a link's hash ('#10AK', or '' for none), or
+// null for a hash that isn't a lookup. AdSense adds #google_vignette when it
+// shows a vignette ad, and anything longer than the box can't be a link to
+// one of ours, so it's left alone rather than cut down to GOOGLE_V.
+export function fromHash(hash: string): string | null {
   let value = hash.replace(/^#/, '');
 
   try {
@@ -16,7 +19,9 @@ export function fromHash(hash: string): string {
     // A stray % that isn't part of an escape. Use it as it is.
   }
 
-  return value.trim().toUpperCase().substring(0, MAX_LENGTH);
+  value = value.trim().toUpperCase();
+
+  return value.length > MAX_LENGTH ? null : value;
 }
 
 // The hash for what's typed, or '' when the box is empty. + is left as it
