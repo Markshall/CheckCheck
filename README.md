@@ -41,6 +41,8 @@ Type a check character instead (e.g. `NOVEMBER`) to list every location that use
 
 A link can open a lookup by putting it after a `#`, e.g. [www.mark-eriksson.com/check/#10AK](https://www.mark-eriksson.com/check/#10AK) or `/check/#NOVEMBER`, so it can be sent to someone or put in a QR code. The link in the address bar follows what's typed, so it can be copied from there. It's after the `#` rather than in a `?query` because the part after the `#` never reaches the server, so every link is the same page in the browser's, the service worker's and Cloudflare's caches, and works offline too.
 
+A location can be printed as a replacement label, for a shelf whose label is missing or worn. Under a location (e.g. `10AK`) a button prints its label, and typing a bay (`10A`, or `J1P` and `S1P` for jewellery and security) offers a sheet of all 26 shelves in it, `10AA` to `10AZ`. The labels print two to a row on A4 (12 to a page) in black on white, with the location, how it's read out and the check character in a black strip like the real label. Four letter locations show both their Store and RFC check characters. Only the print button prints the labels: printing the page any other way (e.g. Ctrl+P) prints the page as usual.
+
 The page follows the phone's dark mode, and the button in the header switches it between Auto, Light and Dark for a phone kept in light mode in a dim stockroom (or the other way round). The first tap always changes the page. The choice is kept in the browser's local storage, like recent lookups, and a small script in `index.html`'s `<head>` applies it before the page is drawn so it doesn't flash. The label stays yellow and black, the way it's printed.
 
 ## Analytics
@@ -63,7 +65,7 @@ The icons in `public/icons/` are drawn in `icon.svg`. `icon-maskable-512.png` is
 ## How it works
 CheckCheck takes the location the user enters and splits it digit by digit.  Argos use a formula which determines check characters for locations which involves quite a bit of maths, I simply took this and used it to my advantage to make this app.
 
-The formulas live in `src/checkchar.ts`. `src/lookup.ts` decides what to show for what's typed, and `src/render.ts` (with `src/reverse.ts` for the list of locations with a check character) draws it on the page. `src/app.ts` wires up the box, the link and the examples, `src/theme-toggle.ts` the theme button, and `src/analytics.ts` sends lookups to Google Tag Manager. `src/recent.ts` and `src/theme.ts` keep recent lookups and the theme on the phone, and `src/link.ts` reads and writes the lookup in the link. Only those page modules (and `src/dom.ts`, their helpers) touch the page, so the others are tested directly.
+The formulas live in `src/checkchar.ts`. `src/lookup.ts` decides what to show for what's typed, and `src/render.ts` (with `src/reverse.ts` for the list of locations with a check character) draws it on the page. `src/app.ts` wires up the box, the link and the examples, `src/theme-toggle.ts` the theme button, `src/print.ts` the label printing (`src/labels.ts` decides what's printed), and `src/analytics.ts` sends lookups to Google Tag Manager. `src/recent.ts` and `src/theme.ts` keep recent lookups and the theme on the phone, and `src/link.ts` reads and writes the lookup in the link. Only those page modules (and `src/dom.ts`, their helpers) touch the page, so the others are tested directly.
 
 ## Development
 The app is written in TypeScript and built with [Vite](https://vite.dev). Run the dev server in Docker:

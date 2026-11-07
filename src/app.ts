@@ -5,6 +5,7 @@ import type { Settled } from './analytics.ts';
 import { dismissKeyboardOnEnter, find } from './dom.ts';
 import { fromHash, toHash } from './link.ts';
 import { lookup } from './lookup.ts';
+import { renderPrint } from './print.ts';
 import { addRecent, loadRecent, saveRecent } from './recent.ts';
 import { render } from './render.ts';
 import type { Actions } from './render.ts';
@@ -53,6 +54,7 @@ function update(now = false): void {
 
   input.classList.toggle('is-long', value.length > 5);
   render(view, recent, actions);
+  renderPrint(value, view);
   updateLink(value);
 
   window.clearTimeout(settleTimer);

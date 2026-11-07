@@ -140,6 +140,9 @@
 
         <div id="similar-locations" class="similar-locations" aria-live="polite" hidden></div>
 
+        <!-- A button to print a replacement label, or a bay's labels. -->
+        <div id="print-labels" class="print-labels" hidden></div>
+
         <section id="recent" class="recent" aria-label="Recent lookups" hidden></section>
 
         <!-- Shown while the box is empty. Tapping one looks it up. -->
@@ -189,5 +192,9 @@
         </div>
       </div>
     </footer>
+
+    <!-- The labels the print button prints. Only shown on paper, and only
+         then while it's printing them (is-printing-labels). -->
+    <div id="print-sheet" class="print-sheet" aria-hidden="true"></div>
   </body>
 </html>
