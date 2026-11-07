@@ -136,6 +136,31 @@ test('a location prints its label', async ({ page }) => {
   await expect(page.locator('.hero')).toBeHidden();
 });
 
+test('ads are left off the labels, and come back after', async ({ page }) => {
+  await page.goto('./#10AK');
+  await stubPrint(page);
+
+  // Like AdSense's auto ads, which put an inline !important on their display.
+  await page.evaluate(() => {
+    const ad = document.createElement('ins');
+    ad.id = 'auto-ad';
+    ad.textContent = 'Ad';
+    ad.setAttribute('style', 'display: block !important;');
+    document.body.append(ad);
+  });
+
+  await page.getByRole('button', { name: /Print a label for 10AK/ }).click();
+  await page.emulateMedia({ media: 'print' });
+  await expect(page.locator('#print-sheet')).toBeVisible();
+  await expect(page.locator('#auto-ad')).toBeHidden();
+
+  await page.emulateMedia({ media: 'screen' });
+  await page.mouse.click(5, 5);
+  await expect(page.locator('#auto-ad')).toBeVisible();
+  await expect(page.locator('#auto-ad')).toHaveAttribute('style', 'display: block !important;');
+  await expect(page.locator('.hero')).toBeVisible();
+});
+
 test('a bay prints a label for every shelf', async ({ page }) => {
   await page.goto('./');
   await stubPrint(page);
