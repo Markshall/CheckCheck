@@ -2,7 +2,8 @@ services:
   web:
     build: .
     ports:
-      - "5174:5174"
+      # PORT lets each worktree run its own server; see scripts/dev-worktree.sh.
+      - "${PORT:-5174}:5174"
     volumes:
       - .:/app
       # Keep the container's node_modules separate from the host's.
