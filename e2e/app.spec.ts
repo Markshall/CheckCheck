@@ -107,6 +107,67 @@ test('a link is remembered in recent lookups', async ({ page }) => {
   await expect(page.locator('#recent')).toContainText('L10A');
 });
 
+// window.print is stubbed, as the print screen would stop the test.
+async function stubPrint(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    window.print = () => {
+      window.dispatchEvent(new Event('beforeprint'));
+      document.body.dataset.printed = String(Number(document.body.dataset.printed ?? 0) + 1);
+      window.dispatchEvent(new Event('afterprint'));
+    };
+  });
+}
+
+const sheetLabels = (page: Page) => page.locator('#print-sheet .print-label');
+
+test('a location prints its label', async ({ page }) => {
+  await page.goto('./#10AK');
+  await stubPrint(page);
+
+  await page.getByRole('button', { name: /Print a label for 10AK/ }).click();
+
+  await expect(page.locator('body')).toHaveAttribute('data-printed', '1');
+  await expect(sheetLabels(page)).toHaveCount(1);
+  await expect(sheetLabels(page)).toContainText(['10AKONE ZERO ALPHA KILONOVEMBER']);
+
+  // On paper only the labels show.
+  await page.emulateMedia({ media: 'print' });
+  await expect(page.locator('#print-sheet')).toBeVisible();
+  await expect(page.locator('.hero')).toBeHidden();
+});
+
+test('a bay prints a label for every shelf', async ({ page }) => {
+  await page.goto('./');
+  await stubPrint(page);
+  await box(page).fill('10a');
+
+  await page.getByRole('button', { name: /Print labels for bay 10A/ }).click();
+
+  await expect(sheetLabels(page)).toHaveCount(26);
+  await expect(sheetLabels(page).first()).toContainText('10AA');
+  await expect(sheetLabels(page).last()).toContainText('10AZ');
+});
+
+test('there is nothing to print for half a location', async ({ page }) => {
+  await page.goto('./');
+  await box(page).fill('10');
+
+  await expect(page.locator('#print-labels')).toBeHidden();
+});
+
+test('printing the page any other way prints the page, not the labels', async ({ page }) => {
+  await page.goto('./#10AK');
+  await stubPrint(page);
+  await page.getByRole('button', { name: /Print a label for 10AK/ }).click();
+
+  // Like Ctrl+P.
+  await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
+  await page.emulateMedia({ media: 'print' });
+
+  await expect(page.locator('#print-sheet')).toBeHidden();
+  await expect(page.locator('.hero')).toBeVisible();
+});
+
 test('it works offline once it has been opened', async ({ page, context }) => {
   await installOffline(page);
   await goOffline(context);
