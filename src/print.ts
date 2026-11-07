@@ -37,23 +37,51 @@ function renderLabel(label: Label): HTMLElement {
   return element;
 }
 
+// The inline styles of everything hidden for the labels, to put back after.
+const hiddenStyles = new Map<HTMLElement, string | null>();
+
+// AdSense's auto ads go straight into <body> with an inline
+// display: ... !important, which beats the print styles, so they'd print
+// above the labels. Only another inline !important beats it.
+function hideAllButSheet(): void {
+  for (const element of document.body.children) {
+    if (!(element instanceof HTMLElement) || element === printSheet || hiddenStyles.has(element)) continue;
+    hiddenStyles.set(element, element.getAttribute('style'));
+    element.style.setProperty('display', 'none', 'important');
+  }
+}
+
+function showAll(): void {
+  hiddenStyles.forEach(function (style, element) {
+    if (style === null) element.removeAttribute('style');
+    else element.setAttribute('style', style);
+  });
+  hiddenStyles.clear();
+}
+
 function printLabels(locations: string[]): void {
   printSheet.replaceChildren(...locations.map(location => renderLabel(makeLabel(location))));
   document.documentElement.classList.add('is-printing-labels');
+  hideAllButSheet();
   printingLabels = true;
   window.print();
 }
 
 window.addEventListener('beforeprint', function () {
   if (printingLabels) return;
+  showAll();
   document.documentElement.classList.remove('is-printing-labels');
   printSheet.replaceChildren();
 });
 
 // Some phones fire this as soon as their print screen opens, so the labels
-// are left on the sheet until the page is next printed.
+// are left on the sheet until the page is next printed, and the page comes
+// back when it's next touched, which can only be once that screen is shut.
 window.addEventListener('afterprint', function () {
   printingLabels = false;
+  if (hiddenStyles.size === 0) return;
+  window.addEventListener('pointerdown', showAll, { once: true });
+  window.addEventListener('keydown', showAll, { once: true });
 });
 
 // A button to print a label for what's typed, or every label in a bay.
