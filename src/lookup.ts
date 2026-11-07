@@ -1,5 +1,5 @@
 // Decides what the page shows for whatever is typed in the box, without
-// touching the page, so it can be tested. src/app.ts draws the result.
+// touching the page, so it can be tested. src/render.ts draws the result.
 import * as CheckCheck from './checkchar.ts';
 import type { LabelledResult, LocationGroup, SimilarLocation } from './checkchar.ts';
 

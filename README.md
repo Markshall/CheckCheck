@@ -63,7 +63,7 @@ The icons in `public/icons/` are drawn in `icon.svg`. `icon-maskable-512.png` is
 ## How it works
 CheckCheck takes the location the user enters and splits it digit by digit.  Argos use a formula which determines check characters for locations which involves quite a bit of maths, I simply took this and used it to my advantage to make this app.
 
-The formulas live in `src/checkchar.ts`. `src/lookup.ts` decides what to show for what's typed, and `src/app.ts` draws it on the page. `src/recent.ts` and `src/theme.ts` keep recent lookups and the theme on the phone, and `src/link.ts` reads and writes the lookup in the link. Only `app.ts` touches the page, so the others are tested directly.
+The formulas live in `src/checkchar.ts`. `src/lookup.ts` decides what to show for what's typed, and `src/render.ts` (with `src/reverse.ts` for the list of locations with a check character) draws it on the page. `src/app.ts` wires up the box, the link and the examples, `src/theme-toggle.ts` the theme button, and `src/analytics.ts` sends lookups to Google Tag Manager. `src/recent.ts` and `src/theme.ts` keep recent lookups and the theme on the phone, and `src/link.ts` reads and writes the lookup in the link. Only those page modules (and `src/dom.ts`, their helpers) touch the page, so the others are tested directly.
 
 ## Development
 The app is written in TypeScript and built with [Vite](https://vite.dev). Run the dev server in Docker:
@@ -83,7 +83,7 @@ The build supports browsers from late 2020 on: Safari 14 (iOS 14), Chrome and Ed
 npm test
 ```
 
-runs the unit tests in `tests/` with Node's test runner. They cover everything but `src/app.ts` and the service worker.
+runs the unit tests in `tests/` with Node's test runner. They cover everything but the modules that touch the page and the service worker.
 
 ```
 npx playwright install chromium   # once
