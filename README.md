@@ -46,7 +46,7 @@ A location can be printed as a replacement label, for a shelf whose label is mis
 The page follows the phone's dark mode, and the button in the header switches it between Auto, Light and Dark for a phone kept in light mode in a dim stockroom (or the other way round). The first tap always changes the page. The choice is kept in the browser's local storage, like recent lookups, and a small script in `index.html`'s `<head>` applies it before the page is drawn so it doesn't flash. The label stays yellow and black, the way it's printed.
 
 ## Analytics
-Each lookup is sent to Google Tag Manager once it has stayed in the box for 1.5 seconds, or straight away when it's tapped, opened from a link, or the keyboard's Done key is pressed, so the steps on the way (`1`, `10`, `10A`) aren't. A location sends `checkcheck_lookup` with `locationName`, and a check character sends `checkcheck_reverse_lookup` with `checkChar`. A word like `GOLF` sends both.
+Each lookup is sent to Google Tag Manager once it has stayed in the box for 1.5 seconds, or straight away when it's tapped, opened from a link, or the keyboard's Done key is pressed, so the steps on the way (`1`, `10`, `10A`) aren't. A location sends `checkcheck_lookup` with `locationName`, and a check character sends `checkcheck_reverse_lookup` with `checkChar`. A word like `GOLF` sends both. The print button sends `checkcheck_print` with `locationName` (the location, or the bay for a bay's labels, e.g. `10A`) and `labelCount` (1, or 26 for a bay), from the main page as it opens the labels page, which has no Tag Manager.
 
 Each event has the same name all the way through, so they're easy to follow in Tag Manager:
 
@@ -54,6 +54,7 @@ Each event has the same name all the way through, so they're easy to follow in T
 | --- | --- | --- | --- |
 | `checkcheck_lookup` | `checkcheck_lookup` | `checkcheck_lookup` | `location_name`, from `locationName` |
 | `checkcheck_reverse_lookup` | `checkcheck_reverse_lookup` | `checkcheck_reverse_lookup` | `check_char`, from `checkChar` |
+| `checkcheck_print` | `checkcheck_print` | `checkcheck_print` | `location_name`, from `locationName`; `label_count`, from `labelCount` |
 
 The trigger has to match the name the page pushes, or the tag never fires. GA4 only shows the parameters in reports once they're registered as custom dimensions (Admin → Custom definitions).
 
@@ -65,7 +66,7 @@ The icons in `public/icons/` are drawn in `icon.svg`. `icon-maskable-512.png` is
 ## How it works
 CheckCheck takes the location the user enters and splits it digit by digit.  Argos use a formula which determines check characters for locations which involves quite a bit of maths, I simply took this and used it to my advantage to make this app.
 
-The formulas live in `src/checkchar.ts`. `src/lookup.ts` decides what to show for what's typed, and `src/render.ts` (with `src/reverse.ts` for the list of locations with a check character) draws it on the page. `src/app.ts` wires up the box, the link and the examples, `src/theme-toggle.ts` the theme button, `src/print.ts` the print button and `src/labels-page.ts` the labels page it opens (`src/labels.ts` decides what's printed), and `src/analytics.ts` sends lookups to Google Tag Manager. `src/recent.ts` and `src/theme.ts` keep recent lookups and the theme on the phone, and `src/link.ts` reads and writes the lookup in the link. Only those page modules (and `src/dom.ts`, their helpers) touch the page, so the others are tested directly.
+The formulas live in `src/checkchar.ts`. `src/lookup.ts` decides what to show for what's typed, and `src/render.ts` (with `src/reverse.ts` for the list of locations with a check character) draws it on the page. `src/app.ts` wires up the box, the link and the examples, `src/theme-toggle.ts` the theme button, `src/print.ts` the print button and `src/labels-page.ts` the labels page it opens (`src/labels.ts` decides what's printed), and `src/analytics.ts` sends lookups and label prints to Google Tag Manager. `src/recent.ts` and `src/theme.ts` keep recent lookups and the theme on the phone, and `src/link.ts` reads and writes the lookup in the link. Only those page modules (and `src/dom.ts`, their helpers) touch the page, so the others are tested directly.
 
 ## Development
 The app is written in TypeScript and built with [Vite](https://vite.dev). Run the dev server in Docker:

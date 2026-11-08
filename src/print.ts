@@ -2,6 +2,7 @@
 // in a bay. It opens the labels page (labels.html, src/labels-page.ts),
 // which prints them: a page of its own, with no ads to print on them.
 // labels.ts decides what goes on them.
+import { trackPrint } from './analytics.ts';
 import { create, find, plural, show } from './dom.ts';
 import { printRun } from './labels.ts';
 import { toHash } from './link.ts';
@@ -21,6 +22,7 @@ export function renderPrint(value: string, view: View): void {
   const last = run.locations[run.locations.length - 1];
 
   button.href = './labels.html' + toHash(value);
+  button.addEventListener('click', () => trackPrint(run.bay ?? first, run.locations.length));
   button.appendChild(text);
   text.append(
     create('span', 'print-button-title', run.bay ? 'Print labels for bay ' + run.bay : 'Print a label for ' + first),

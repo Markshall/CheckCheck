@@ -161,6 +161,23 @@ test('a bay prints a label for every shelf', async ({ page }) => {
   await expect(page.locator('#labels-title')).toHaveText('Bay 10A, 26 labels');
 });
 
+test('the print button is sent to Tag Manager', async ({ page }) => {
+  await page.goto('./');
+  // Stays on the page, so its dataLayer can be read.
+  await page.evaluate(() => window.addEventListener('click', event => event.preventDefault()));
+
+  await box(page).fill('10AK');
+  await printButton(page, /Print a label for 10AK/).click();
+  await box(page).fill('10A');
+  await printButton(page, /Print labels for bay 10A/).click();
+
+  const prints = await page.evaluate(() => (window.dataLayer ?? []).filter(entry => entry.event === 'checkcheck_print'));
+  expect(prints).toEqual([
+    { event: 'checkcheck_print', locationName: '10AK', labelCount: 1 },
+    { event: 'checkcheck_print', locationName: '10A', labelCount: 26 }
+  ]);
+});
+
 test('the labels page loads no ads or Tag Manager', async ({ page }) => {
   const requests: string[] = [];
   page.on('request', request => requests.push(request.url()));
