@@ -15,12 +15,13 @@ RedirectMatch 404 /assets/$
 AddType application/manifest+json .webmanifest
 
 <IfModule mod_headers.c>
-  # Browsers check for a new page every time (a cheap 304 when nothing has
-  # changed), so they never pair an old page with deleted assets. Cloudflare
-  # keeps it for up to 4 hours, and the deploy purges it when it changes.
-  <Files "index.html">
+  # Browsers check for a new page (the app, or the labels page) every time
+  # (a cheap 304 when nothing has changed), so they never pair an old page
+  # with deleted assets. Cloudflare keeps it for up to 4 hours, and the
+  # deploy purges it when it changes.
+  <FilesMatch "^(index|labels)\.html$">
     Header set Cache-Control "public, max-age=0, must-revalidate, s-maxage=14400"
-  </Files>
+  </FilesMatch>
 
   # Built files in assets/ have a content hash in their names, so a changed
   # file gets a new URL and these can be cached for good.

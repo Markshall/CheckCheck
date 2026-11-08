@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#e53a40">
+    <!-- A sheet of labels for what's in the link, not a page to find. -->
+    <meta name="robots" content="noindex">
+    <title>CheckCheck labels</title>
+
+    <!-- No Tag Manager or AdSense on this page, so no ads can print on the
+         labels. index.html's print button opens it, e.g. labels.html#10A. -->
+    <link rel="stylesheet" href="/css/reset.css">
+    <link rel="stylesheet" href="/css/labels.css">
+
+    <script type="module" src="/src/labels-page.ts"></script>
+
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+    <link rel="icon" type="image/png" href="/logo.png">
+  </head>
+
+  <body>
+    <!-- Only on screen: the labels print on their own. -->
+    <header class="labels-bar">
+      <a href="./" id="labels-back" class="labels-back">Back</a>
+      <h1 id="labels-title" class="labels-title">Labels</h1>
+      <button type="button" id="labels-print" class="labels-print" hidden>Print</button>
+    </header>
+
+    <p id="labels-note" class="labels-note" hidden></p>
+
+    <!-- Drawn by src/labels-page.ts. -->
+    <div id="print-sheet" class="print-sheet"></div>
+  </body>
+</html>

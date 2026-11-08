@@ -107,89 +107,95 @@ test('a link is remembered in recent lookups', async ({ page }) => {
   await expect(page.locator('#recent')).toContainText('L10A');
 });
 
-// window.print is stubbed, as the print screen would stop the test.
+// window.print is stubbed on every page the tab opens, as the print screen
+// would stop the test. Each call is counted on <html>.
 async function stubPrint(page: Page): Promise<void> {
-  await page.evaluate(() => {
+  await page.addInitScript(() => {
     window.print = () => {
-      window.dispatchEvent(new Event('beforeprint'));
-      document.body.dataset.printed = String(Number(document.body.dataset.printed ?? 0) + 1);
-      window.dispatchEvent(new Event('afterprint'));
+      const root = document.documentElement;
+      root.dataset.printed = String(Number(root.dataset.printed ?? 0) + 1);
     };
   });
 }
 
 const sheetLabels = (page: Page) => page.locator('#print-sheet .print-label');
+const printButton = (page: Page, name: RegExp) => page.getByRole('link', { name });
 
 test('a location prints its label', async ({ page }) => {
-  await page.goto('./#10AK');
   await stubPrint(page);
+  await page.goto('./#10AK');
 
-  await page.getByRole('button', { name: /Print a label for 10AK/ }).click();
+  await printButton(page, /Print a label for 10AK/).click();
 
-  await expect(page.locator('body')).toHaveAttribute('data-printed', '1');
+  await expect(page).toHaveURL(/\/labels\.html#10AK$/);
   await expect(sheetLabels(page)).toHaveCount(1);
   await expect(sheetLabels(page)).toContainText(['10AKONE ZERO ALPHA KILONOVEMBER']);
+  await expect(page.locator('html')).toHaveAttribute('data-printed', '1');
 
   // On paper only the labels show.
   await page.emulateMedia({ media: 'print' });
   await expect(page.locator('#print-sheet')).toBeVisible();
-  await expect(page.locator('.hero')).toBeHidden();
-});
-
-test('ads are left off the labels, and come back after', async ({ page }) => {
-  await page.goto('./#10AK');
-  await stubPrint(page);
-
-  // Like AdSense's auto ads, which put an inline !important on their display.
-  await page.evaluate(() => {
-    const ad = document.createElement('ins');
-    ad.id = 'auto-ad';
-    ad.textContent = 'Ad';
-    ad.setAttribute('style', 'display: block !important;');
-    document.body.append(ad);
-  });
-
-  await page.getByRole('button', { name: /Print a label for 10AK/ }).click();
-  await page.emulateMedia({ media: 'print' });
-  await expect(page.locator('#print-sheet')).toBeVisible();
-  await expect(page.locator('#auto-ad')).toBeHidden();
-
-  await page.emulateMedia({ media: 'screen' });
-  await page.mouse.click(5, 5);
-  await expect(page.locator('#auto-ad')).toBeVisible();
-  await expect(page.locator('#auto-ad')).toHaveAttribute('style', 'display: block !important;');
-  await expect(page.locator('.hero')).toBeVisible();
+  await expect(page.locator('.labels-bar')).toBeHidden();
 });
 
 test('a bay prints a label for every shelf', async ({ page }) => {
-  await page.goto('./');
   await stubPrint(page);
+  await page.goto('./');
   await box(page).fill('10a');
 
-  await page.getByRole('button', { name: /Print labels for bay 10A/ }).click();
+  await printButton(page, /Print labels for bay 10A/).click();
 
   await expect(sheetLabels(page)).toHaveCount(26);
   await expect(sheetLabels(page).first()).toContainText('10AA');
   await expect(sheetLabels(page).last()).toContainText('10AZ');
+  await expect(page.locator('#labels-title')).toHaveText('Bay 10A, 26 labels');
+});
+
+test('the labels page loads no ads or Tag Manager', async ({ page }) => {
+  const requests: string[] = [];
+  page.on('request', request => requests.push(request.url()));
+  await stubPrint(page);
+
+  await page.goto('./labels.html#10AK');
+  await expect(sheetLabels(page)).toHaveCount(1);
+
+  expect(requests.filter(url => new URL(url).hostname !== 'localhost')).toEqual([]);
+  expect(await page.locator('script[src*="googlesyndication"], script[src*="googletagmanager"], ins.adsbygoogle').count()).toBe(0);
+});
+
+test('the labels page can print again, and goes back to the lookup', async ({ page }) => {
+  await stubPrint(page);
+  await page.goto('./#10AK');
+  await printButton(page, /Print a label for 10AK/).click();
+  await expect(page.locator('html')).toHaveAttribute('data-printed', '1');
+
+  await page.getByRole('button', { name: 'Print' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-printed', '2');
+
+  await page.getByRole('link', { name: 'Back' }).click();
+  await expect(page).toHaveURL(/\/#10AK$/);
+  await expect(checkChar(page)).toHaveText('NOVEMBER');
 });
 
 test('there is nothing to print for half a location', async ({ page }) => {
+  await stubPrint(page);
   await page.goto('./');
   await box(page).fill('10');
 
   await expect(page.locator('#print-labels')).toBeHidden();
+
+  // Or a link to its labels.
+  await page.goto('./labels.html#10');
+  await expect(page.locator('#labels-note')).toContainText('no label to print for 10');
+  await expect(sheetLabels(page)).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Print' })).toBeHidden();
+  await expect(page.locator('html')).not.toHaveAttribute('data-printed');
 });
 
-test('printing the page any other way prints the page, not the labels', async ({ page }) => {
+test('printing the page any other way prints the page', async ({ page }) => {
   await page.goto('./#10AK');
-  await stubPrint(page);
-  await page.getByRole('button', { name: /Print a label for 10AK/ }).click();
-
-  // Like Ctrl+P.
-  await page.evaluate(() => window.dispatchEvent(new Event('beforeprint')));
   await page.emulateMedia({ media: 'print' });
 
-  await expect(page.locator('#print-sheet')).toBeHidden();
   await expect(page.locator('.hero')).toBeVisible();
 });
 
@@ -213,6 +219,19 @@ test('a link works offline', async ({ page, context }) => {
   await tab.goto('./#S1PG');
 
   await expect(checkChar(tab)).toHaveText('X-RAY');
+});
+
+test('labels print offline', async ({ page, context }) => {
+  await installOffline(page);
+  await goOffline(context);
+  await stubPrint(page);
+
+  await page.reload();
+  await box(page).fill('10AK');
+  await printButton(page, /Print a label for 10AK/).click();
+
+  await expect(sheetLabels(page)).toContainText(['10AKONE ZERO ALPHA KILONOVEMBER']);
+  await expect(page.locator('html')).toHaveAttribute('data-printed', '1');
 });
 
 test('the font is cached for offline', async ({ page, context }) => {
