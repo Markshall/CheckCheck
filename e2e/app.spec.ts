@@ -129,7 +129,7 @@ test('a location prints its label', async ({ page }) => {
 
   await expect(page).toHaveURL(/\/labels\.html#10AK$/);
   await expect(sheetLabels(page)).toHaveCount(1);
-  await expect(sheetLabels(page)).toContainText(['10AKONE ZERO ALPHA KILONOVEMBER']);
+  await expect(sheetLabels(page)).toContainText(['10AK“ONE ZERO ALPHA KILO”NOVEMBER']);
   await expect(page.locator('html')).toHaveAttribute('data-printed', '1');
 
   // On paper only the labels show.
@@ -137,9 +137,11 @@ test('a location prints its label', async ({ page }) => {
   await expect(page.locator('#print-sheet')).toBeVisible();
   await expect(page.locator('.labels-bar')).toBeHidden();
 
-  // Yellow with a black strip, like the real label.
+  // Yellow, with the check character in yellow on a black strip, like the
+  // label on the main page.
   await expect(sheetLabels(page)).toHaveCSS('background-color', 'rgb(239, 220, 5)');
   await expect(sheetLabels(page).locator('.print-check-char')).toHaveCSS('background-color', 'rgb(0, 0, 0)');
+  await expect(sheetLabels(page).locator('.print-check-char')).toHaveCSS('color', 'rgb(239, 220, 5)');
 });
 
 test('a bay prints a label for every shelf', async ({ page }) => {
@@ -234,7 +236,7 @@ test('labels print offline', async ({ page, context }) => {
   await box(page).fill('10AK');
   await printButton(page, /Print a label for 10AK/).click();
 
-  await expect(sheetLabels(page)).toContainText(['10AKONE ZERO ALPHA KILONOVEMBER']);
+  await expect(sheetLabels(page)).toContainText(['10AK“ONE ZERO ALPHA KILO”NOVEMBER']);
   await expect(page.locator('html')).toHaveAttribute('data-printed', '1');
 });
 

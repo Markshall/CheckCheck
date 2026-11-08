@@ -28,15 +28,20 @@ function renderRows(className: string, rows: Row[]): HTMLElement {
   return element;
 }
 
-// A replacement label, laid out like the one on the shelf.
+// A replacement label, laid out like the one on the shelf and the main
+// page: a black keyline inside a yellow edge, with the check character in
+// yellow on a black strip.
 function renderLabel(label: Label): HTMLElement {
   const element = create('div', 'print-label');
+  const main = create('div', 'print-label-main');
 
-  element.append(
+  main.append(
     create('div', 'print-location', label.location),
-    renderRows('print-text', label.texts),
+    // In quotes, like the main page: it's how the location is read out.
+    renderRows('print-text', label.texts.map(row => ({ label: row.label, value: '“' + row.value + '”' }))),
     renderRows('print-check-char', label.checkChars)
   );
+  element.append(main);
   return element;
 }
 
