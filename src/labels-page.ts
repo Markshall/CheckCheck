@@ -13,6 +13,7 @@ const back = find<HTMLAnchorElement>('#labels-back');
 const title = find('#labels-title');
 const printButton = find<HTMLButtonElement>('#labels-print');
 const note = find('#labels-note');
+const done = find('#labels-done');
 const sheet = find('#print-sheet');
 
 function renderRows(className: string, rows: Row[]): HTMLElement {
@@ -70,6 +71,7 @@ if (run) {
   title.textContent = heading;
   sheet.replaceChildren(...run.locations.map(location => renderLabel(makeLabel(location))));
   show(printButton, true);
+  show(done, true);
   printButton.addEventListener('click', () => window.print());
 
   // Once the font has loaded, so the labels don't print in a fallback.

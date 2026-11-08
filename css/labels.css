@@ -86,6 +86,22 @@ body {
 	padding: 0 16px;
 }
 
+/* Under the labels, how to get back to the app. */
+.labels-done {
+	max-width: 190mm;
+	margin: 8px auto 32px;
+	padding: 0 16px;
+	padding-bottom: env(safe-area-inset-bottom);
+	font-size: 16px;
+	line-height: 1.45;
+	text-align: center;
+	color: #555;
+}
+
+	.labels-done strong {
+		color: #000;
+	}
+
 /* As wide as a printed label where the screen has room, one to a row on a
    phone. */
 .print-sheet {
@@ -178,7 +194,8 @@ body {
 	}
 
 	.labels-bar,
-	.labels-note {
+	.labels-note,
+	.labels-done {
 		display: none !important;
 	}
 

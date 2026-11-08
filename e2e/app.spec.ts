@@ -132,10 +132,14 @@ test('a location prints its label', async ({ page }) => {
   await expect(sheetLabels(page)).toContainText(['10AK“ONE ZERO ALPHA KILO”NOVEMBER']);
   await expect(page.locator('html')).toHaveAttribute('data-printed', '1');
 
+  // On screen, it says how to get back.
+  await expect(page.locator('#labels-done')).toContainText('Tap Back at the top of this page, or use your browser’s back button');
+
   // On paper only the labels show.
   await page.emulateMedia({ media: 'print' });
   await expect(page.locator('#print-sheet')).toBeVisible();
   await expect(page.locator('.labels-bar')).toBeHidden();
+  await expect(page.locator('#labels-done')).toBeHidden();
 
   // Yellow, with the check character in yellow on a black strip, like the
   // label on the main page.
@@ -195,6 +199,7 @@ test('there is nothing to print for half a location', async ({ page }) => {
   await expect(page.locator('#labels-note')).toContainText('no label to print for 10');
   await expect(sheetLabels(page)).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Print' })).toBeHidden();
+  await expect(page.locator('#labels-done')).toBeHidden();
   await expect(page.locator('html')).not.toHaveAttribute('data-printed');
 });
 
