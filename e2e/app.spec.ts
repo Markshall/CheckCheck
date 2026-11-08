@@ -136,6 +136,10 @@ test('a location prints its label', async ({ page }) => {
   await page.emulateMedia({ media: 'print' });
   await expect(page.locator('#print-sheet')).toBeVisible();
   await expect(page.locator('.labels-bar')).toBeHidden();
+
+  // Yellow with a black strip, like the real label.
+  await expect(sheetLabels(page)).toHaveCSS('background-color', 'rgb(239, 220, 5)');
+  await expect(sheetLabels(page).locator('.print-check-char')).toHaveCSS('background-color', 'rgb(0, 0, 0)');
 });
 
 test('a bay prints a label for every shelf', async ({ page }) => {

@@ -2,7 +2,7 @@
 
 /* The labels page (labels.html). On screen, a bar to go back or print
    again over the labels as they'll print. On paper, only the labels, two to
-   a row on A4, in black on white. */
+   a row on A4, yellow and black like the real label. */
 
 /* Served with the app, like global.css, so it works offline. */
 @import '@fontsource/source-sans-3/latin-400.css';
@@ -15,6 +15,8 @@
 	--red: #e53a40;
 	--red-dark: #c72228;
 	--page: #f3f2ef;
+	/* The real label's yellow, as in global.css. */
+	--label-yellow: #efdc05;
 }
 
 body {
@@ -99,11 +101,12 @@ body {
 	break-inside: avoid;
 	page-break-inside: avoid;
 	border: 0.6mm solid #000;
-	background-color: #fff;
+	background-color: var(--label-yellow);
 	color: #000;
 	text-align: center;
 	text-transform: uppercase;
-	/* Keeps the strip black when the browser leaves backgrounds out. */
+	/* Keeps the yellow and the black strip when the browser would leave
+	   backgrounds out. */
 	-webkit-print-color-adjust: exact;
 	print-color-adjust: exact;
 }
