@@ -654,6 +654,7 @@ button { -webkit-tap-highlight-color: transparent; }
 	color: var(--ink);
 	font-family: inherit;
 	text-align: left;
+	text-decoration: none;
 	cursor: pointer;
 }
 
@@ -670,6 +671,7 @@ button { -webkit-tap-highlight-color: transparent; }
 
 	.print-button:hover {
 		background-color: var(--surface);
+		text-decoration: none;
 	}
 
 	.print-button:focus-visible {
@@ -690,12 +692,6 @@ button { -webkit-tap-highlight-color: transparent; }
 		line-height: 1.3;
 		color: var(--muted);
 	}
-
-/* The sheet of labels, only ever shown on paper (see the print styles at
-   the end). */
-.print-sheet {
-	display: none;
-}
 
 /* Recent lookups, each a small copy of the label, in a row that scrolls
    sideways. */
@@ -1180,75 +1176,4 @@ footer .adspace {
 	.check-char {
 		font-size: 36px;
 	}
-}
-
-/* Replacement labels from the print button: two to a row on A4, in black
-   on white whatever the theme, with a black strip for the check character
-   like the real label. Ctrl+P without the button prints the page as usual. */
-@media print {
-	@page {
-		margin: 10mm;
-	}
-
-	.is-printing-labels body {
-		background: #fff;
-		color: #000;
-	}
-
-	.is-printing-labels body > :not(.print-sheet) {
-		display: none !important;
-	}
-
-	.is-printing-labels .print-sheet {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 6mm;
-	}
-
-	.print-label {
-		break-inside: avoid;
-		page-break-inside: avoid;
-		border: 0.6mm solid #000;
-		text-align: center;
-		text-transform: uppercase;
-		/* Keeps the strip black when the browser leaves backgrounds out. */
-		-webkit-print-color-adjust: exact;
-		print-color-adjust: exact;
-	}
-
-		.print-location {
-			padding: 2mm 3mm 0;
-			font-size: 46pt;
-			font-weight: 700;
-			line-height: 1.05;
-			letter-spacing: 0.02em;
-		}
-
-		.print-text {
-			padding: 0 3mm 2.5mm;
-			font-size: 10pt;
-			font-weight: 600;
-			line-height: 1.3;
-			letter-spacing: 0.03em;
-		}
-
-		.print-check-char {
-			padding: 2mm 3mm;
-			background-color: #000;
-			color: #fff;
-			font-size: 20pt;
-			font-weight: 700;
-			line-height: 1.2;
-			letter-spacing: 0.04em;
-		}
-
-		.print-row {
-			display: block;
-		}
-
-		.print-row-label {
-			font-size: 0.55em;
-			font-weight: 600;
-			opacity: 0.75;
-		}
 }

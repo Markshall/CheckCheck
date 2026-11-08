@@ -1,11 +1,12 @@
 // Keeps CheckCheck working with no signal, as stockrooms often have none.
 //
-// The page comes from the network when it can, so a deploy shows up straight
-// away, and from the cache when the network is down or too slow. Each time a
-// fresh copy arrives, everything it needs is cached with it: the built CSS
-// and JS it links to and the fonts that CSS loads. Built files have a content
+// The pages (the app, and the labels page its print button opens) come from
+// the network when they can, so a deploy shows up straight away, and from the
+// cache when the network is down or too slow. Each time a fresh copy of one
+// arrives, everything it needs is cached with it: the built CSS and JS it
+// links to and the fonts that CSS loads. Built files have a content
 // hash in their names and never change, so they're served from the cache
-// first, and ones an older page used are deleted.
+// first, and ones that only older pages used are deleted.
 //
 // This file isn't built by Vite, so it's plain JavaScript.
 
@@ -13,16 +14,19 @@ const CACHE = 'checkcheck';
 const NETWORK_TIMEOUT = 3000;
 const SCOPE = self.registration.scope;
 const PAGE = SCOPE;
+const LABELS = new URL('labels.html', SCOPE).href;
+const PAGES = [PAGE, LABELS];
 const ASSETS = new URL('assets/', SCOPE).href;
 const STATIC = ['manifest.webmanifest', 'logo.png', 'icons/icon.svg', 'icons/icon-192.png', 'icons/apple-touch-icon.png']
   .map(path => new URL(path, SCOPE).href);
 
 self.addEventListener('install', event => {
   event.waitUntil((async () => {
-    const response = await fetch(PAGE, { cache: 'no-cache' });
-    if (!response.ok) throw new Error(`Couldn't fetch the page: ${response.status}`);
-
-    await savePage(response);
+    for (const url of PAGES) {
+      const response = await fetch(url, { cache: 'no-cache' });
+      if (!response.ok) throw new Error(`Couldn't fetch ${url}: ${response.status}`);
+      await savePage(url, response);
+    }
     const cache = await caches.open(CACHE);
     await cache.addAll(STATIC);
     await self.skipWaiting();
@@ -52,23 +56,30 @@ self.addEventListener('fetch', event => {
   }
 });
 
+// Which page a navigation is for: the labels page, or the app for anything
+// else (./, ./index.html, ./?utm_source=…).
+function pageFor(url) {
+  return new URL(url).pathname === new URL(LABELS).pathname ? LABELS : PAGE;
+}
+
 // The network's copy of the page, or the cached one if the network fails or
 // takes longer than NETWORK_TIMEOUT.
 async function page(event) {
+  const key = pageFor(event.request.url);
   const network = fetch(event.request).then(response => {
-    if (response.ok) event.waitUntil(savePage(response.clone()));
+    if (response.ok) event.waitUntil(savePage(key, response.clone()));
     return response;
   });
   network.catch(() => {});
 
   const timeout = new Promise(resolve => setTimeout(resolve, NETWORK_TIMEOUT))
-    .then(() => caches.match(PAGE))
+    .then(() => caches.match(key))
     .then(cached => cached || network);
 
   try {
     return await Promise.race([network, timeout]);
   } catch (error) {
-    const cached = await caches.match(PAGE);
+    const cached = await caches.match(key);
     if (cached) return cached;
     throw error;
   }
@@ -109,11 +120,28 @@ async function staticFile(event) {
   return network;
 }
 
-// Caches the page and the built files it needs, and drops built files that
-// only an older page used.
-async function savePage(response) {
+// Caches a page (PAGE or LABELS) and the built files it needs, and drops
+// built files that neither cached page uses any more.
+async function savePage(key, response) {
   const cache = await caches.open(CACHE);
-  const queue = linkedAssets(await response.clone().text(), PAGE);
+  await cacheAssets(cache, await response.clone().text(), key, true);
+  await cache.put(key, response);
+
+  const needed = new Set();
+  for (const url of PAGES) {
+    const cached = await cache.match(url);
+    if (cached) for (const asset of await cacheAssets(cache, await cached.text(), url, false)) needed.add(asset);
+  }
+
+  for (const request of await cache.keys()) {
+    if (request.url.startsWith(ASSETS) && !needed.has(request.url)) await cache.delete(request);
+  }
+}
+
+// The built files a page needs, and the ones its CSS needs in turn. With
+// fetchMissing, any that aren't cached yet are fetched and cached.
+async function cacheAssets(cache, html, base, fetchMissing) {
+  const queue = linkedAssets(html, base);
   const needed = new Set();
 
   while (queue.length) {
@@ -122,23 +150,19 @@ async function savePage(response) {
     needed.add(url);
 
     let file = await cache.match(url);
-    if (!file) {
+    if (!file && fetchMissing) {
       file = await fetch(url);
       if (!file.ok) throw new Error(`Couldn't fetch ${url}: ${file.status}`);
       await cache.put(url, file.clone());
     }
 
-    if (url.endsWith('.css')) {
+    if (file && url.endsWith('.css')) {
       // Skip the .woff fallbacks: every browser with service workers reads woff2.
       queue.push(...linkedAssets(await file.text(), url).filter(link => !link.endsWith('.woff')));
     }
   }
 
-  for (const request of await cache.keys()) {
-    if (request.url.startsWith(ASSETS) && !needed.has(request.url)) await cache.delete(request);
-  }
-
-  await cache.put(PAGE, response);
+  return needed;
 }
 
 // Built files linked from HTML (src="…", href="…") or CSS (url(…)).

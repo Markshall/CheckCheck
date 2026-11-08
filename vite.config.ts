@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
@@ -13,6 +14,14 @@ export default defineConfig({
     cssTarget: ['chrome87', 'edge88', 'firefox78', 'safari14'],
     outDir: 'dist',
     emptyOutDir: true,
+    rolldownOptions: {
+      // The app, and the labels page its print button opens, which has no
+      // ads to print on the labels.
+      input: {
+        main: fileURLToPath(new URL('index.html', import.meta.url)),
+        labels: fileURLToPath(new URL('labels.html', import.meta.url)),
+      },
+    },
   },
   server: {
     host: true,

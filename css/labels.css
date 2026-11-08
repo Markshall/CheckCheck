@@ -1,0 +1,210 @@
+@charset "utf-8";
+
+/* The labels page (labels.html). On screen, a bar to go back or print
+   again over the labels as they'll print. On paper, only the labels, two to
+   a row on A4, yellow and black like the real label. */
+
+/* Served with the app, like global.css, so it works offline. */
+@import '@fontsource/source-sans-3/latin-400.css';
+@import '@fontsource/source-sans-3/latin-600.css';
+@import '@fontsource/source-sans-3/latin-700.css';
+
+:root {
+	/* Paper, so always light. */
+	color-scheme: light;
+	--red: #e53a40;
+	--red-dark: #c72228;
+	--page: #f3f2ef;
+	/* The real label's yellow, as in global.css. */
+	--label-yellow: #efdc05;
+}
+
+body {
+	font: 400 18px/1.6 'Source Sans 3', 'Source Sans Pro', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	color: #000;
+	background-color: var(--page);
+	-webkit-text-size-adjust: 100%;
+	-webkit-tap-highlight-color: transparent;
+}
+
+[hidden] { display: none !important; }
+
+.labels-bar {
+	position: sticky;
+	top: 0;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 10px 16px;
+	padding-top: max(10px, env(safe-area-inset-top));
+	background-color: var(--red);
+	color: #fff;
+}
+
+	.labels-back,
+	.labels-print {
+		flex: none;
+		padding: 6px 14px;
+		border: 0;
+		border-radius: 999px;
+		font: inherit;
+		font-size: 16px;
+		font-weight: 600;
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	.labels-back {
+		color: #fff;
+		background-color: rgba(255, 255, 255, 0.18);
+	}
+
+	.labels-print {
+		color: var(--red-dark);
+		background-color: #fff;
+	}
+
+	.labels-back:focus-visible,
+	.labels-print:focus-visible {
+		outline: 3px solid #000;
+		outline-offset: 2px;
+	}
+
+	.labels-title {
+		flex: 1;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		font-size: 18px;
+		font-weight: 700;
+	}
+
+.labels-note {
+	max-width: 560px;
+	margin: 24px auto;
+	padding: 0 16px;
+}
+
+/* Under the labels, how to get back to the app. */
+.labels-done {
+	max-width: 190mm;
+	margin: 8px auto 32px;
+	padding: 0 16px;
+	padding-bottom: env(safe-area-inset-bottom);
+	font-size: 16px;
+	line-height: 1.45;
+	text-align: center;
+	color: #555;
+}
+
+	.labels-done strong {
+		color: #000;
+	}
+
+/* As wide as a printed label where the screen has room, one to a row on a
+   phone. */
+.print-sheet {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 92mm), 1fr));
+	gap: 6mm;
+	max-width: 190mm;
+	margin: 16px auto;
+	padding: 0 16px;
+}
+
+.print-label {
+	break-inside: avoid;
+	page-break-inside: avoid;
+	padding: 2mm;
+	border-radius: 1mm;
+	background-color: var(--label-yellow);
+	color: #000;
+	text-align: center;
+	text-transform: uppercase;
+	/* Keeps the yellow and the black strip when the browser would leave
+	   backgrounds out. */
+	-webkit-print-color-adjust: exact;
+	print-color-adjust: exact;
+}
+
+	/* The keyline, like .location-box-main in global.css. */
+	.print-label-main {
+		border: 0.5mm solid #000;
+	}
+
+	.print-location {
+		padding: 1.5mm 3mm 0;
+		font-size: 40pt;
+		font-weight: 700;
+		line-height: 1.05;
+		letter-spacing: 0.02em;
+	}
+
+	.print-text {
+		padding: 0.5mm 3mm 1.5mm;
+		font-size: 11pt;
+		font-weight: 600;
+		line-height: 1.35;
+		letter-spacing: 0.03em;
+	}
+
+		.print-text .print-row + .print-row {
+			margin-top: 1mm;
+		}
+
+	/* Like .check-char in global.css: yellow on black. */
+	.print-check-char {
+		padding: 1mm 3mm 1.5mm;
+		background-color: #000;
+		color: var(--label-yellow);
+		font-size: 24pt;
+		font-weight: 700;
+		line-height: 1.2;
+		letter-spacing: 0.03em;
+	}
+
+		.print-check-char .print-row + .print-row {
+			border-top: 0.3mm solid rgba(239, 220, 5, 0.35);
+			margin-top: 1.5mm;
+			padding-top: 1.5mm;
+		}
+
+	.print-row {
+		display: block;
+	}
+
+	/* STORE or RFC over its answer, like .row-label in global.css. */
+	.print-row-label {
+		display: block;
+		font-size: 7pt;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		line-height: 1.4;
+		opacity: 0.75;
+	}
+
+@media print {
+	@page {
+		margin: 10mm;
+	}
+
+	body {
+		background: #fff;
+	}
+
+	.labels-bar,
+	.labels-note,
+	.labels-done {
+		display: none !important;
+	}
+
+	/* Six rows of two fit on A4. */
+	.print-sheet {
+		grid-template-columns: repeat(2, 1fr);
+		gap: 5mm;
+		max-width: none;
+		margin: 0;
+		padding: 0;
+	}
+}
