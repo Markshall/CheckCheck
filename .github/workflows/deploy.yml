@@ -8,6 +8,7 @@ on:
     # tab (workflow_dispatch) to force a deploy.
     paths:
       - "index.html"
+      - "labels.html"
       - "css/**"
       - "src/**"
       - "public/**"
